@@ -754,6 +754,28 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
             const trimmed = block.trim();
             if (!trimmed) return null;
 
+            // Display math block
+            if (trimmed.startsWith('$$') && trimmed.endsWith('$$')) {
+              const expression = trimmed.slice(2, -2).trim();
+              const html = katex.renderToString(expression, {
+                displayMode: true,
+                throwOnError: false,
+                strict: 'ignore',
+                output: 'htmlAndMathml',
+              });
+              return (
+                <div
+                  key={idx}
+                  className="my-6 overflow-x-auto rounded-lg border border-slate-200 bg-white px-4 py-4 text-center"
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              );
+            }
+
+            if (trimmed === '---') {
+              return <hr key={idx} className="my-10 border-0 border-t border-slate-200" />;
+            }
+
             // Heading 1
             if (trimmed.startsWith('# ')) {
               return (
@@ -823,7 +845,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                     return (
                       <li key={itemIdx} className="flex items-start space-x-3 text-slate-700">
                         <span className="text-blue-600 font-bold text-lg leading-none mt-1">•</span>
-                        <span>{clean}</span>
+                        <span>{renderInlineMarkdown(clean)}</span>
                       </li>
                     );
                   })}
@@ -844,7 +866,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                         <span className="font-sans font-bold text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 mt-0.5">
                           {numMatch[1]}
                         </span>
-                        <span>{numMatch[2]}</span>
+                        <span>{renderInlineMarkdown(numMatch[2])}</span>
                       </li>
                     );
                   })}
@@ -860,7 +882,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                   key={idx}
                   className="my-6 pl-5 border-l-4 border-blue-900 italic text-slate-700 font-serif text-[19px] leading-relaxed bg-blue-50/30 py-2 rounded-r-lg"
                 >
-                  {quoteContent}
+                  {renderInlineMarkdown(quoteContent)}
                 </blockquote>
               );
             }
@@ -868,7 +890,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
             // Standard narrative paragraph
             return (
               <p key={idx} className="leading-[1.85] text-slate-800">
-                {trimmed}
+                {renderInlineMarkdown(trimmed)}
               </p>
             );
           })}
