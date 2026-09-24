@@ -46,39 +46,59 @@
   "tasks": [
     {
       "id": "l1-t1",
-      "title": "Evaluate AI-integration strategies",
-      "description": "Compare direct AI authority, model-embedded policy, and separated AI-plus-policy architectures using software-engineering criteria.",
-      "category": "analysis"
+      "title": "Compare the three AI-integration strategies",
+      "description": "Before coding, compare direct AI authority, putting all rules inside the AI model, and separating AI prediction from deterministic software policy. Use auditability, maintainability, safety, retraining dependence, and human review as your criteria. Record a short justification in the report.",
+      "category": "analysis",
+      "action": "report"
     },
     {
       "id": "l1-t2",
-      "title": "Inspect an AI-only release decision",
-      "description": "Run the supplied defect-risk model and identify how an AI recommendation can conflict with current CI or security evidence.",
-      "category": "analysis"
+      "title": "Run the AI-only baseline",
+      "description": "Open main.py. Keep ENABLE_GUARDRAIL = False and ACTIVE_CASE = \"PR-1042\". Click Run Python. Do not change the code yet.",
+      "category": "code",
+      "action": "code"
     },
     {
       "id": "l1-t3",
-      "title": "Implement the release guardrail",
-      "description": "Complete an independent behavioral policy that can block deployment or require human review.",
-      "category": "code"
+      "title": "Read the baseline result",
+      "description": "Record the AI risk label, risk probability, confidence, failed tests, security findings, and final decision. Identify why DEPLOY is not acceptable for this case.",
+      "category": "analysis",
+      "action": "report"
     },
     {
       "id": "l1-t4",
-      "title": "Compare release scenarios",
-      "description": "Evaluate safe, failed-test, security, low-confidence, and high-risk pull-request cases.",
-      "category": "analysis"
+      "title": "Implement release_guardrail()",
+      "description": "In main.py, complete only release_guardrail(change, prediction). Hard violations must block DEPLOY and request BLOCK_RELEASE. Low confidence or low coverage must require HUMAN_REVIEW.",
+      "category": "code",
+      "action": "code"
     },
     {
       "id": "l1-t5",
-      "title": "Verify requirements",
-      "description": "Run executable checks over the combined AI and software-policy workflow.",
-      "category": "test"
+      "title": "Enable the guardrail and run again",
+      "description": "Change ENABLE_GUARDRAIL to True. Run PR-1042 again. Confirm that the AI prediction stays the same but the final software decision changes appropriately.",
+      "category": "code",
+      "action": "code"
     },
     {
       "id": "l1-t6",
-      "title": "Interpret and transfer",
-      "description": "Explain the engineering decision, interpret evidence, and identify how the pattern transfers to the Final Project.",
-      "category": "report"
+      "title": "Try the remaining pull-request cases",
+      "description": "Run PR-1001, PR-1057, PR-1088, and PR-1093. For each case, distinguish the AI prediction from the final action allowed by the software workflow.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l1-t7",
+      "title": "Verify the requirements",
+      "description": "Click Verify Requirements. All checks should pass. If one fails, use its message to fix the policy logic rather than changing the AI model.",
+      "category": "test",
+      "action": "verify"
+    },
+    {
+      "id": "l1-t8",
+      "title": "Complete and export the report",
+      "description": "Explain your strategy choice, baseline, guardrail logic, scenario results, critical interpretation, and how this pattern could transfer to the Final Project. Export the report to Word.",
+      "category": "report",
+      "action": "report"
     }
   ]
 }
