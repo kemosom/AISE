@@ -1,29 +1,35 @@
 {
-  "title": "Lab 01 Report: Behavioral Programming Safety Requirement",
+  "title": "Lab 01 Report: Safe AI-Assisted Software Release",
   "sections": [
     {
-      "id": "implementation",
-      "title": "1. Safety B-Thread Implementation",
+      "id": "ai-baseline",
+      "title": "1. AI-Only Baseline",
       "required": true,
-      "placeholder": "Explain how your overflow_prevention() b-thread tracks volume, blocks fill events, and requests draining."
+      "placeholder": "Describe the supplied defect-risk prediction for PR-1042 and explain why the AI-only release decision is insufficient."
+    },
+    {
+      "id": "guardrail",
+      "title": "2. Behavioral Release Guardrail",
+      "required": true,
+      "placeholder": "Explain your release_guardrail() logic and how Request-Wait-Block separates software policy from the AI model."
     },
     {
       "id": "results",
-      "title": "2. Baseline vs Safe Execution",
+      "title": "3. Scenario Results and Requirement Verification",
       "required": true,
-      "placeholder": "Compare the unsafe baseline with the safety-enabled run. Add execution output, test results, and the visual architecture."
+      "placeholder": "Compare at least four pull-request cases. Add console output, requirement-verification results, and the system design diagram."
     },
     {
-      "id": "discussion",
-      "title": "3. Software Engineering Discussion",
+      "id": "analysis",
+      "title": "4. Critical Analysis",
       "required": true,
-      "placeholder": "Why is the safety rule better kept in a separate b-thread? Does BP remove complexity or move it into coordination?"
+      "placeholder": "Discuss why AI confidence is not equivalent to release safety, why deterministic constraints should remain separate, and when human review is necessary."
     },
     {
-      "id": "conclusion",
-      "title": "4. Conclusion",
+      "id": "project-transfer",
+      "title": "5. Transfer to the Final Project",
       "required": true,
-      "placeholder": "Summarize what the lab demonstrated about modular requirements and executable safety verification."
+      "placeholder": "Identify one way the same pattern could be reused in your final AI-powered software-engineering project: AI prediction/recommendation + explicit policy/guardrail + measurable verification."
     }
   ]
 }
