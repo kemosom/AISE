@@ -188,7 +188,7 @@ function createLabShell(
   };
 }
 
-// Registry Map of all 11 Laboratories + Practical Exam
+// Registry Map of the 11 MAI5124 laboratory modules
 const labRegistryMap: Map<string, LabManifest> = new Map();
 
 // Lab 01 - Content-driven reference module.
@@ -392,23 +392,7 @@ labRegistryMap.set(
   )
 );
 
-// Practical Exam
-labRegistryMap.set(
-  'exam-code-review',
-  createLabShell(
-    'exam-code-review',
-    12,
-    12,
-    'Practical Examination: AI-Assisted Code Review',
-    'Timed practical assessment examining critical vulnerability detection and automated patch validation.',
-    [
-      'Perform comprehensive security and architectural audit on unvetted codebase.',
-      'Synthesize automated remediation patches satisfying all security invariants.',
-      'Author formal technical review report under examination constraints.',
-    ],
-    `# Practical Examination: AI-Assisted Code Review\n# MAI5124 Examination Rules Apply\n\nprint("Examination Mode Active.")\n`
-  )
-);
+
 
 export class LabRegistry {
   static getLab(labId: string): LabManifest | undefined {
