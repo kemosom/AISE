@@ -367,7 +367,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   // Evidence Insertion Handlers
   const handleAddCodeSnapshotToReport = (snapshot: { title: string; code: string }) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
+    const targetSection = reportState.sections.find((s) => s.id === 'guardrail') || reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
     if (!targetSection) return;
 
     const curSnaps = targetSection.codeSnapshots || [];
@@ -427,7 +427,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
-    const newContent = `${currentContent}[Automated Verification Results]\n${testSummary}`;
+    const newContent = `${currentContent}[Requirement Verification Results]\n${testSummary}`;
 
     const updatedSections = reportState.sections.map((s) =>
       s.id === targetSection.id ? { ...s, content: newContent } : s
