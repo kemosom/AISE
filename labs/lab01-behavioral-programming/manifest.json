@@ -2,48 +2,56 @@
   "id": "lab01-behavioral-programming",
   "labNumber": 1,
   "week": 1,
-  "title": "AI for Software Design: Behavioral Programming",
-  "shortDescription": "Run an unsafe behavioral controller, add one independent overflow-safety b-thread, and verify the capacity invariant.",
+  "title": "Safe AI-Assisted Software Release with Behavioral Programming",
+  "shortDescription": "Integrate an AI defect-risk recommendation into a pull-request workflow, then constrain unsafe release decisions using independent behavioral guardrails.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
   "packages": [],
   "features": {
     "visualDesigner": true,
-    "blockly": true,
-    "functionPalette": true,
+    "blockly": false,
+    "functionPalette": false,
     "testRunner": true,
     "reportEditor": true,
     "webPreview": false
   },
   "learningOutcomes": [
-    "Explain Request-Wait-Block synchronization in a behavioral program.",
-    "Add an independent safety requirement without rewriting existing functional behaviours.",
-    "Verify a software safety invariant using execution traces and automated tests."
+    "Explain the difference between an AI prediction and an enforceable software-engineering requirement.",
+    "Apply Behavioral Programming to integrate AI recommendations with independent release guardrails.",
+    "Implement deterministic constraints for failed tests, security findings, confidence, and coverage without modifying the AI model.",
+    "Verify that an AI-enabled software workflow satisfies explicit release requirements across multiple pull-request scenarios.",
+    "Critically evaluate when AI recommendations require deterministic controls or human review."
   ],
   "tasks": [
     {
       "id": "l1-t1",
-      "title": "Run the unsafe baseline",
-      "description": "Execute the supplied hot/cold controller and observe the capacity violation.",
+      "title": "Inspect an AI-only release decision",
+      "description": "Run the supplied defect-risk model and observe how an AI recommendation can conflict with current CI or security evidence.",
       "category": "code"
     },
     {
       "id": "l1-t2",
-      "title": "Implement overflow prevention",
-      "description": "Complete the independent safety b-thread and enable it.",
+      "title": "Implement the release guardrail",
+      "description": "Complete an independent behavioral policy that can block deployment or require human review.",
       "category": "code"
     },
     {
       "id": "l1-t3",
-      "title": "Verify the invariant",
-      "description": "Run the safe controller and pass the public behavioral tests.",
-      "category": "test"
+      "title": "Compare release scenarios",
+      "description": "Evaluate safe, failed-test, security, low-confidence, and high-risk pull-request cases.",
+      "category": "design"
     },
     {
       "id": "l1-t4",
-      "title": "Document the result",
-      "description": "Capture the design, execution evidence, and software-engineering interpretation in the report.",
+      "title": "Verify requirements",
+      "description": "Run executable checks over the combined AI and software-policy workflow.",
+      "category": "test"
+    },
+    {
+      "id": "l1-t5",
+      "title": "Interpret and report",
+      "description": "Document evidence and explain why AI decisions require explicit software-engineering controls.",
       "category": "report"
     }
   ]
