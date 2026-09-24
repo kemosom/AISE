@@ -401,10 +401,11 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   return (
     <div
       ref={containerRef}
+      data-labsheet-print-root
       className="relative flex-1 bg-[#FAFAFA] overflow-y-auto text-slate-900 font-sans selection:bg-amber-100 selection:text-amber-900"
     >
       {/* 1. TOP READING PROGRESS BAR (MEDIUM STYLE) */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-200">
+      <div data-labsheet-no-print className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-200">
         <div
           className="h-full bg-blue-900 transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
@@ -412,7 +413,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
       </div>
 
       {/* 2. STICKY FLOATING ANNOTATION TOOLBAR */}
-      <aside aria-label="Annotation tools" className="sticky top-4 z-40 max-w-3xl mx-auto px-4 pointer-events-none mb-6">
+      <aside data-labsheet-no-print aria-label="Annotation tools" className="sticky top-4 z-40 max-w-3xl mx-auto px-4 pointer-events-none mb-6">
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-2 px-3 flex items-center justify-between pointer-events-auto gap-2">
           {/* Main Annotation Tools */}
           <div className="flex items-center space-x-1">
