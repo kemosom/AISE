@@ -67,7 +67,7 @@ The repository also contains optional Supabase/database infrastructure for futur
 
 Requirements:
 
-- Node.js 20+ recommended
+- Node.js 22+ recommended
 - npm
 
 ```bash
@@ -100,6 +100,7 @@ labs/
     ├── lab-sheet.md
     ├── starter/
     │   ├── main.py
+    │   ├── risk_model.py
     │   └── helpers.py
     ├── tests/
     │   └── public-tests.json
@@ -187,6 +188,19 @@ Use Lab 01 as the pattern:
 10. Keep the module locked until its content and tests have been reviewed.
 
 See `docs/LAB_MODULE_SPEC.md` for the detailed module contract.
+
+## Instructor-only answer material
+
+Instructor reference material is **not stored as plaintext in the public repository or client bundle**.
+
+The deployed instructor endpoint requires two server-side environment variables:
+
+- `INSTRUCTOR_ADMIN_CODE`: the private code entered by the instructor.
+- `INSTRUCTOR_CONTENT_KEY`: the AES-256 key used to decrypt the instructor payload.
+
+These values must be configured as server-side deployment variables. Do not prefix them with `VITE_`, because Vite-prefixed variables are exposed to browser code.
+
+The public repository contains only the encrypted instructor payload. The complete reference solution, expected outputs, teaching sequence, sample report, common mistakes, and Master's-level rationale are decrypted only after the server validates the instructor code.
 
 ## Deployment note
 
