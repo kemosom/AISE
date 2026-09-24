@@ -6,7 +6,6 @@ interface HeaderProps {
   user: AuthUserPublic | null;
   activeView: string;
   onNavigate: (view: string) => void;
-  onLogout: () => void;
   isInstructorPreview?: boolean;
   onExitPreview?: () => void;
 }
