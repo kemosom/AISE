@@ -5,6 +5,7 @@ import {
   type FC,
   type MouseEvent as ReactMouseEvent,
   type TouchEvent as ReactTouchEvent,
+  type ReactNode,
 } from 'react';
 import {
   PenTool,
@@ -30,6 +31,8 @@ import {
 } from 'lucide-react';
 import type { LabManifest } from '../../labs/types';
 import { generateLabsheetDocx, type StickyNoteItem } from '../lib/reports/labsheet-docx';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
 
 interface DrawingStroke {
   id: string;
@@ -38,6 +41,36 @@ interface DrawingStroke {
   width: number;
   opacity: number;
   points: Array<{ x: number; y: number }>;
+}
+
+function renderInlineMarkdown(text: string): ReactNode[] {
+  const tokens = text.split(/(\$[^$]+\$|\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
+  return tokens.filter(Boolean).map((token, index) => {
+    if (token.startsWith('$') && token.endsWith('$')) {
+      return (
+        <span
+          key={index}
+          dangerouslySetInnerHTML={{
+            __html: katex.renderToString(token.slice(1, -1), {
+              throwOnError: false,
+              strict: 'ignore',
+              output: 'htmlAndMathml',
+            }),
+          }}
+        />
+      );
+    }
+    if (token.startsWith('**') && token.endsWith('**')) {
+      return <strong key={index}>{token.slice(2, -2)}</strong>;
+    }
+    if (token.startsWith('`') && token.endsWith('`')) {
+      return <code key={index} className="font-mono text-[0.9em] bg-slate-100 px-1 rounded">{token.slice(1, -1)}</code>;
+    }
+    if (token.startsWith('*') && token.endsWith('*')) {
+      return <em key={index}>{token.slice(1, -1)}</em>;
+    }
+    return <span key={index}>{token}</span>;
+  });
 }
 
 interface LabTheoryArticleProps {
