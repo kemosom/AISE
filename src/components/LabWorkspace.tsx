@@ -4,11 +4,9 @@ import {
   Play,
   CheckSquare,
   FileText,
-  Send,
   Code,
   Layout,
   BookOpen,
-  CheckCircle2,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
@@ -18,7 +16,6 @@ import { MonacoEditorPanel, type EditorFile } from './MonacoEditorPanel';
 import { OutputConsolePanel } from './OutputConsolePanel';
 import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
-import { SubmitLabModal } from './SubmitLabModal';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
@@ -43,11 +40,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Main View: 'theory' (Medium style article) vs 'ide' vs 'report'
-  const [viewMode, setViewMode] = useState<'theory' | 'ide' | 'report'>('theory');
-
-  // Keep the IDE deliberately simple: either code + console, or design + code.
-  const [workspaceMode, setWorkspaceMode] = useState<'code' | 'design'>('code');
+  // Keep the navigation explicit: theory, code, design, and report.
+  const [viewMode, setViewMode] = useState<'theory' | 'code' | 'design' | 'report'>('theory');
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
@@ -69,10 +63,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [reportState, setReportState] = useState<ReportState>({ title: '', sections: [] });
   const [reportSaveStatus, setReportSaveStatus] = useState<string>('All changes saved');
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
-
-  // Submission State
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [submissionCompleted, setSubmissionCompleted] = useState(false);
 
   // Debounced auto-save timers
   const saveTimeoutRef = useRef<any>(null);
@@ -168,7 +158,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         );
         setReportState(savedReport || createInitialReport(loadedManifest));
         setCheckpoints(savedCheckpoints || []);
-        setSubmissionCompleted(Boolean(savedSubmission));
         setTestStats(savedTestStats);
         return;
       }
@@ -205,13 +194,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         );
       } catch {
         setReportState(createInitialReport(loadedManifest));
-      }
-
-      try {
-        const subData = await apiClient.get(`/api/submissions/${labId}`);
-        setSubmissionCompleted(Boolean(subData.submission));
-      } catch {
-        setSubmissionCompleted(false);
       }
 
       try {
@@ -460,43 +442,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     handleContentChange(newContent);
   };
 
-  // Submit Lab. In open-access mode the submission snapshot is private
-  // to this browser; authenticated deployments can persist it server-side.
-  const handleConfirmSubmit = async () => {
-    if (!reportState.studentName?.trim() || !reportState.studentId?.trim()) {
-      window.alert('Enter your full name and student ID in the Report workspace before completing the lab.');
-      setViewMode('report');
-      setIsSubmitModalOpen(false);
-      return;
-    }
 
-    const snapshot = {
-      reportSnapshot: reportState,
-      codeSnapshot: files,
-      visualDesignSnapshot: visualGraph,
-      testResultsSnapshot: {
-        total: testStats?.total ?? manifest?.tests.length ?? 0,
-        passed: testStats?.passed ?? 0,
-      },
-      submittedAt: new Date().toISOString(),
-    };
-
-    if (useLocalPersistence) {
-      await writeLocal('submission', snapshot);
-      setSubmissionCompleted(true);
-      setIsSubmitModalOpen(false);
-      return;
-    }
-
-    await apiClient.post(`/api/submissions/${labId}`, snapshot);
-    setSubmissionCompleted(true);
-    setIsSubmitModalOpen(false);
-  };
 
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center bg-slate-50 text-xs text-slate-500 font-mono">
-        Initializing AISE Laboratory Workspace & Pyodide Environment...
+        Loading laboratory workspace...
       </div>
     );
   }
@@ -548,112 +499,81 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Center Mode Switcher: Theory vs IDE vs Report */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+        {/* Compact workspace navigation */}
+        <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200 text-xs">
           <button
             onClick={() => setViewMode('theory')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'theory'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-blue-900" />
-            <span>Theory & Lab Sheet</span>
+            <BookOpen className="w-3.5 h-3.5" />
+            Theory
           </button>
           <button
-            onClick={() => setViewMode('ide')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              viewMode === 'ide'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+            onClick={() => setViewMode('code')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'code'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Code className="w-3.5 h-3.5 text-blue-900" />
-            <span>IDE Workspace</span>
+            <Code className="w-3.5 h-3.5" />
+            Code
+          </button>
+          <button
+            onClick={() => setViewMode('design')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'design'
+                ? 'bg-white text-slate-950 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Layout className="w-3.5 h-3.5" />
+            Design
           </button>
           <button
             onClick={() => setViewMode('report')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'report'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-indigo-900" />
-            <span>Lab Report ({filledSectionsCount}/{reportState.sections.length})</span>
+            <FileText className="w-3.5 h-3.5" />
+            Report
           </button>
         </div>
 
-        {/* Right Action Buttons */}
-        <div className="flex items-center space-x-2">
-          {viewMode === 'ide' && (
+        {/* Only show execution controls when coding */}
+        <div className="flex items-center gap-2">
+          {viewMode === 'code' && (
             <>
-              <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 text-[11px]">
-                <button
-                  onClick={() => setWorkspaceMode('code')}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded cursor-pointer ${
-                    workspaceMode === 'code'
-                      ? 'bg-white text-slate-950 font-semibold shadow-xs'
-                      : 'text-slate-600'
-                  }`}
-                >
-                  <Code className="w-3.5 h-3.5" />
-                  Code
-                </button>
-                <button
-                  onClick={() => setWorkspaceMode('design')}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded cursor-pointer ${
-                    workspaceMode === 'design'
-                      ? 'bg-white text-slate-950 font-semibold shadow-xs'
-                      : 'text-slate-600'
-                  }`}
-                >
-                  <Layout className="w-3.5 h-3.5" />
-                  Design
-                </button>
-              </div>
-
               <button
                 onClick={() => setIsTestHarnessOpen(!isTestHarnessOpen)}
-                className={`inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-medium rounded border cursor-pointer transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded border cursor-pointer transition-colors ${
                   isTestHarnessOpen
                     ? 'bg-blue-50 text-blue-900 border-blue-300'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                <CheckSquare className="w-3.5 h-3.5 text-blue-900" />
-                <span>
-                  {testStats === null
-                    ? 'Tests (Not Run)'
-                    : `Tests (${testStats.passed}/${testStats.total})`}
-                </span>
+                <CheckSquare className="w-3.5 h-3.5" />
+                {testStats === null
+                  ? 'Tests'
+                  : `Tests ${testStats.passed}/${testStats.total}`}
               </button>
 
               <button
                 onClick={handleRunCode}
                 disabled={isRunningCode}
-                className="inline-flex items-center space-x-1 px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{isRunningCode ? 'Running...' : 'Run Python'}</span>
+                {isRunningCode ? 'Running...' : 'Run Python'}
               </button>
             </>
-          )}
-
-          {submissionCompleted ? (
-            <div className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded text-xs font-semibold">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Submitted</span>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsSubmitModalOpen(true)}
-              className="inline-flex items-center space-x-1 px-3.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-semibold cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Submit Lab</span>
-            </button>
           )}
         </div>
       </div>
@@ -667,71 +587,68 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               manifest={manifest}
               studentName={reportState.studentName || user.name}
               studentId={reportState.studentId || user.studentId}
-              onBeginLab={() => setViewMode('ide')}
+              onBeginLab={() => setViewMode('code')}
             />
           </div>
         )}
 
-        {/* VIEW 1: IDE WORKSPACE */}
-        {viewMode === 'ide' && (
+        {/* VIEW 1: CODE WORKSPACE */}
+        {viewMode === 'code' && (
           <div className="h-full flex overflow-hidden bg-slate-950">
-            {workspaceMode === 'code' ? (
-              <>
-                {/* Default working view: code gets most of the screen, console stays visible. */}
-                <div className="flex-1 min-w-0 h-full">
-                  <MonacoEditorPanel
-                    files={files}
-                    activeFileIndex={activeFileIndex}
-                    onSelectFile={setActiveFileIndex}
-                    onChangeContent={handleContentChange}
-                    onAddFile={handleAddFile}
-                    onDeleteFile={handleDeleteFile}
-                    saveStatus={codeSaveStatus}
-                    onAddCodeToReport={handleAddCodeSnapshotToReport}
-                  />
-                </div>
-                <div className="w-[34%] min-w-[320px] max-w-[470px] shrink-0 h-full border-l border-slate-800">
-                  <OutputConsolePanel
-                    result={execResult}
-                    isRunning={isRunningCode}
-                    onClearConsole={() => setExecResult(null)}
-                    onRestartRuntime={() => defaultCodeRunner.reset()}
-                    onAddOutputToReport={handleAddOutputToReport}
-                    onAddPlotToReport={handleAddPlotToReport}
-                  />
-                </div>
-              </>
-            ) : (
-              <>
-                {/* Design view: visual model beside the source, without a third guide panel. */}
-                <div className="w-[46%] min-w-[420px] shrink-0 h-full border-r border-slate-800">
-                  <VisualDesignPanel
-                    snippets={manifest.snippets}
-                    blocks={manifest.blocks}
-                    visualGraph={visualGraph}
-                    onUpdateVisualGraph={handleUpdateVisualGraph}
-                    onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
-                    onAddDesignToReport={handleAddDesignToReport}
-                  />
-                </div>
-                <div className="flex-1 min-w-0 h-full">
-                  <MonacoEditorPanel
-                    files={files}
-                    activeFileIndex={activeFileIndex}
-                    onSelectFile={setActiveFileIndex}
-                    onChangeContent={handleContentChange}
-                    onAddFile={handleAddFile}
-                    onDeleteFile={handleDeleteFile}
-                    saveStatus={codeSaveStatus}
-                    onAddCodeToReport={handleAddCodeSnapshotToReport}
-                  />
-                </div>
-              </>
-            )}
+            <div className="flex-1 min-w-0 h-full">
+              <MonacoEditorPanel
+                files={files}
+                activeFileIndex={activeFileIndex}
+                onSelectFile={setActiveFileIndex}
+                onChangeContent={handleContentChange}
+                onAddFile={handleAddFile}
+                onDeleteFile={handleDeleteFile}
+                saveStatus={codeSaveStatus}
+                onAddCodeToReport={handleAddCodeSnapshotToReport}
+              />
+            </div>
+            <div className="w-[32%] min-w-[300px] max-w-[430px] shrink-0 h-full border-l border-slate-800">
+              <OutputConsolePanel
+                result={execResult}
+                isRunning={isRunningCode}
+                onClearConsole={() => setExecResult(null)}
+                onRestartRuntime={() => defaultCodeRunner.reset()}
+                onAddOutputToReport={handleAddOutputToReport}
+                onAddPlotToReport={handleAddPlotToReport}
+              />
+            </div>
           </div>
         )}
 
-        {/* VIEW 2: LAB REPORT WORKSPACE */}
+        {/* VIEW 2: DESIGN WORKSPACE */}
+        {viewMode === 'design' && (
+          <div className="h-full flex overflow-hidden bg-slate-950">
+            <div className="w-[52%] min-w-[460px] shrink-0 h-full border-r border-slate-800">
+              <VisualDesignPanel
+                snippets={manifest.snippets}
+                blocks={manifest.blocks}
+                visualGraph={visualGraph}
+                onUpdateVisualGraph={handleUpdateVisualGraph}
+                onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
+                onAddDesignToReport={handleAddDesignToReport}
+              />
+            </div>
+            <div className="flex-1 min-w-0 h-full">
+              <MonacoEditorPanel
+                files={files}
+                activeFileIndex={activeFileIndex}
+                onSelectFile={setActiveFileIndex}
+                onChangeContent={handleContentChange}
+                onAddFile={handleAddFile}
+                onDeleteFile={handleDeleteFile}
+                saveStatus={codeSaveStatus}
+                onAddCodeToReport={handleAddCodeSnapshotToReport}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 3: LAB REPORT WORKSPACE */}
         {viewMode === 'report' && (
           <div className="h-full">
             <ReportWorkspace
@@ -782,19 +699,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </div>
         )}
 
-        {/* Submit Confirmation Modal */}
-        {isSubmitModalOpen && (
-          <SubmitLabModal
-            labNumber={manifest.labNumber}
-            labTitle={manifest.title}
-            testPassedCount={testStats ? testStats.passed : 0}
-            totalTests={manifest.tests.length}
-            reportSectionsFilled={filledSectionsCount}
-            totalReportSections={reportState.sections.length}
-            onConfirmSubmit={handleConfirmSubmit}
-            onClose={() => setIsSubmitModalOpen(false)}
-          />
-        )}
       </div>
     </div>
   );
