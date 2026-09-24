@@ -28,6 +28,7 @@ import { LabTheoryArticle } from './LabTheoryArticle';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
+import { LabRegistry } from '../../labs/registry';
 
 interface LabWorkspaceProps {
   labId: string;
@@ -124,15 +125,29 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     setError(null);
 
     try {
-      const data = await apiClient.get(
-        `/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`
-      );
-
-      const loadedManifest = data.manifest as LabManifest;
-      setManifest(loadedManifest);
-      setLabMeta(data.lab);
-
+      // Open-access/Vercel mode is intentionally client-side. The complete
+      // laboratory manifest is bundled by Vite, so loading a lab must not
+      // depend on an Express /api route that does not exist in a static Vercel deployment.
       if (useLocalPersistence) {
+        const loadedManifest = LabRegistry.getLab(labId);
+
+        if (!loadedManifest) {
+          throw new Error('Laboratory module not found.');
+        }
+
+        if (loadedManifest.labNumber !== 1) {
+          throw new Error('This laboratory is not released yet.');
+        }
+
+        setManifest(loadedManifest);
+        setLabMeta({
+          id: loadedManifest.id,
+          labNumber: loadedManifest.labNumber,
+          title: loadedManifest.title,
+          isUnlocked: true,
+          isPublished: true,
+        });
+
         const [
           savedFiles,
           savedDesign,
@@ -164,7 +179,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         return;
       }
 
-      // Authenticated/instructor mode can continue using the server data layer.
+      // Optional authenticated/instructor deployment path.
+      const data = await apiClient.get(
+        `/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`
+      );
+
+      const loadedManifest = data.manifest as LabManifest;
+      setManifest(loadedManifest);
+      setLabMeta(data.lab);
+
       try {
         const wsData = await apiClient.get(`/api/workspaces/${labId}`);
         setFiles(wsData.files || loadedManifest.starterFiles);
