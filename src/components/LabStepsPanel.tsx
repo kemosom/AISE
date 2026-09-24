@@ -29,8 +29,8 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
 }) => {
   const tasks = manifest.tasks || [];
 
-  const actionFor = (category?: string) => {
-    if (category === 'report') {
+  const actionFor = (task: NonNullable<LabManifest['tasks']>[number]) => {
+    if (task.action === 'report') {
       return {
         label: 'Open Report',
         icon: <FileText className="w-3.5 h-3.5" />,
@@ -38,7 +38,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
       };
     }
 
-    if (category === 'test') {
+    if (task.action === 'verify') {
       return {
         label: 'Open Code + Verify',
         icon: <ShieldCheck className="w-3.5 h-3.5" />,
@@ -46,10 +46,12 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
       };
     }
 
-    if (category === 'code' || category === 'analysis') {
+    if (task.action === 'code') {
       return {
-        label: 'Open Code',
-        icon: category === 'code'
+        label: task.id === 'l1-t2' || task.id === 'l1-t5' || task.id === 'l1-t6'
+          ? 'Open Code + Run'
+          : 'Open Code',
+        icon: task.id === 'l1-t4'
           ? <Code2 className="w-3.5 h-3.5" />
           : <Play className="w-3.5 h-3.5" />,
         onClick: onOpenCode,
@@ -100,7 +102,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
         <div className="space-y-3">
           {tasks.map((task, index) => {
             const complete = completedStepIds.includes(task.id);
-            const action = actionFor(task.category);
+            const action = actionFor(task);
 
             return (
               <section
