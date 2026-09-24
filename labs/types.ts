@@ -66,6 +66,7 @@ export interface LabTaskItem {
   description: string;
   completed?: boolean;
   category?: 'code' | 'design' | 'analysis' | 'test' | 'report' | 'submission';
+  action?: 'theory' | 'code' | 'verify' | 'report';
 }
 
 export interface LabCourseAlignment {

@@ -5,18 +5,18 @@ import {
   CheckSquare,
   FileText,
   Code,
-  Layout,
+  ListChecks,
   BookOpen,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
 import { apiClient } from '../lib/api-client';
-import { VisualDesignPanel } from './VisualDesignPanel';
 import { MonacoEditorPanel, type EditorFile } from './MonacoEditorPanel';
 import { OutputConsolePanel } from './OutputConsolePanel';
 import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
+import { LabStepsPanel } from './LabStepsPanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -40,16 +40,13 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Keep the navigation explicit: theory, code, design, and report.
-  const [viewMode, setViewMode] = useState<'theory' | 'code' | 'design' | 'report'>('theory');
+  // Keep the student workflow explicit: theory, steps, code, and report.
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>('theory');
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
   const [activeFileIndex, setActiveFileIndex] = useState(0);
   const [codeSaveStatus, setCodeSaveStatus] = useState<'Saved' | 'Saving...' | 'Save failed'>('Saved');
-
-  // Visual Graph
-  const [visualGraph, setVisualGraph] = useState<any>({ nodes: [], edges: [] });
 
   // Execution Output
   const [execResult, setExecResult] = useState<ExecutionResult | null>(null);
@@ -63,6 +60,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [reportState, setReportState] = useState<ReportState>({ title: '', sections: [] });
   const [reportSaveStatus, setReportSaveStatus] = useState<string>('All changes saved');
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
+  const [completedStepIds, setCompletedStepIds] = useState<string[]>([]);
 
   // Debounced auto-save timers
   const saveTimeoutRef = useRef<any>(null);
@@ -159,18 +157,18 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
         const [
           savedFiles,
-          savedDesign,
           savedReport,
           savedCheckpoints,
           savedSubmission,
           savedTestStats,
+          savedSteps,
         ] = await Promise.all([
           readLocal<EditorFile[]>('files'),
-          readLocal<any>('visual-design'),
           readLocal<ReportState>('report'),
           readLocal<any[]>('checkpoints'),
           readLocal<any>('submission'),
           readLocal<{ passed: number; total: number }>('test-stats'),
+          readLocal<string[]>('steps'),
         ]);
 
         setFiles(
@@ -178,12 +176,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             ? savedFiles
             : loadedManifest.starterFiles
         );
-        setVisualGraph(
-          savedDesign || loadedManifest.visualDesign || { nodes: [], edges: [] }
-        );
         setReportState(mergeReportWithTemplate(savedReport, loadedManifest));
         setCheckpoints(savedCheckpoints || []);
         setTestStats(savedTestStats);
+        setCompletedStepIds(savedSteps || []);
         return;
       }
 
@@ -201,15 +197,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         setFiles(wsData.files || loadedManifest.starterFiles);
       } catch {
         setFiles(loadedManifest.starterFiles);
-      }
-
-      try {
-        const vdData = await apiClient.get(`/api/visual-designs/${labId}`);
-        setVisualGraph(
-          vdData.state || loadedManifest.visualDesign || { nodes: [], edges: [] }
-        );
-      } catch {
-        setVisualGraph(loadedManifest.visualDesign || { nodes: [], edges: [] });
       }
 
       try {
@@ -280,29 +267,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     setFiles(updated);
     setActiveFileIndex(0);
     writeLocal('files', updated);
-  };
-
-  // Save Visual Graph
-  const handleUpdateVisualGraph = async (newGraph: any) => {
-    setVisualGraph(newGraph);
-
-    if (useLocalPersistence) {
-      try {
-        await writeLocal('visual-design', newGraph);
-      } catch (err) {
-        console.error('Failed to save local visual design', err);
-      }
-      return;
-    }
-
-    try {
-      await apiClient.post(`/api/visual-designs/${labId}`, {
-        designType: 'react-flow',
-        state: newGraph,
-      });
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   // Run Code via Pyodide
@@ -433,20 +397,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     handleUpdateReportState({ ...reportState, sections: updatedSections });
   };
 
-  const handleAddDesignToReport = (summary: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
-    if (!targetSection) return;
-
-    const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
-    const newContent = `${currentContent}[Visual Pipeline Design]\n${summary}`;
-
-    const updatedSections = reportState.sections.map((s) =>
-      s.id === targetSection.id ? { ...s, content: newContent } : s
-    );
-
-    handleUpdateReportState({ ...reportState, sections: updatedSections });
-  };
-
   const handleAddTestResultsToReport = (testSummary: string) => {
     const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
     if (!targetSection) return;
@@ -461,13 +411,27 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     handleUpdateReportState({ ...reportState, sections: updatedSections });
   };
 
-  const handleInsertCodeIntoActiveEditor = (codeSnippet: string) => {
-    const curContent = files[activeFileIndex]?.content || '';
-    const newContent = `${curContent}\n\n# --- Inserted Component ---\n${codeSnippet}`;
-    handleContentChange(newContent);
+
+  const handleToggleStep = async (stepId: string) => {
+    const updated = completedStepIds.includes(stepId)
+      ? completedStepIds.filter((id) => id !== stepId)
+      : [...completedStepIds, stepId];
+
+    setCompletedStepIds(updated);
+
+    if (useLocalPersistence) {
+      try {
+        await writeLocal('steps', updated);
+      } catch (err) {
+        console.warn('Unable to save lab-step progress', err);
+      }
+    }
   };
 
-
+  const handleOpenVerification = () => {
+    setViewMode('code');
+    setIsTestHarnessOpen(true);
+  };
 
   if (loading) {
     return (
@@ -538,6 +502,17 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             Theory
           </button>
           <button
+            onClick={() => setViewMode('steps')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'steps'
+                ? 'bg-white text-slate-950 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <ListChecks className="w-3.5 h-3.5" />
+            Steps
+          </button>
+          <button
             onClick={() => setViewMode('code')}
             className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'code'
@@ -548,19 +523,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <Code className="w-3.5 h-3.5" />
             Code
           </button>
-          {manifest.features.visualDesigner && (
-            <button
-              onClick={() => setViewMode('design')}
-              className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === 'design'
-                  ? 'bg-white text-slate-950 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Layout className="w-3.5 h-3.5" />
-              Design
-            </button>
-          )}
           <button
             onClick={() => setViewMode('report')}
             className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
@@ -614,12 +576,24 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               manifest={manifest}
               studentName={reportState.studentName || user.name}
               studentId={reportState.studentId || user.studentId}
-              onBeginLab={() => setViewMode('code')}
+              onBeginLab={() => setViewMode('steps')}
             />
           </div>
         )}
 
-        {/* VIEW 1: CODE WORKSPACE */}
+        {/* VIEW 1: STEP-BY-STEP WORKFLOW */}
+        {viewMode === 'steps' && (
+          <LabStepsPanel
+            manifest={manifest}
+            completedStepIds={completedStepIds}
+            onToggleStep={handleToggleStep}
+            onOpenCode={() => setViewMode('code')}
+            onOpenReport={() => setViewMode('report')}
+            onOpenVerification={handleOpenVerification}
+          />
+        )}
+
+        {/* VIEW 2: CODE WORKSPACE */}
         {viewMode === 'code' && (
           <div className="h-full flex overflow-hidden bg-slate-950">
             <div className="flex-1 min-w-0 h-full">
@@ -642,34 +616,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                 onRestartRuntime={() => defaultCodeRunner.reset()}
                 onAddOutputToReport={handleAddOutputToReport}
                 onAddPlotToReport={handleAddPlotToReport}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* VIEW 2: DESIGN WORKSPACE */}
-        {manifest.features.visualDesigner && viewMode === 'design' && (
-          <div className="h-full flex overflow-hidden bg-slate-950">
-            <div className="w-[52%] min-w-[460px] shrink-0 h-full border-r border-slate-800">
-              <VisualDesignPanel
-                snippets={manifest.snippets}
-                blocks={manifest.blocks}
-                visualGraph={visualGraph}
-                onUpdateVisualGraph={handleUpdateVisualGraph}
-                onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
-                onAddDesignToReport={handleAddDesignToReport}
-              />
-            </div>
-            <div className="flex-1 min-w-0 h-full">
-              <MonacoEditorPanel
-                files={files}
-                activeFileIndex={activeFileIndex}
-                onSelectFile={setActiveFileIndex}
-                onChangeContent={handleContentChange}
-                onAddFile={handleAddFile}
-                onDeleteFile={handleDeleteFile}
-                saveStatus={codeSaveStatus}
-                onAddCodeToReport={handleAddCodeSnapshotToReport}
               />
             </div>
           </div>
