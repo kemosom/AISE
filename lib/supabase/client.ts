@@ -17,6 +17,7 @@ export const getSupabaseAnonKey = (): string => {
   if (typeof window !== 'undefined') {
     return (
       (window as any).__ENV__?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+      (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY ||
       (import.meta as any).env?.VITE_SUPABASE_ANON_KEY ||
       (import.meta as any).env?.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
       (import.meta as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY ||

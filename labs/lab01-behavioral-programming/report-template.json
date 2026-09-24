@@ -32,10 +32,10 @@
       "placeholder": "Discuss AI confidence, deterministic authority, auditability, retraining dependence, human review, and what should remain stable if the AI model changes."
     },
     {
-      "id": "project-transfer",
-      "title": "6. Transfer to the Final Project",
+      "id": "conclusion",
+      "title": "6. Conclusion",
       "required": true,
-      "placeholder": "Identify one realistic way the same pattern could be reused in your final AI-powered software-engineering project and name the AI and system-level metrics that could be evaluated."
+      "placeholder": "Summarize the key finding from the lab: how the AI prediction, deterministic software policy, human-review path, and requirement verification work together. State what the experiment demonstrates about integrating AI safely into software-engineering workflows."
     }
   ]
 }

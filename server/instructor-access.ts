@@ -7,6 +7,10 @@ import {
   INSTRUCTOR_ALIGNMENT_CIPHERTEXT,
   INSTRUCTOR_ALIGNMENT_NONCE,
 } from './instructor-alignment-payload';
+import {
+  INSTRUCTOR_REPORT_CIPHERTEXT,
+  INSTRUCTOR_REPORT_NONCE,
+} from './instructor-report-payload';
 
 export function instructorAccessConfigured(): boolean {
   return Boolean(
@@ -83,8 +87,15 @@ export function decryptInstructorContent(): unknown {
     INSTRUCTOR_ALIGNMENT_CIPHERTEXT
   );
 
+  const reportOverride = decryptPayload(
+    encodedKey,
+    INSTRUCTOR_REPORT_NONCE,
+    INSTRUCTOR_REPORT_CIPHERTEXT
+  );
+
   return {
     ...base,
     ...alignment,
+    ...reportOverride,
   };
 }

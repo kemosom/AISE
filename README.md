@@ -211,6 +211,42 @@ Use Lab 01 as the pattern:
 
 See `docs/LAB_MODULE_SPEC.md` for the detailed module contract.
 
+## Student report submission to Supabase
+
+The open-access student interface has no visible login. When a student submits a final report, the browser creates an **invisible Supabase anonymous-auth session**. This gives the submission a real `auth.uid()` so Row Level Security can protect the student's record and private Word file without adding a login screen.
+
+Final submission stores:
+
+- the generated `.docx` file in the private Supabase Storage bucket `lab-submissions`,
+- student name and student ID in `public.submissions`,
+- the structured report snapshot,
+- the student's code snapshot,
+- the latest requirement-verification counts,
+- the DOCX storage path and filename,
+- the server-generated submission timestamp.
+
+Run the migrations in order, including:
+
+```text
+supabase/migrations/003_open_access_docx_submissions.sql
+```
+
+In Supabase Dashboard, enable **Authentication → Providers → Anonymous Sign-Ins**.
+
+Vercel also needs:
+
+```text
+VITE_SUPABASE_URL=https://<project>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<project publishable key>
+
+# Legacy projects may instead use:
+VITE_SUPABASE_ANON_KEY=<project anon key>
+```
+
+The anon/publishable key is designed for browser use. Do not expose a Supabase service-role key in `VITE_*` variables.
+
+The generated Word document is stored in **Supabase Storage**, while PostgreSQL stores the submission record and file metadata. This is preferable to putting DOCX binary data directly into a database row.
+
 ## Instructor-only answer material
 
 Instructor reference material is **not stored as plaintext in the public repository or client bundle**.
