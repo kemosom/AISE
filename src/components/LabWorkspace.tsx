@@ -220,8 +220,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
       if (useLocalPersistence) {
-        await writeLocal('files', updated);
-        setCodeSaveStatus('Saved');
+        try {
+          await writeLocal('files', updated);
+          setCodeSaveStatus('Saved');
+        } catch {
+          setCodeSaveStatus('Save failed');
+        }
         return;
       }
 
@@ -259,7 +263,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     setVisualGraph(newGraph);
 
     if (useLocalPersistence) {
-      await writeLocal('visual-design', newGraph);
+      try {
+        await writeLocal('visual-design', newGraph);
+      } catch (err) {
+        console.error('Failed to save local visual design', err);
+      }
       return;
     }
 
@@ -307,8 +315,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
       if (useLocalPersistence) {
-        await writeLocal('report', newReport);
-        setReportSaveStatus('Saved in this browser');
+        try {
+          await writeLocal('report', newReport);
+          setReportSaveStatus('Saved in this browser');
+        } catch {
+          setReportSaveStatus('Save failed');
+        }
         return;
       }
 
@@ -432,6 +444,13 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Submit Lab. In open-access mode the submission snapshot is private
   // to this browser; authenticated deployments can persist it server-side.
   const handleConfirmSubmit = async () => {
+    if (!reportState.studentName?.trim() || !reportState.studentId?.trim()) {
+      window.alert('Enter your full name and student ID in the Report workspace before completing the lab.');
+      setViewMode('report');
+      setIsSubmitModalOpen(false);
+      return;
+    }
+
     const snapshot = {
       reportSnapshot: reportState,
       codeSnapshot: files,
