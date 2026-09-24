@@ -9,7 +9,7 @@
   "runner": "pyodide",
   "packages": [],
   "features": {
-    "visualDesigner": true,
+    "visualDesigner": false,
     "blockly": false,
     "functionPalette": false,
     "testRunner": true,
@@ -40,7 +40,7 @@
       "id": "l1-t3",
       "title": "Compare release scenarios",
       "description": "Evaluate safe, failed-test, security, low-confidence, and high-risk pull-request cases.",
-      "category": "design"
+      "category": "analysis"
     },
     {
       "id": "l1-t4",
