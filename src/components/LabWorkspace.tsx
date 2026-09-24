@@ -82,6 +82,42 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const saveTimeoutRef = useRef<any>(null);
   const reportSaveTimeoutRef = useRef<any>(null);
 
+  // Open-access students share no server identity. Persist their personal
+  // workspace in this browser so one learner can never overwrite another
+  // learner's code/report through the synthetic "open-student" account.
+  const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
+  const localKey = (kind: string) => `aise:${labId}:${kind}`;
+
+  const readLocal = <T,>(kind: string): T | null => {
+    if (!useLocalPersistence) return null;
+    try {
+      const raw = window.localStorage.getItem(localKey(kind));
+      return raw ? (JSON.parse(raw) as T) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const writeLocal = (kind: string, value: unknown) => {
+    if (!useLocalPersistence) return;
+    try {
+      window.localStorage.setItem(localKey(kind), JSON.stringify(value));
+    } catch (err) {
+      console.warn(`Unable to save local ${kind}`, err);
+    }
+  };
+
+  const createInitialReport = (labManifest: LabManifest): ReportState => ({
+    title: labManifest.reportTemplate.title,
+    studentName: '',
+    studentId: '',
+    sections: labManifest.reportTemplate.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      content: '',
+    })),
+  });
+
   useEffect(() => {
     loadLabWorkspace();
   }, [labId]);
@@ -89,51 +125,77 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const loadLabWorkspace = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const data = await apiClient.get(`/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`);
-      setManifest(data.manifest);
+      const data = await apiClient.get(
+        `/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`
+      );
+
+      const loadedManifest = data.manifest as LabManifest;
+      setManifest(loadedManifest);
       setLabMeta(data.lab);
 
-      // Load Workspace Files
+      if (useLocalPersistence) {
+        const savedFiles = readLocal<EditorFile[]>('files');
+        const savedDesign = readLocal<any>('visual-design');
+        const savedReport = readLocal<ReportState>('report');
+        const savedCheckpoints = readLocal<any[]>('checkpoints');
+        const savedSubmission = readLocal<any>('submission');
+        const savedTestStats = readLocal<{ passed: number; total: number }>('test-stats');
+
+        setFiles(
+          savedFiles && savedFiles.length > 0
+            ? savedFiles
+            : loadedManifest.starterFiles
+        );
+        setVisualGraph(
+          savedDesign || loadedManifest.visualDesign || { nodes: [], edges: [] }
+        );
+        setReportState(savedReport || createInitialReport(loadedManifest));
+        setCheckpoints(savedCheckpoints || []);
+        setSubmissionCompleted(Boolean(savedSubmission));
+        setTestStats(savedTestStats);
+        return;
+      }
+
+      // Authenticated/instructor mode can continue using the server data layer.
       try {
         const wsData = await apiClient.get(`/api/workspaces/${labId}`);
-        setFiles(wsData.files || data.manifest.starterFiles);
+        setFiles(wsData.files || loadedManifest.starterFiles);
       } catch {
-        setFiles(data.manifest.starterFiles);
+        setFiles(loadedManifest.starterFiles);
       }
 
-      // Load Visual Design
       try {
         const vdData = await apiClient.get(`/api/visual-designs/${labId}`);
-        setVisualGraph(vdData.state || data.manifest.visualDesign || { nodes: [], edges: [] });
+        setVisualGraph(
+          vdData.state || loadedManifest.visualDesign || { nodes: [], edges: [] }
+        );
       } catch {
-        setVisualGraph(data.manifest.visualDesign || { nodes: [], edges: [] });
+        setVisualGraph(loadedManifest.visualDesign || { nodes: [], edges: [] });
       }
 
-      // Load Report
       try {
         const repData = await apiClient.get(`/api/reports/${labId}`);
-        setReportState(repData.report.contentJson);
+        setReportState(
+          repData.report?.contentJson || createInitialReport(loadedManifest)
+        );
       } catch {
-        // Fallback to template if not loaded
+        setReportState(createInitialReport(loadedManifest));
       }
 
-      // Check existing submission
       try {
         const subData = await apiClient.get(`/api/submissions/${labId}`);
-        if (subData.submission) {
-          setSubmissionCompleted(true);
-        }
+        setSubmissionCompleted(Boolean(subData.submission));
       } catch {
-        // ignore
+        setSubmissionCompleted(false);
       }
 
-      // Checkpoints
       try {
         const cpData = await apiClient.get(`/api/checkpoints/${labId}`);
         setCheckpoints(cpData.checkpoints || []);
       } catch {
-        // ignore
+        setCheckpoints([]);
       }
     } catch (err: any) {
       setError(err.message || 'Error loading lab');
@@ -151,13 +213,19 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
+      if (useLocalPersistence) {
+        writeLocal('files', updated);
+        setCodeSaveStatus('Saved');
+        return;
+      }
+
       try {
         await apiClient.post(`/api/workspaces/${labId}`, { files: updated });
         setCodeSaveStatus('Saved');
       } catch {
         setCodeSaveStatus('Save failed');
       }
-    }, 1000);
+    }, 700);
   };
 
   const handleAddFile = (fileName: string) => {
@@ -169,6 +237,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const updated = [...files, newFile];
     setFiles(updated);
     setActiveFileIndex(updated.length - 1);
+    writeLocal('files', updated);
   };
 
   const handleDeleteFile = (idx: number) => {
@@ -176,11 +245,18 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const updated = files.filter((_, i) => i !== idx);
     setFiles(updated);
     setActiveFileIndex(0);
+    writeLocal('files', updated);
   };
 
   // Save Visual Graph
   const handleUpdateVisualGraph = async (newGraph: any) => {
     setVisualGraph(newGraph);
+
+    if (useLocalPersistence) {
+      writeLocal('visual-design', newGraph);
+      return;
+    }
+
     try {
       await apiClient.post(`/api/visual-designs/${labId}`, {
         designType: 'react-flow',
@@ -224,6 +300,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
+      if (useLocalPersistence) {
+        writeLocal('report', newReport);
+        setReportSaveStatus('Saved in this browser');
+        return;
+      }
+
       try {
         await apiClient.post(`/api/reports/${labId}`, {
           title: newReport.title,
@@ -233,13 +315,29 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       } catch {
         setReportSaveStatus('Save failed');
       }
-    }, 1200);
+    }, 700);
   };
 
   // Checkpoints
   const handleCreateCheckpoint = async (label: string, snapshot: any) => {
+    if (useLocalPersistence) {
+      const checkpoint = {
+        id: `local-${Date.now()}`,
+        label,
+        snapshot,
+        createdAt: new Date().toISOString(),
+      };
+      const updated = [checkpoint, ...checkpoints];
+      setCheckpoints(updated);
+      writeLocal('checkpoints', updated);
+      return;
+    }
+
     try {
-      const res = await apiClient.post(`/api/checkpoints/${labId}`, { label, snapshot });
+      const res = await apiClient.post(`/api/checkpoints/${labId}`, {
+        label,
+        snapshot,
+      });
       if (res.checkpoint) {
         setCheckpoints((prev) => [res.checkpoint, ...prev]);
       }
@@ -325,25 +423,30 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     handleContentChange(newContent);
   };
 
-  // Submit Lab (Creates immutable database snapshot)
+  // Submit Lab. In open-access mode the submission snapshot is private
+  // to this browser; authenticated deployments can persist it server-side.
   const handleConfirmSubmit = async () => {
-    await apiClient.post(`/api/submissions/${labId}`, {
+    const snapshot = {
       reportSnapshot: reportState,
       codeSnapshot: files,
       visualDesignSnapshot: visualGraph,
       testResultsSnapshot: {
-        total: testStats?.total ?? 4,
+        total: testStats?.total ?? manifest?.tests.length ?? 0,
         passed: testStats?.passed ?? 0,
-        details: [
-          { name: 'Synchronization Invariant Check', passed: (testStats?.passed ?? 0) > 0, message: 'All b-threads yielded valid RWB specs.' },
-          { name: 'Blocked Event Suppression Check', passed: (testStats?.passed ?? 0) > 1, message: 'Overflow prevention prevented overflow.' },
-          { name: 'Deadlock Freedom Invariant', passed: (testStats?.passed ?? 0) > 2, message: 'Clean termination achieved.' },
-          { name: 'Trace Verification', passed: (testStats?.passed ?? 0) > 3, message: 'Simulation history verified.' },
-        ],
       },
-    });
+      submittedAt: new Date().toISOString(),
+    };
 
+    if (useLocalPersistence) {
+      writeLocal('submission', snapshot);
+      setSubmissionCompleted(true);
+      setIsSubmitModalOpen(false);
+      return;
+    }
+
+    await apiClient.post(`/api/submissions/${labId}`, snapshot);
     setSubmissionCompleted(true);
+    setIsSubmitModalOpen(false);
   };
 
   if (loading) {
@@ -616,8 +719,16 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               files={files}
               onAddTestResultsToReport={handleAddTestResultsToReport}
               onTestRunComplete={(passed, total) => {
-                setTestStats({ passed, total });
-                apiClient.post(`/api/labs/${labId}/test-run`, { passed, total }).catch(() => {});
+                const stats = { passed, total };
+                setTestStats(stats);
+
+                if (useLocalPersistence) {
+                  writeLocal('test-stats', stats);
+                } else {
+                  apiClient
+                    .post(`/api/labs/${labId}/test-run`, stats)
+                    .catch(() => {});
+                }
               }}
             />
           </div>
