@@ -7,6 +7,7 @@ import lab01Theory from './lab01-behavioral-programming/theory.md?raw';
 import lab01LabSheet from './lab01-behavioral-programming/lab-sheet.md?raw';
 import lab01MainPy from './lab01-behavioral-programming/starter/main.py?raw';
 import lab01HelpersPy from './lab01-behavioral-programming/starter/helpers.py?raw';
+import lab01RiskModelPy from './lab01-behavioral-programming/starter/risk_model.py?raw';
 import lab01Snippets from './lab01-behavioral-programming/snippets.json';
 import lab01Blocks from './lab01-behavioral-programming/blocks.json';
 import lab01VisualNodes from './lab01-behavioral-programming/visual-nodes.json';
@@ -198,6 +199,7 @@ labRegistryMap.set('lab01-behavioral-programming', {
   ...(lab01Metadata as any),
   starterFiles: [
     { name: 'main.py', language: 'python', content: lab01MainPy },
+    { name: 'risk_model.py', language: 'python', content: lab01RiskModelPy },
     { name: 'helpers.py', language: 'python', content: lab01HelpersPy },
   ],
   reportTemplate: lab01ReportTemplate as any,
