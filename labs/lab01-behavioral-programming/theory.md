@@ -1,193 +1,83 @@
-# Lab 01 Theory: Behavioral Programming for Modular Software Design
+# Lab 01: Behavioral Programming for Modular Software Design
 
-**Course:** MAI5124 AI in Software Engineering  
-**Topic:** AI for Software Design: Interweaving AI and Behavioral Programming Towards Better Programming Environments  
-**Estimated theory reading:** 35–45 minutes
+**Pre-lab recap:** about 8–10 minutes
 
-## Why this topic matters
+You already have the lecture material. This page only summarizes the concepts needed for the practical.
 
-Software systems rarely fail because a programmer cannot write an `if` statement. They become difficult to maintain when many requirements interact inside the same controller. A new safety constraint, exception, or policy may require edits across several branches of a state machine. Those edits can introduce regressions because the implementation of one requirement is entangled with the implementation of another.
+## 1. The idea
 
-**Behavioral Programming (BP)** addresses this design problem by representing requirements as independent behavioral threads, or **b-threads**. Each b-thread describes only one aspect of the required behaviour. A coordinator repeatedly considers what all active b-threads request, what they are waiting for, and what they forbid, then selects the next event.
+Behavioral Programming (BP) represents software requirements as independent **behavioral threads (b-threads)**.
 
-The software-engineering question in this lab is therefore not simply "can we make the tank work?" It is:
+Each b-thread describes one requirement. The b-threads do not call one another directly. Instead, they synchronize by proposing, observing, or blocking events.
 
-> Can a requirement-oriented design let us add a safety rule without rewriting the existing functional behaviours?
+For this lab, the system has three requirements:
 
-That question is directly relevant to maintainability, incremental design, verification, and intelligent coordination.
+- request hot-water fill events,
+- request cold-water fill events,
+- prevent the tank from exceeding its safe capacity.
 
-## 1. From centralised control to requirement-oriented behaviour
+The key software-engineering question is:
 
-Consider a fluid-mixing controller with three requirements:
+> Can we add the safety requirement without rewriting the two functional fill behaviours?
 
-1. The hot-water subsystem must request hot-water fill events.
-2. The cold-water subsystem must request cold-water fill events.
-3. The tank must never exceed its safe capacity.
+## 2. Request–Wait–Block
 
-A conventional implementation may place all three requirements in one controller:
+At each synchronization point, b-thread *i* provides three event sets:
 
-```python
-if hot_required and volume < MAX_CAPACITY:
-    add_hot_water()
-elif cold_required and volume < MAX_CAPACITY:
-    add_cold_water()
-elif volume >= MAX_CAPACITY:
-    drain()
-```
+$$S_i = \langle R_i, W_i, B_i \rangle$$
 
-This is understandable at small scale. The problem appears when the system gains new requirements such as maintenance lockout, temperature constraints, emergency drain, operator override, or energy-saving policies. The same control structure gradually becomes the meeting point for every requirement.
+where:
 
-BP takes a different approach. Each requirement becomes a separate b-thread. The b-threads do not call one another. They synchronize through events and a coordinator.
+- $R_i$ = events requested by b-thread *i*,
+- $W_i$ = events it wants to observe,
+- $B_i$ = events it currently blocks.
 
-## 2. The Request-Wait-Block model
+The coordinator forms the candidate event set:
 
-At a synchronization point, a b-thread yields a specification containing three event sets:
+$$E_{\mathrm{candidate}} = \left(\bigcup_i R_i\right) \setminus \left(\bigcup_i B_i\right)$$
 
-- **Request (R):** events the b-thread proposes for execution.
-- **WaitFor (W):** events the b-thread wants to observe.
-- **Block (B):** events the b-thread forbids at that synchronization point.
+So an event can be selected only if:
 
-For active b-threads (t_1,ldots,t_n), let
-
-[
-S_i = \langle R_i, W_i, B_i \rangle
-]
-
-be the synchronization specification of b-thread (i).
-
-The coordinator forms the candidate set
-
-[
-E_{cand} =
-\left(\bigcup_i R_i\right)
-\setminus
-\left(\bigcup_i B_i\right).
-]
-
-An event is therefore selectable only when:
-
-1. at least one active b-thread requests it, and
+1. at least one b-thread requests it, and
 2. no active b-thread blocks it.
 
-After an event is selected, each b-thread that requested or waited for that event is resumed. Other b-threads remain at their current synchronization point.
+## 3. Minimal Python pattern
 
-## 3. A minimal b-thread
-
-A b-thread can be implemented as a Python generator. The generator yields a synchronization dictionary and is resumed when a relevant event occurs.
+A b-thread is implemented as a Python generator:
 
 ```python
-def request_hot_water():
-    for _ in range(3):
-        selected = yield {
-            "request": ["HOT_WATER"],
+def add_hot_water():
+    for _ in range(FILL_CYCLES):
+        yield {
+            "request": [HOT_WATER],
             "waitFor": [],
-            "block": []
+            "block": [],
         }
 ```
 
-This thread expresses one requirement only: request three hot-water events. It does not know anything about cold water, draining, or tank capacity.
+The supplied coordinator resumes a b-thread when a selected event is one that the thread requested or waited for.
 
-That separation is deliberate.
+## 4. Safety invariant
 
-## 4. Safety as an independent requirement
+Let $v_k$ be the tank volume after event $k$ and $C_{\max}$ the safe capacity.
 
-Suppose the tank has a maximum safe capacity. The safety requirement can be introduced as another b-thread.
+The required invariant is:
 
-Conceptually:
+$$0 \le v_k \le C_{\max} \qquad \text{for every dispatched event } k$$
 
-```text
-observe fill events
-update estimated volume
+The safety b-thread should therefore observe fill events and, when the capacity boundary is reached, block further fill events and request a drain event.
 
-IF volume < MAX_CAPACITY
-    wait for relevant events
+The important design constraint is that this safety logic must remain **independent** of the hot-water and cold-water b-threads.
 
-IF volume >= MAX_CAPACITY
-    block HOT_WATER
-    block COLD_WATER
-    request DRAIN_VALVE
-```
+## 5. What you will do
 
-The important design property is that the existing hot-water and cold-water b-threads do not need to be rewritten. The safety rule is added by composition.
+In the practical you will:
 
-This illustrates a key software-engineering benefit of BP: **incremental requirement integration**.
+1. run the supplied system **without** safety protection and observe the violation,
+2. implement one missing function: `overflow_prevention()`,
+3. enable the safety b-thread,
+4. run the system again and compare the trace,
+5. execute public tests that verify the safety invariant,
+6. capture evidence in the integrated report.
 
-## 5. Coordination is not the same as "AI"
-
-Behavioral Programming itself should not be mislabeled as machine learning or a multi-agent AI algorithm. In this course it is relevant because it provides a structured way to coordinate independent behavioural requirements and can serve as a substrate for intelligent decision rules, planners, learned policies, or agents.
-
-For example, a future b-thread could request an event based on:
-
-- a learned anomaly detector,
-- a reinforcement-learning policy,
-- a probabilistic risk score,
-- a rule-based expert system.
-
-The BP coordinator would still resolve the interaction among that intelligent component and other functional or safety requirements.
-
-In this lab, however, the focus is **software design and coordination**, not model training.
-
-## 6. Event selection and determinism
-
-If several events are requested and none are blocked, a coordinator needs a selection policy. Examples include:
-
-- fixed priority,
-- round-robin selection,
-- heuristic scoring,
-- random selection,
-- search-based selection.
-
-For this introductory lab, the supplied `BProgram` uses a deterministic first-requested policy. Determinism is useful because repeated runs of the same program should produce the same trace, making debugging and testing easier.
-
-Later systems may use more sophisticated selection policies.
-
-## 7. Deadlock and completion
-
-If no unblocked requested event exists, execution cannot proceed.
-
-This may mean:
-
-- all useful behaviour has completed, or
-- active requirements are in conflict.
-
-A good implementation should therefore distinguish normal completion from a genuine behavioural deadlock where requests remain but all are blocked.
-
-You will inspect this condition when you analyse the execution trace.
-
-## 8. Safety invariant used in this lab
-
-Let (v_k) be the tank volume after event (k), and let (C_{max}) be the safe capacity.
-
-The required safety invariant is
-
-[
-0 \le v_k \le C_{max}
-\quad \text{for every event } k.
-]
-
-A fill event increases the volume by one unit:
-
-[
-v_{k+1}=v_k+1.
-]
-
-A drain event removes a fixed amount:
-
-[
-v_{k+1}=\max(0,v_k-D).
-]
-
-Passing the lab does not mean merely producing a `block` field. Your implementation must preserve this invariant across the complete event trace.
-
-## 9. What you should be able to explain before coding
-
-Before selecting **Begin Lab**, make sure you can answer these questions:
-
-1. Why can separate b-threads improve requirement modularity?
-2. What makes an event eligible for selection?
-3. What is the difference between `request`, `waitFor`, and `block`?
-4. Why should a safety b-thread be independent of the fill b-threads?
-5. What evidence would demonstrate that the safety invariant actually holds?
-6. What would count as a behavioural deadlock?
-
-You will use these ideas in the implementation and in your laboratory report.
+That is the complete task. The starter code is intentionally provided so you can focus on the software-design concept rather than writing a behavioral-programming engine from scratch.
