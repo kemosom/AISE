@@ -1,41 +1,29 @@
 {
-  "title": "Lab 01 Report: Behavioral Programming for Modular Software Design",
+  "title": "Lab 01 Report: Behavioral Programming Safety Requirement",
   "sections": [
     {
-      "id": "concepts",
-      "title": "1. Behavioral Programming Concepts",
-      "required": true,
-      "placeholder": "Explain Request-Wait-Block synchronization in your own words and state how the candidate event set is formed."
-    },
-    {
       "id": "implementation",
-      "title": "2. Implementation",
+      "title": "1. Safety B-Thread Implementation",
       "required": true,
-      "placeholder": "Describe your cold-water b-thread, safety b-thread, and build_program configuration. Explain how you kept safety logic separate from functional behavior."
+      "placeholder": "Explain how your overflow_prevention() b-thread tracks volume, blocks fill events, and requests draining."
     },
     {
       "id": "results",
-      "title": "3. Results and Verification Evidence",
+      "title": "2. Baseline vs Safe Execution",
       "required": true,
-      "placeholder": "Insert your execution trace, relevant output, visual architecture, and public test evidence. State the maximum observed tank volume."
+      "placeholder": "Compare the unsafe baseline with the safety-enabled run. Add execution output, test results, and the visual architecture."
     },
     {
-      "id": "modularity",
-      "title": "4. Modularity Stress Test",
+      "id": "discussion",
+      "title": "3. Software Engineering Discussion",
       "required": true,
-      "placeholder": "Report what happened when MAX_CAPACITY and DRAIN_AMOUNT were changed. Did the functional b-threads need modification?"
-    },
-    {
-      "id": "critical-analysis",
-      "title": "5. Critical Analysis",
-      "required": true,
-      "placeholder": "Answer the lab-sheet critical-analysis questions, including coupling, invariant verification, deadlock, and where AI could be integrated."
+      "placeholder": "Why is the safety rule better kept in a separate b-thread? Does BP remove complexity or move it into coordination?"
     },
     {
       "id": "conclusion",
-      "title": "6. Conclusion",
+      "title": "4. Conclusion",
       "required": true,
-      "placeholder": "Summarize what the experiment demonstrated about requirement modularity, deterministic coordination, and executable safety verification."
+      "placeholder": "Summarize what the lab demonstrated about modular requirements and executable safety verification."
     }
   ]
 }
