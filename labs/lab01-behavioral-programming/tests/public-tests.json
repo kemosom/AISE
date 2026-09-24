@@ -1,0 +1,30 @@
+[
+  {
+    "id": "test-bprogram-import",
+    "name": "BProgram Structure & Invariants",
+    "description": "Verifies that BProgram and event classes are structured correctly.",
+    "testCode": "from helpers import BProgram\nbp = BProgram()\nassert bp.threads == [], 'Initial threads list must be empty'\nassert bp.history == [], 'Initial event history must be empty'",
+    "weight": 20
+  },
+  {
+    "id": "test-hot-cold-water-bthreads",
+    "name": "Positive Behavioral Threads Verification",
+    "description": "Checks that add_hot_water and add_cold_water yield valid synchronization specifications.",
+    "testCode": "from main import add_hot_water, add_cold_water\ngen_hot = add_hot_water()\nspec_hot = next(gen_hot)\nassert 'request' in spec_hot and 'HOT_WATER' in spec_hot['request'], 'add_hot_water must request HOT_WATER'\ngen_cold = add_cold_water()\nspec_cold = next(gen_cold)\nassert 'request' in spec_cold and 'COLD_WATER' in spec_cold['request'], 'add_cold_water must request COLD_WATER'",
+    "weight": 30
+  },
+  {
+    "id": "test-overflow-safety-block",
+    "name": "Safety Monitor & Block Verification",
+    "description": "Ensures that the overflow prevention b-thread correctly blocks pumping events when capacity threshold is reached.",
+    "testCode": "from main import overflow_prevention\nsafety = overflow_prevention()\nspec = next(safety)\nassert 'block' in spec, 'overflow_prevention must return block specifications'",
+    "weight": 30
+  },
+  {
+    "id": "test-full-trace-execution",
+    "name": "End-to-End Simulation Trace Execution",
+    "description": "Runs the coordinator and ensures that no unhandled deadlock or crash occurs during full simulation.",
+    "testCode": "from helpers import BProgram\nfrom main import add_hot_water, add_cold_water, overflow_prevention\nbp = BProgram()\nbp.add_bthread(add_hot_water)\nbp.add_bthread(add_cold_water)\nbp.add_bthread(overflow_prevention)\ntrace = bp.run(max_steps=15)\nassert len(trace) > 0, 'Simulation must dispatch events successfully'\nassert all(isinstance(e, str) for e in trace), 'All dispatched events must be strings'",
+    "weight": 20
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    {
+      "id": "node-1",
+      "type": "input",
+      "data": { "label": "B-Thread: add_hot_water (Requests HOT_WATER)" },
+      "position": { "x": 50, "y": 80 }
+    },
+    {
+      "id": "node-2",
+      "type": "input",
+      "data": { "label": "B-Thread: add_cold_water (Requests COLD_WATER)" },
+      "position": { "x": 50, "y": 200 }
+    },
+    {
+      "id": "node-3",
+      "type": "input",
+      "data": { "label": "B-Thread: overflow_prevention (Safety Guard)" },
+      "position": { "x": 50, "y": 320 }
+    },
+    {
+      "id": "node-4",
+      "type": "default",
+      "data": { "label": "BProgram Coordinator (RWB Arbiter)" },
+      "position": { "x": 420, "y": 180 }
+    },
+    {
+      "id": "node-5",
+      "type": "output",
+      "data": { "label": "Event Dispatcher -> Hardware Actuators" },
+      "position": { "x": 750, "y": 180 }
+    }
+  ],
+  "edges": [
+    { "id": "e1-4", "source": "node-1", "target": "node-4", "label": "Yield Sync Spec (RWB)" },
+    { "id": "e2-4", "source": "node-2", "target": "node-4", "label": "Yield Sync Spec (RWB)" },
+    { "id": "e3-4", "source": "node-3", "target": "node-4", "label": "Safety Blocks / Overrides" },
+    { "id": "e4-5", "source": "node-4", "target": "node-5", "label": "Dispatched Event" }
+  ]
+}

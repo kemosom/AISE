@@ -1,0 +1,6 @@
+{
+  "name": "AISE Lab Studio",
+  "description": "Interactive laboratory environment for MAI5124 AI in Software Engineering with real code execution, visual design, automated testing, and report generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

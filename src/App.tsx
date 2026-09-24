@@ -1,0 +1,214 @@
+import React, { useState, useEffect } from 'react';
+import type { AuthUserPublic } from '../lib/auth/types';
+import { isSupabaseConfigured } from '../lib/supabase/client';
+import { apiClient } from './lib/api-client';
+import { Header } from './components/Header';
+import { StudentDashboard, type LabSummary } from './components/StudentDashboard';
+import { LecturerDashboard } from './components/LecturerDashboard';
+import { LecturerSubmissionsView } from './components/LecturerSubmissionsView';
+import { LecturerSubmissionInspector } from './components/LecturerSubmissionInspector';
+import { LabWorkspace } from './components/LabWorkspace';
+
+const DEFAULT_OPEN_USER: AuthUserPublic = {
+  id: 'open-student',
+  email: 'student@mai5124.academic',
+  name: '',
+  studentId: '',
+  role: 'STUDENT',
+};
+
+export default function App() {
+  const [user, setUser] = useState<AuthUserPublic>(DEFAULT_OPEN_USER);
+  const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<
+    'dashboard' | 'lab' | 'students' | 'submissions' | 'inspect'
+  >('dashboard');
+  const [activeLabId, setActiveLabId] = useState<string | null>(null);
+  const [isInstructorPreview, setIsInstructorPreview] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);
+  const [labs, setLabs] = useState<LabSummary[]>([]);
+  const [labsLoading, setLabsLoading] = useState(false);
+  const [labsError, setLabsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    checkCurrentUser();
+  }, []);
+
+  const checkCurrentUser = async () => {
+    try {
+      const data = await apiClient.get('/api/auth/me');
+      if (data?.user) {
+        setUser(data.user);
+      }
+    } catch {
+      // open student access
+    } finally {
+      fetchLabs();
+      setLoading(false);
+    }
+  };
+
+  const fetchLabs = async () => {
+    setLabsLoading(true);
+    setLabsError(null);
+    try {
+      const data = await apiClient.get('/api/labs');
+      // In open academic access mode, ensure all labs are unlocked for free exploration
+      const unlockedLabs = (data.labs || []).map((l: LabSummary) => ({
+        ...l,
+        isUnlocked: true,
+        status: l.status === 'Locked' ? 'Available' : l.status,
+      }));
+      setLabs(unlockedLabs);
+    } catch (err: any) {
+      console.error('Failed to fetch labs list:', err);
+      setLabsError(err.message || 'Unable to load laboratory modules.');
+    } finally {
+      setLabsLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiClient.post('/api/auth/logout');
+    } catch {
+      // ignore
+    } finally {
+      apiClient.clearToken();
+      setUser(DEFAULT_OPEN_USER);
+      setActiveLabId(null);
+      setIsInstructorPreview(false);
+      setSelectedSubmission(null);
+      setActiveView('dashboard');
+    }
+  };
+
+  const handleSelectLab = (labId: string) => {
+    setActiveLabId(labId);
+    setIsInstructorPreview(false);
+    setActiveView('lab');
+  };
+
+  const handlePreviewLabAsInstructor = (labId: string) => {
+    setActiveLabId(labId);
+    setIsInstructorPreview(true);
+    setActiveView('lab');
+  };
+
+  const handleViewSubmissions = (labId: string) => {
+    setActiveLabId(labId);
+    setActiveView('submissions');
+  };
+
+  const handleInspectSubmission = (submission: any) => {
+    setSelectedSubmission(submission);
+    setActiveView('inspect');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-mono text-xs text-slate-500">
+        Loading Laboratory Modules...
+      </div>
+    );
+  }
+
+  const isStudent = user.role?.toLowerCase() === 'student';
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
+      {/* Institutional Top Header */}
+      <Header
+        user={user}
+        activeView={activeView}
+        onNavigate={(view) => {
+          setActiveView(view as any);
+          if (view === 'dashboard') {
+            setActiveLabId(null);
+            setIsInstructorPreview(false);
+            fetchLabs();
+          }
+        }}
+        onLogout={handleLogout}
+        isInstructorPreview={isInstructorPreview}
+        onExitPreview={() => {
+          setIsInstructorPreview(false);
+          setActiveView('dashboard');
+          fetchLabs();
+        }}
+      />
+
+      {/* Main Routed Content */}
+      <main className="flex-1 flex flex-col">
+        {/* VIEW: LAB WORKSPACE (STUDENT OR PREVIEW) */}
+        {activeView === 'lab' && activeLabId && (
+          <LabWorkspace
+            labId={activeLabId}
+            user={user}
+            onBack={() => {
+              setActiveView('dashboard');
+              setActiveLabId(null);
+              setIsInstructorPreview(false);
+              fetchLabs();
+            }}
+            isInstructorPreview={isInstructorPreview}
+          />
+        )}
+
+        {/* VIEW: LECTURER SUBMISSIONS LIST */}
+        {activeView === 'submissions' && activeLabId && (
+          <LecturerSubmissionsView
+            labId={activeLabId}
+            user={user}
+            onBack={() => {
+              setActiveView('dashboard');
+              setActiveLabId(null);
+              fetchLabs();
+            }}
+            onInspectSubmission={handleInspectSubmission}
+          />
+        )}
+
+        {/* VIEW: LECTURER SUBMISSION INSPECTION */}
+        {activeView === 'inspect' && selectedSubmission && (
+          <LecturerSubmissionInspector
+            submission={selectedSubmission}
+            onBack={() => {
+              setActiveView('submissions');
+              setSelectedSubmission(null);
+            }}
+          />
+        )}
+
+        {/* VIEW: DASHBOARD (STUDENT VS LECTURER) */}
+        {activeView === 'dashboard' && (
+          isStudent ? (
+            <StudentDashboard
+              user={user}
+              labs={labs}
+              isLoading={labsLoading}
+              error={labsError}
+              onSelectLab={handleSelectLab}
+              onRefresh={fetchLabs}
+            />
+          ) : (
+            <LecturerDashboard
+              user={user}
+              onPreviewLab={handlePreviewLabAsInstructor}
+              onViewSubmissions={handleViewSubmissions}
+            />
+          )
+        )}
+
+        {/* VIEW: STUDENTS ROSTER (FOR LECTURER DIRECT NAV) */}
+        {activeView === 'students' && (
+          <LecturerDashboard
+            user={user}
+            onPreviewLab={handlePreviewLabAsInstructor}
+            onViewSubmissions={handleViewSubmissions}
+          />
+        )}
+      </main>
+    </div>
+  );
+}

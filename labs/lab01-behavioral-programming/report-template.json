@@ -1,0 +1,41 @@
+{
+  "title": "Lab 01 Technical Report: Behavioral Programming",
+  "sections": [
+    {
+      "id": "objective",
+      "title": "1. Laboratory Objectives",
+      "required": true,
+      "placeholder": "Articulate the design principles of behavioral programming and the objectives of coordinating independent concurrent threads."
+    },
+    {
+      "id": "methodology",
+      "title": "2. Theoretical Methodology",
+      "required": true,
+      "placeholder": "Explain the Request-Wait-Block (RWB) protocol, candidate event evaluation formula, and how conflict arbitration works."
+    },
+    {
+      "id": "implementation",
+      "title": "3. Implementation & B-Thread Design",
+      "required": true,
+      "placeholder": "Detail your implementation of add_hot_water, add_cold_water, and the overflow_prevention safety monitor."
+    },
+    {
+      "id": "results",
+      "title": "4. Execution Results & Empirical Evidence",
+      "required": true,
+      "placeholder": "Insert your console trace output, generated event plot, and public automated test run results."
+    },
+    {
+      "id": "discussion",
+      "title": "5. Critical Analysis & Answers to Questions",
+      "required": true,
+      "placeholder": "Analyze the advantages of behavioral programming over monolithic state machines regarding software maintainability and incremental safety rules."
+    },
+    {
+      "id": "conclusion",
+      "title": "6. Conclusion & Future Refinements",
+      "required": true,
+      "placeholder": "Summarize key findings, verification conclusions, and potential extensions to multi-agent cyber-physical systems."
+    }
+  ]
+}

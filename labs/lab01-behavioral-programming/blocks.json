@@ -1,0 +1,39 @@
+[
+  {
+    "type": "bthread_request",
+    "message0": "request event %1 while blocking %2",
+    "args0": [
+      { "type": "field_input", "name": "REQ", "text": "HOT_WATER" },
+      { "type": "field_input", "name": "BLK", "text": "DRAIN_VALVE" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 210,
+    "tooltip": "Yields an event request with an optional block list",
+    "codeGenerator": "yield {'request': ['{REQ}'], 'waitFor': [], 'block': ['{BLK}']}\n"
+  },
+  {
+    "type": "bthread_wait",
+    "message0": "wait for event %1",
+    "args0": [
+      { "type": "field_input", "name": "WAIT", "text": "COLD_WATER" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 160,
+    "tooltip": "Waits for an event to be dispatched by another thread",
+    "codeGenerator": "event = yield {'request': [], 'waitFor': ['{WAIT}'], 'block': []}\n"
+  },
+  {
+    "type": "bthread_safety_block",
+    "message0": "safety rule: strictly block %1 when condition holds",
+    "args0": [
+      { "type": "field_input", "name": "BLOCKED", "text": "HOT_WATER" }
+    ],
+    "previousStatement": null,
+    "nextStatement": null,
+    "colour": 0,
+    "tooltip": "Enforces a strict safety invariant block",
+    "codeGenerator": "yield {'request': [], 'waitFor': [], 'block': ['{BLOCKED}']}\n"
+  }
+]
