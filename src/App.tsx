@@ -53,13 +53,9 @@ export default function App() {
     setLabsError(null);
     try {
       const data = await apiClient.get('/api/labs');
-      // In open academic access mode, ensure all labs are unlocked for free exploration
-      const unlockedLabs = (data.labs || []).map((l: LabSummary) => ({
-        ...l,
-        isUnlocked: true,
-        status: l.status === 'Locked' ? 'Available' : l.status,
-      }));
-      setLabs(unlockedLabs);
+      // Lab release state comes from the course configuration. Only completed
+      // modules should be unlocked; unfinished modules remain visible but locked.
+      setLabs(data.labs || []);
     } catch (err: any) {
       console.error('Failed to fetch labs list:', err);
       setLabsError(err.message || 'Unable to load laboratory modules.');
