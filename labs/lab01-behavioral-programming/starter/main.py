@@ -1,147 +1,233 @@
 """
 MAI5124 AI in Software Engineering
-Lab 01: Behavioral Programming
+Lab 01: Safe AI-Assisted Software Release with Behavioral Programming
 
 STUDENT TASK
 ------------
-1. Run this file once with ENABLE_SAFETY = False.
-2. Observe the unsafe baseline.
-3. Implement overflow_prevention().
-4. Set ENABLE_SAFETY = True.
-5. Run again and verify the public tests.
+1. Run this file once with ENABLE_GUARDRAIL = False.
+2. Observe the AI-only release decision.
+3. Implement release_guardrail(change, prediction).
+4. Set ENABLE_GUARDRAIL = True.
+5. Run again, compare the decision, and verify requirements.
 
-The functional hot-water and cold-water behaviours are already provided.
+The AI model and Behavioral Programming coordinator are already provided.
 """
 
 from helpers import BProgram
+from risk_model import predict_risk
 
-HOT_WATER = "HOT_WATER"
-COLD_WATER = "COLD_WATER"
-DRAIN_VALVE = "DRAIN_VALVE"
+DEPLOY = "DEPLOY"
+HUMAN_REVIEW = "HUMAN_REVIEW"
+BLOCK_RELEASE = "BLOCK_RELEASE"
 
-FILL_CYCLES = 5
-MAX_CAPACITY = 8
-DRAIN_AMOUNT = 3
+MIN_AI_CONFIDENCE = 0.70
+MIN_TEST_COVERAGE = 70
 
-# Keep False for the first baseline run.
-# Change to True only after implementing overflow_prevention().
-ENABLE_SAFETY = False
+# Start with the AI-only baseline.
+ENABLE_GUARDRAIL = False
+
+# Change this after completing the default case.
+ACTIVE_CASE = "PR-1042"
 
 
-def add_hot_water():
-    """Existing functional requirement: request HOT_WATER."""
-    for _ in range(FILL_CYCLES):
+PULL_REQUESTS = {
+    "PR-1001": {
+        "title": "Update customer profile validation",
+        "lines_changed": 40,
+        "files_changed": 3,
+        "test_coverage": 92,
+        "static_warnings": 1,
+        "prior_defect_rate": 0.06,
+        "failed_tests": 0,
+        "critical_security_findings": 0,
+    },
+    "PR-1042": {
+        "title": "Refactor authentication token refresh",
+        "lines_changed": 65,
+        "files_changed": 4,
+        "test_coverage": 89,
+        "static_warnings": 1,
+        "prior_defect_rate": 0.08,
+        "failed_tests": 0,
+        "critical_security_findings": 1,
+    },
+    "PR-1057": {
+        "title": "Modify invoice calculation service",
+        "lines_changed": 55,
+        "files_changed": 3,
+        "test_coverage": 93,
+        "static_warnings": 0,
+        "prior_defect_rate": 0.07,
+        "failed_tests": 2,
+        "critical_security_findings": 0,
+    },
+    "PR-1088": {
+        "title": "Large checkout workflow redesign",
+        "lines_changed": 330,
+        "files_changed": 16,
+        "test_coverage": 67,
+        "static_warnings": 8,
+        "prior_defect_rate": 0.30,
+        "failed_tests": 0,
+        "critical_security_findings": 0,
+    },
+    "PR-1093": {
+        "title": "Moderate search-service refactor",
+        "lines_changed": 175,
+        "files_changed": 9,
+        "test_coverage": 79,
+        "static_warnings": 3,
+        "prior_defect_rate": 0.18,
+        "failed_tests": 0,
+        "critical_security_findings": 0,
+    },
+}
+
+
+def ai_recommendation(change, prediction):
+    """
+    Supplied AI decision behavior.
+
+    LOW predicted risk requests DEPLOY.
+    HIGH predicted risk requests HUMAN_REVIEW.
+    """
+    if prediction["risk_label"] == "LOW":
         yield {
-            "request": [HOT_WATER],
+            "request": [DEPLOY],
             "waitFor": [],
             "block": [],
         }
-
-
-def add_cold_water():
-    """Existing functional requirement: request COLD_WATER."""
-    for _ in range(FILL_CYCLES):
+    else:
         yield {
-            "request": [COLD_WATER],
+            "request": [HUMAN_REVIEW],
             "waitFor": [],
-            "block": [],
+            "block": [DEPLOY],
         }
 
 
-def overflow_prevention():
+def release_guardrail(change, prediction):
     """
-    TODO: Implement the independent safety requirement.
+    TODO: Implement the independent release-policy b-thread.
 
-    Required behaviour:
-    - track the observed tank volume;
-    - while volume < MAX_CAPACITY, observe relevant events;
-    - when volume >= MAX_CAPACITY, block HOT_WATER and COLD_WATER
-      and request DRAIN_VALVE;
-    - after DRAIN_VALVE, subtract DRAIN_AMOUNT without going below zero.
+    Policy A: HARD BLOCK
+    If failed_tests > 0 OR critical_security_findings > 0:
+        - block DEPLOY
+        - request BLOCK_RELEASE
 
-    Hint:
-    A b-thread receives the selected event from:
+    Policy B: HUMAN REVIEW
+    Otherwise, if prediction confidence < MIN_AI_CONFIDENCE
+    OR test_coverage < MIN_TEST_COVERAGE:
+        - block DEPLOY
+        - request HUMAN_REVIEW
 
-        event = yield {
-            "request": [...],
-            "waitFor": [...],
-            "block": [...],
-        }
+    Policy C: ALLOW AI DECISION
+    Otherwise:
+        - request nothing
+        - wait for DEPLOY or HUMAN_REVIEW
+
+    Do not modify predict_risk() to implement these policies.
     """
 
-    # Write your implementation here.
-    # Keep this function as a generator by retaining the unreachable yield
-    # until you replace the TODO with your own loop.
-    return
-    yield
+    # TODO: replace this placeholder with your b-thread logic.
+    # This default placeholder simply observes the AI decision so the
+    # starter remains executable before you implement the guardrail.
+    yield {
+        "request": [],
+        "waitFor": [DEPLOY, HUMAN_REVIEW, BLOCK_RELEASE],
+        "block": [],
+    }
 
 
-def build_program(enable_safety=None):
-    """Build the controller with or without the safety requirement."""
-    if enable_safety is None:
-        enable_safety = ENABLE_SAFETY
+def build_release_program(change, prediction, enable_guardrail=None):
+    """Build the AI-assisted release-decision program."""
+    if enable_guardrail is None:
+        enable_guardrail = ENABLE_GUARDRAIL
 
     bp = BProgram()
-    bp.add_bthread(add_hot_water)
-    bp.add_bthread(add_cold_water)
 
-    if enable_safety:
-        bp.add_bthread(overflow_prevention)
+    bp.add_bthread(lambda: ai_recommendation(change, prediction))
+
+    if enable_guardrail:
+        bp.add_bthread(lambda: release_guardrail(change, prediction))
 
     return bp
 
 
-def calculate_volume_trace(trace):
-    """Return the tank volume after every dispatched event."""
-    volume = 0
-    volumes = []
+def evaluate_case(case_id, enable_guardrail=None, verbose=True):
+    """Run one pull-request case and return its prediction and final decision."""
+    change = PULL_REQUESTS[case_id]
+    prediction = predict_risk(change)
 
-    for event in trace:
-        if event in (HOT_WATER, COLD_WATER):
-            volume += 1
-        elif event == DRAIN_VALVE:
-            volume = max(0, volume - DRAIN_AMOUNT)
+    bp = build_release_program(
+        change,
+        prediction,
+        enable_guardrail=enable_guardrail,
+    )
+    trace = bp.run(max_steps=5)
+    decision = trace[0] if trace else "NO_DECISION"
 
-        volumes.append(volume)
+    if verbose:
+        print("=" * 68)
+        print(f"{case_id}: {change['title']}")
+        print("=" * 68)
+        print(
+            "AI prediction: "
+            f"{prediction['risk_label']} risk "
+            f"(p={prediction['risk_probability']:.3f}, "
+            f"confidence={prediction['confidence']:.3f})"
+        )
+        print(
+            "Engineering evidence: "
+            f"coverage={change['test_coverage']}%, "
+            f"failed_tests={change['failed_tests']}, "
+            f"critical_security_findings="
+            f"{change['critical_security_findings']}"
+        )
+        print(
+            "Guardrail: "
+            f"{'ENABLED' if (ENABLE_GUARDRAIL if enable_guardrail is None else enable_guardrail) else 'DISABLED'}"
+        )
+        print(f"Final workflow decision: {decision}")
 
-    return volumes
+        if (
+            decision == DEPLOY
+            and (
+                change["failed_tests"] > 0
+                or change["critical_security_findings"] > 0
+            )
+        ):
+            print(
+                "WARNING: AI-only recommendation conflicts with "
+                "current engineering evidence."
+            )
+
+    return {
+        "case_id": case_id,
+        "change": change,
+        "prediction": prediction,
+        "trace": trace,
+        "decision": decision,
+    }
 
 
 def main():
-    print("=" * 58)
-    print("MAI5124 Lab 01 | Behavioral Programming")
-    print("=" * 58)
-    print(f"Safety protection: {'ON' if ENABLE_SAFETY else 'OFF'}")
+    result = evaluate_case(ACTIVE_CASE)
 
-    bp = build_program()
-    trace = bp.run(max_steps=50)
-    volumes = calculate_volume_trace(trace)
-
-    print("\nEvent trace:")
-    print(" -> ".join(trace) if trace else "(no events dispatched)")
-
-    print("\nVolume after each event:")
-    print(volumes)
-
-    max_volume = max(volumes, default=0)
-
-    if max_volume <= MAX_CAPACITY:
+    print("\nStudent task:")
+    if not ENABLE_GUARDRAIL:
         print(
-            f"\nSafety check: PASS "
-            f"(maximum observed volume = {max_volume}, limit = {MAX_CAPACITY})"
+            "1. Inspect the AI-only decision above.\n"
+            "2. Implement release_guardrail().\n"
+            "3. Set ENABLE_GUARDRAIL = True.\n"
+            "4. Run again and compare the final decision."
         )
     else:
         print(
-            f"\nSafety check: FAIL "
-            f"(maximum observed volume = {max_volume}, limit = {MAX_CAPACITY})"
+            "Explore the remaining PULL_REQUESTS and run "
+            "Verify Requirements."
         )
-        if not ENABLE_SAFETY:
-            print(
-                "This failure is expected for Task 1. "
-                "Implement overflow_prevention() and enable safety."
-            )
 
-    return trace
+    return result
 
 
 if __name__ == "__main__":
