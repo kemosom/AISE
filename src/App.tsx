@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { AuthUserPublic } from '../lib/auth/types';
-import { isSupabaseConfigured } from '../lib/supabase/client';
 import { apiClient } from './lib/api-client';
 import { Header } from './components/Header';
 import { StudentDashboard, type LabSummary } from './components/StudentDashboard';
