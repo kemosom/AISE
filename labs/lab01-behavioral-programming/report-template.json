@@ -1,41 +1,35 @@
 {
-  "title": "Lab 01 Technical Report: Behavioral Programming",
+  "title": "Lab 01 Report: Safe AI-Assisted Software Release",
   "sections": [
     {
-      "id": "objective",
-      "title": "1. Laboratory Objectives",
+      "id": "ai-baseline",
+      "title": "1. AI-Only Baseline",
       "required": true,
-      "placeholder": "Articulate the design principles of behavioral programming and the objectives of coordinating independent concurrent threads."
+      "placeholder": "Describe the supplied defect-risk prediction for PR-1042 and explain why the AI-only release decision is insufficient."
     },
     {
-      "id": "methodology",
-      "title": "2. Theoretical Methodology",
+      "id": "guardrail",
+      "title": "2. Behavioral Release Guardrail",
       "required": true,
-      "placeholder": "Explain the Request-Wait-Block (RWB) protocol, candidate event evaluation formula, and how conflict arbitration works."
-    },
-    {
-      "id": "implementation",
-      "title": "3. Implementation & B-Thread Design",
-      "required": true,
-      "placeholder": "Detail your implementation of add_hot_water, add_cold_water, and the overflow_prevention safety monitor."
+      "placeholder": "Explain your release_guardrail() logic and how Request-Wait-Block separates software policy from the AI model."
     },
     {
       "id": "results",
-      "title": "4. Execution Results & Empirical Evidence",
+      "title": "3. Scenario Results and Requirement Verification",
       "required": true,
-      "placeholder": "Insert your console trace output, generated event plot, and public automated test run results."
+      "placeholder": "Compare at least four pull-request cases. Add console output, requirement-verification results, and the system design diagram."
     },
     {
-      "id": "discussion",
-      "title": "5. Critical Analysis & Answers to Questions",
+      "id": "analysis",
+      "title": "4. Critical Analysis",
       "required": true,
-      "placeholder": "Analyze the advantages of behavioral programming over monolithic state machines regarding software maintainability and incremental safety rules."
+      "placeholder": "Discuss why AI confidence is not equivalent to release safety, why deterministic constraints should remain separate, and when human review is necessary."
     },
     {
-      "id": "conclusion",
-      "title": "6. Conclusion & Future Refinements",
+      "id": "project-transfer",
+      "title": "5. Transfer to the Final Project",
       "required": true,
-      "placeholder": "Summarize key findings, verification conclusions, and potential extensions to multi-agent cyber-physical systems."
+      "placeholder": "Identify one way the same pattern could be reused in your final AI-powered software-engineering project: AI prediction/recommendation + explicit policy/guardrail + measurable verification."
     }
   ]
 }

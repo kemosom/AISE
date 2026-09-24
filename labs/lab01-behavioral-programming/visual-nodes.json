@@ -1,40 +1,43 @@
 {
   "nodes": [
     {
-      "id": "node-1",
-      "type": "input",
-      "data": { "label": "B-Thread: add_hot_water (Requests HOT_WATER)" },
-      "position": { "x": 50, "y": 80 }
+      "id": "pr",
+      "data": { "label": "Pull Request + CI Evidence", "kind": "input" },
+      "position": { "x": 20, "y": 125 }
     },
     {
-      "id": "node-2",
-      "type": "input",
-      "data": { "label": "B-Thread: add_cold_water (Requests COLD_WATER)" },
-      "position": { "x": 50, "y": 200 }
+      "id": "ai-model",
+      "data": { "label": "k-NN Defect-Risk Model", "kind": "ai" },
+      "position": { "x": 250, "y": 35 }
     },
     {
-      "id": "node-3",
-      "type": "input",
-      "data": { "label": "B-Thread: overflow_prevention (Safety Guard)" },
-      "position": { "x": 50, "y": 320 }
+      "id": "ai-thread",
+      "data": { "label": "AI Recommendation b-thread", "kind": "bthread" },
+      "position": { "x": 485, "y": 35 }
     },
     {
-      "id": "node-4",
-      "type": "default",
-      "data": { "label": "BProgram Coordinator (RWB Arbiter)" },
-      "position": { "x": 420, "y": 180 }
+      "id": "guardrail",
+      "data": { "label": "Release Guardrail b-thread", "kind": "safety" },
+      "position": { "x": 485, "y": 220 }
     },
     {
-      "id": "node-5",
-      "type": "output",
-      "data": { "label": "Event Dispatcher -> Hardware Actuators" },
-      "position": { "x": 750, "y": 180 }
+      "id": "coordinator",
+      "data": { "label": "Behavioral Coordinator", "kind": "coordinator" },
+      "position": { "x": 735, "y": 125 }
+    },
+    {
+      "id": "decision",
+      "data": { "label": "DEPLOY / HUMAN_REVIEW / BLOCK_RELEASE", "kind": "output" },
+      "position": { "x": 985, "y": 125 }
     }
   ],
   "edges": [
-    { "id": "e1-4", "source": "node-1", "target": "node-4", "label": "Yield Sync Spec (RWB)" },
-    { "id": "e2-4", "source": "node-2", "target": "node-4", "label": "Yield Sync Spec (RWB)" },
-    { "id": "e3-4", "source": "node-3", "target": "node-4", "label": "Safety Blocks / Overrides" },
-    { "id": "e4-5", "source": "node-4", "target": "node-5", "label": "Dispatched Event" }
+    { "id": "e-pr-ai", "source": "pr", "target": "ai-model", "label": "change features" },
+    { "id": "e-ai-thread", "source": "ai-model", "target": "ai-thread", "label": "risk + confidence" },
+    { "id": "e-pr-policy", "source": "pr", "target": "guardrail", "label": "CI/security evidence" },
+    { "id": "e-ai-policy", "source": "ai-model", "target": "guardrail", "label": "confidence" },
+    { "id": "e-thread-bp", "source": "ai-thread", "target": "coordinator", "label": "request/block" },
+    { "id": "e-guard-bp", "source": "guardrail", "target": "coordinator", "label": "request/block" },
+    { "id": "e-decision", "source": "coordinator", "target": "decision", "label": "selected event" }
   ]
 }

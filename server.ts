@@ -15,6 +15,11 @@ import { LabRegistry } from './labs/registry';
 import { getStorageProvider } from './lib/storage/provider';
 import { generateDocxReport } from './lib/reports/docx-generator';
 import { generateSubmissionsZip } from './lib/reports/zip-generator';
+import {
+  decryptInstructorContent,
+  instructorAccessConfigured,
+  validateInstructorCode,
+} from './server/instructor-access';
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -75,6 +80,29 @@ app.get('/api/system/mode', (_req: Request, res: Response) => {
     mode: provider.mode,
     isConfigured: provider.mode === 'supabase',
   });
+});
+
+// Instructor-only material for local Express development.
+app.post('/api/instructor', (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+
+  if (!instructorAccessConfigured()) {
+    return res.status(503).json({
+      error: 'Instructor access is not configured for this environment.',
+    });
+  }
+
+  if (!validateInstructorCode(req.body?.code)) {
+    return res.status(401).json({ error: 'Invalid instructor code.' });
+  }
+
+  try {
+    return res.json({ ok: true, data: decryptInstructorContent() });
+  } catch {
+    return res.status(500).json({
+      error: 'Instructor material could not be decrypted.',
+    });
+  }
 });
 
 // ==========================================

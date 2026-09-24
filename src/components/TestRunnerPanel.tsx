@@ -48,7 +48,7 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
           name: testCase.name,
           passed,
           message: passed
-            ? 'Assertion passed: Behavioral invariant verified.'
+            ? 'Requirement verified.'
             : execRes.error || execRes.stderr || 'Assertion failure during test execution.',
         });
       } catch (err: any) {
@@ -72,7 +72,7 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
 
   const handleAttachResults = () => {
     const passed = results.filter((r) => r.passed).length;
-    const text = `Automated Verification Suite: ${passed}/${results.length} tests passed.\n${results
+    const text = `Requirement Verification: ${passed}/${results.length} tests passed.\n${results
       .map((r) => `[${r.passed ? 'PASS' : 'FAIL'}] ${r.name}: ${r.message}`)
       .join('\n')}`;
 
@@ -88,10 +88,10 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Public Automated Test Harness
+            Requirement Verification
           </h3>
           <p className="text-[11px] text-slate-500">
-            Verify behavioral synchronization and safety blocking invariants before submission.
+            Run executable checks against the stated laboratory requirements.
           </p>
         </div>
 
@@ -121,7 +121,7 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
             className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50"
           >
             <PlayCircle className="w-3.5 h-3.5" />
-            <span>{isRunning ? 'Running Verification...' : 'Run All Tests'}</span>
+            <span>{isRunning ? 'Verifying...' : 'Verify Requirements'}</span>
           </button>
         </div>
       </div>
@@ -129,7 +129,7 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
       {/* Summary Score */}
       {results.length > 0 && (
         <div className="mb-4 p-3 bg-slate-50 border border-slate-200 rounded flex items-center justify-between">
-          <div className="text-xs font-medium text-slate-700">Verification Outcome:</div>
+          <div className="text-xs font-medium text-slate-700">Verification result:</div>
           <div className="flex items-center space-x-2">
             <span
               className={`font-mono text-xs font-bold px-2 py-0.5 rounded ${
@@ -138,7 +138,7 @@ export const TestRunnerPanel: React.FC<TestRunnerPanelProps> = ({
                   : 'bg-amber-50 text-amber-700 border border-amber-200'
               }`}
             >
-              {passedTotal} of {results.length} Tests Passed
+              {passedTotal} of {results.length} Requirements Verified
             </span>
           </div>
         </div>

@@ -75,7 +75,7 @@ export const VisualDesignPanel: React.FC<VisualDesignPanelProps> = ({
   };
 
   const handleAttachDesignToReport = () => {
-    const summary = `Behavioral Pipeline Topology: ${nodes.length} nodes configured (${nodes.map((n) => n.data.label).join(' -> ')})`;
+    const summary = `AI Software Workflow: ${nodes.length} nodes configured (${nodes.map((n) => n.data.label).join(' -> ')})`;
     onAddDesignToReport(summary);
   };
 
@@ -95,28 +95,32 @@ export const VisualDesignPanel: React.FC<VisualDesignPanelProps> = ({
             <Network className="w-3.5 h-3.5 text-blue-900" />
             <span>React Flow</span>
           </button>
-          <button
-            onClick={() => setActiveTab('blockly')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              activeTab === 'blockly'
-                ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Puzzle className="w-3.5 h-3.5 text-indigo-700" />
-            <span>Blockly</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('palette')}
-            className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              activeTab === 'palette'
-                ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Box className="w-3.5 h-3.5 text-emerald-700" />
-            <span>Function Palette</span>
-          </button>
+          {blocks.length > 0 && (
+            <button
+              onClick={() => setActiveTab('blockly')}
+              className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1.5 ${
+                activeTab === 'blockly'
+                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Puzzle className="w-3.5 h-3.5 text-indigo-700" />
+              <span>Blockly</span>
+            </button>
+          )}
+          {snippets.length > 0 && (
+            <button
+              onClick={() => setActiveTab('palette')}
+              className={`px-2.5 py-1 text-xs font-semibold rounded transition-colors cursor-pointer flex items-center space-x-1.5 ${
+                activeTab === 'palette'
+                  ? 'bg-white text-slate-900 border border-slate-200 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Box className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Function Palette</span>
+            </button>
+          )}
         </div>
 
         {activeTab === 'flow' && (

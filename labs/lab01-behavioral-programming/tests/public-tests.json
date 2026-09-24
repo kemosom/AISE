@@ -1,30 +1,44 @@
 [
   {
-    "id": "test-bprogram-import",
-    "name": "BProgram Structure & Invariants",
-    "description": "Verifies that BProgram and event classes are structured correctly.",
-    "testCode": "from helpers import BProgram\nbp = BProgram()\nassert bp.threads == [], 'Initial threads list must be empty'\nassert bp.history == [], 'Initial event history must be empty'",
+    "id": "test-ai-model-output",
+    "name": "AI Risk Model Produces Valid Predictions",
+    "description": "Checks that the supplied k-NN model returns a valid risk label, probability, and confidence.",
+    "testCode": "import main\nfrom risk_model import predict_risk\n\nfor case_id, change in main.PULL_REQUESTS.items():\n    prediction = predict_risk(change)\n    assert prediction['risk_label'] in ('LOW', 'HIGH'), f'{case_id}: invalid risk label'\n    assert 0.0 <= prediction['risk_probability'] <= 1.0, f'{case_id}: invalid risk probability'\n    assert 0.5 <= prediction['confidence'] <= 1.0, f'{case_id}: invalid confidence'",
+    "weight": 15
+  },
+  {
+    "id": "test-ai-only-conflict",
+    "name": "AI-Only Baseline Exposes a Release Conflict",
+    "description": "Confirms that PR-1042 looks low-risk to the AI and would deploy without an independent security guardrail.",
+    "testCode": "import main\n\nresult = main.evaluate_case('PR-1042', enable_guardrail=False, verbose=False)\nassert result['prediction']['risk_label'] == 'LOW', 'PR-1042 should be low risk according to the supplied model'\nassert result['change']['critical_security_findings'] > 0, 'PR-1042 must contain a current security finding'\nassert result['decision'] == main.DEPLOY, 'AI-only baseline should expose the unsafe DEPLOY recommendation'",
+    "weight": 15
+  },
+  {
+    "id": "test-security-block",
+    "name": "Security Finding Blocks Deployment",
+    "description": "A critical security finding must override a low-risk AI deployment recommendation.",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1042']\nprediction = main.predict_risk(change)\nresult = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert result, 'Guarded workflow produced no decision'\nassert result[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {result[0]}'",
     "weight": 20
   },
   {
-    "id": "test-hot-cold-water-bthreads",
-    "name": "Positive Behavioral Threads Verification",
-    "description": "Checks that add_hot_water and add_cold_water yield valid synchronization specifications.",
-    "testCode": "from main import add_hot_water, add_cold_water\ngen_hot = add_hot_water()\nspec_hot = next(gen_hot)\nassert 'request' in spec_hot and 'HOT_WATER' in spec_hot['request'], 'add_hot_water must request HOT_WATER'\ngen_cold = add_cold_water()\nspec_cold = next(gen_cold)\nassert 'request' in spec_cold and 'COLD_WATER' in spec_cold['request'], 'add_cold_water must request COLD_WATER'",
-    "weight": 30
-  },
-  {
-    "id": "test-overflow-safety-block",
-    "name": "Safety Monitor & Block Verification",
-    "description": "Ensures that the overflow prevention b-thread correctly blocks pumping events when capacity threshold is reached.",
-    "testCode": "from main import overflow_prevention\nsafety = overflow_prevention()\nspec = next(safety)\nassert 'block' in spec, 'overflow_prevention must return block specifications'",
-    "weight": 30
-  },
-  {
-    "id": "test-full-trace-execution",
-    "name": "End-to-End Simulation Trace Execution",
-    "description": "Runs the coordinator and ensures that no unhandled deadlock or crash occurs during full simulation.",
-    "testCode": "from helpers import BProgram\nfrom main import add_hot_water, add_cold_water, overflow_prevention\nbp = BProgram()\nbp.add_bthread(add_hot_water)\nbp.add_bthread(add_cold_water)\nbp.add_bthread(overflow_prevention)\ntrace = bp.run(max_steps=15)\nassert len(trace) > 0, 'Simulation must dispatch events successfully'\nassert all(isinstance(e, str) for e in trace), 'All dispatched events must be strings'",
+    "id": "test-failed-tests-block",
+    "name": "Failed Tests Block Deployment",
+    "description": "Failed CI tests must block release even when the AI predicts low defect risk.",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1057']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1057 should be low risk according to the supplied model'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {trace[0]}'",
     "weight": 20
+  },
+  {
+    "id": "test-low-confidence-review",
+    "name": "Low AI Confidence Requires Human Review",
+    "description": "A boundary prediction below the accepted confidence threshold must not auto-deploy.",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1093']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1093 should remain a LOW-risk prediction'\nassert prediction['confidence'] < main.MIN_AI_CONFIDENCE, 'PR-1093 should exercise the low-confidence policy'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.HUMAN_REVIEW, f'Expected HUMAN_REVIEW, got {trace[0]}'",
+    "weight": 15
+  },
+  {
+    "id": "test-safe-change-deploys",
+    "name": "Safe Change Can Still Deploy",
+    "description": "The guardrail must not block a low-risk change that satisfies release requirements.",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1001']\nprediction = main.predict_risk(change)\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert prediction['risk_label'] == 'LOW', 'PR-1001 should be a LOW-risk AI prediction'\nassert trace[0] == main.DEPLOY, f'Expected DEPLOY for the safe case, got {trace[0]}'",
+    "weight": 15
   }
 ]

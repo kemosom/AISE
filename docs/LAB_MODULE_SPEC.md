@@ -1,46 +1,59 @@
 # AISE Lab Studio Laboratory Module Specification
 
 **Course:** MAI5124 AI in Software Engineering  
-**Standard Version:** 1.0.0  
-**Target Environment:** AISE Lab Studio (Standalone Node.js / Next.js / Vercel Architecture)
+**Module format version:** 2.0
 
----
+## 1. Principle
 
-## 1. Overview
+A laboratory is an academic content package.
 
-AISE Lab Studio is architected with a decoupled laboratory design. The platform infrastructure (authentication, editor, runners, test framework, report engine, DOCX generator) is completely independent of specific laboratory domain contents.
+The platform provides the reusable reading, annotation, coding, execution, visual-design, testing, reporting, and export engines. A lecturer should normally build or revise a laboratory by editing files inside one `/labs/<lab-slug>/` folder rather than editing React application components.
 
-Each laboratory resides in its own isolated directory within `/labs/<lab-slug>/`. Laboratories are loaded via the `LabRegistry` abstraction. To add or modify a laboratory, an instructor or curriculum engineer only needs to push a new folder to GitHub matching this specification.
+The intended sequence is:
 
----
-
-## 2. Directory Structure
-
+```text
+theory.md
+    ↓
+lab-sheet.md
+    ↓
+Begin Lab
+    ↓
+starter code + visual tools
+    ↓
+public tests
+    ↓
+report-template.json
 ```
+
+## 2. Standard directory structure
+
+```text
 /labs/
 └── labXX-<descriptive-slug>/
-    ├── manifest.json            # Lab metadata, packages, enabled features
-    ├── instructions.md          # Pedagogical instructions in Markdown
-    ├── report-template.json     # Academic report structure for the lab
-    ├── starter/                 # Initial code files loaded into student workspace
+    ├── manifest.json
+    ├── theory.md
+    ├── lab-sheet.md
+    ├── starter/
     │   ├── main.py
-    │   ├── helpers.py
-    │   └── README.md
-    ├── snippets.json            # Function palette items for drag-and-drop / insert
-    ├── blocks.json              # Custom Blockly blocks (if visual coding enabled)
-    ├── visual-nodes.json        # Pre-configured React Flow nodes and edges
+    │   └── helpers.py          # only when needed
     ├── tests/
-    │   └── public-tests.json    # Automated test cases run in the workspace
-    └── assets/                  # Lab-specific reference diagrams or datasets
+    │   └── public-tests.json
+    ├── report-template.json
+    ├── snippets.json
+    ├── blocks.json
+    ├── visual-nodes.json
+    └── assets/
+        ├── figures/
+        └── datasets/
 ```
 
----
+Not every laboratory needs Blockly, reusable snippets, or a visual graph. Disable features in the manifest when they do not improve the learning activity.
 
-## 3. File Specifications
+## 3. `manifest.json`
 
-### 3.1 `manifest.json`
+The manifest contains module metadata and enabled capabilities. It should not contain long theory text or starter source code.
 
-The entry configuration file for the lab.
+Example:
 
 ```json
 {
@@ -48,11 +61,11 @@ The entry configuration file for the lab.
   "labNumber": 1,
   "week": 1,
   "title": "AI for Software Design: Behavioral Programming",
-  "shortDescription": "Explore behavioral programming principles using b-threads, priority coordination, and AI-assisted behavioral conflict detection.",
+  "shortDescription": "Model independent software requirements as b-threads and verify a safety invariant.",
   "estimatedDuration": "3 hours",
   "language": "python",
   "runner": "pyodide",
-  "packages": ["numpy", "matplotlib"],
+  "packages": [],
   "features": {
     "visualDesigner": true,
     "blockly": true,
@@ -62,85 +75,281 @@ The entry configuration file for the lab.
     "webPreview": false
   },
   "learningOutcomes": [
-    "Formulate software behaviors using independent b-threads.",
-    "Implement request, wait-for, and block idioms.",
-    "Verify behavioral synchronization using automated assertions."
+    "Model software requirements as independent behavioral threads.",
+    "Apply Request-Wait-Block synchronization.",
+    "Verify a safety invariant using executable assertions."
   ],
-  "defaultFiles": [
-    { "name": "main.py", "language": "python", "path": "starter/main.py" },
-    { "name": "helpers.py", "language": "python", "path": "starter/helpers.py" }
+  "tasks": [
+    {
+      "id": "l1-t1",
+      "title": "Understand the coordinator",
+      "description": "Trace event selection and b-thread synchronization.",
+      "category": "code"
+    }
   ]
 }
 ```
 
-### 3.2 `instructions.md`
+### Required metadata
 
-Written in standard Markdown. Must follow academic rigor and include:
-1. **Overview & Context**
-2. **Learning Outcomes**
-3. **Background & Theoretical Foundation**
-4. **Step-by-Step Required Tasks**
-5. **Guidance and Common Pitfalls**
-6. **Deliverables and Completion Checklist**
+- `id`: stable slug used by routes and persistence.
+- `labNumber`: displayed module number.
+- `week`: teaching week.
+- `title`: academic laboratory title.
+- `shortDescription`: one or two sentences for the module list.
+- `estimatedDuration`: realistic student working time.
+- `language`: primary editor language.
+- `runner`: execution engine.
+- `packages`: approved Pyodide packages if required.
+- `features`: turn optional workspace engines on/off.
+- `learningOutcomes`: outcomes specific to this practical.
+- `tasks`: high-level completion structure.
 
-### 3.3 `report-template.json`
+## 4. `theory.md`
 
-Defines the structure of the student laboratory report. The TipTap / rich-text report engine dynamically provisions these sections for the student, and the Word (`.docx`) exporter formats them according to university standards.
+This is the pre-lab conceptual reading.
+
+It should explain enough theory for the student to understand *why* the practical exists, not merely repeat the task instructions.
+
+Recommended structure:
+
+1. Why the topic matters in software engineering.
+2. Core concepts and terminology.
+3. Formal or algorithmic model where appropriate.
+4. Small worked example.
+5. Design limitations and assumptions.
+6. Questions students should be able to answer before coding.
+
+Keep terminology technically precise. Do not label a method as AI, machine learning, an agent, or a digital twin unless the activity actually meets that definition.
+
+The current article renderer supports common Markdown headings, paragraphs, lists, blockquotes, fenced code, bold/italic text, and inline code. Prefer renderer-friendly notation for mathematical expressions unless equation rendering is added to the platform.
+
+## 5. `lab-sheet.md`
+
+This contains the practical activity.
+
+Recommended structure:
+
+- scenario,
+- objective,
+- provided files/data,
+- configuration,
+- numbered implementation tasks,
+- verification requirements,
+- visual-design activity where relevant,
+- controlled experiment or extension,
+- report requirements,
+- critical-analysis questions,
+- completion checklist.
+
+A Master's-level lab should not collapse into "copy this code and run it." At least one task should require design reasoning, verification, comparison, interpretation, or critical evaluation.
+
+## 6. Starter code
+
+Starter code must provide enough scaffolding to focus the student on the learning outcome without giving away the solution.
+
+Good starter code may include:
+
+- constants,
+- imports,
+- helper functions,
+- one worked example,
+- TODO functions,
+- instrumentation,
+- data loading,
+- display utilities.
+
+Avoid shipping the full required solution and then asking students to reproduce it.
+
+If a full instructor solution is required, keep it outside the public student repository or in an access-controlled instructor location. Hiding a solution in client-side application code is not secure.
+
+## 7. `tests/public-tests.json`
+
+Public tests are formative executable checks.
+
+Each test has:
 
 ```json
 {
-  "title": "Lab 01 Technical Report",
+  "id": "test-name",
+  "name": "Readable test name",
+  "description": "What behavior is being verified.",
+  "testCode": "Python assertion code",
+  "weight": 20
+}
+```
+
+### Test design rules
+
+Prefer semantic tests over structural tests.
+
+Weak:
+
+```python
+assert "block" in spec
+```
+
+Stronger:
+
+```python
+for event in trace:
+    update_state(event)
+    assert volume <= MAX_CAPACITY
+```
+
+A student should not pass a safety requirement merely because a variable, field, or function name exists.
+
+Tests should cover:
+
+- required functional behavior,
+- edge conditions,
+- deterministic behavior when required,
+- stated invariants,
+- integration across relevant components.
+
+Weights across tests should normally sum to 100.
+
+## 8. `report-template.json`
+
+The report template defines the integrated student report.
+
+Example:
+
+```json
+{
+  "title": "Lab 01 Report",
   "sections": [
-    { "id": "objective", "title": "1. Laboratory Objectives", "required": true, "placeholder": "Describe the key objectives..." },
-    { "id": "methodology", "title": "2. Theoretical Methodology", "required": true },
-    { "id": "implementation", "title": "3. Implementation & B-Thread Design", "required": true },
-    { "id": "results", "title": "4. Execution Results & Empirical Evidence", "required": true },
-    { "id": "discussion", "title": "5. Critical Analysis & Answers to Questions", "required": true },
-    { "id": "conclusion", "title": "6. Conclusion & Future Refinements", "required": true }
+    {
+      "id": "concepts",
+      "title": "1. Concepts",
+      "required": true,
+      "placeholder": "Explain the key model in your own words."
+    },
+    {
+      "id": "results",
+      "title": "2. Results and Verification Evidence",
+      "required": true,
+      "placeholder": "Insert output, figures, tests, and interpretation."
+    },
+    {
+      "id": "critical-analysis",
+      "title": "3. Critical Analysis",
+      "required": true,
+      "placeholder": "Answer the laboratory analysis questions."
+    }
   ]
 }
 ```
 
-### 3.4 `snippets.json`
+Students enter their name and student ID in the report workspace. The platform does not require a student login in open-access mode.
 
-Populates the reusable component palette. Students can click **"Insert"** or drag snippets into the Monaco editor.
+The report should require interpretation, not only screenshots.
 
-```json
-[
-  {
-    "id": "bthread-template",
-    "category": "Behavioral Programming",
-    "name": "B-Thread Generator",
-    "description": "Yields request, wait-for, and block event specifications.",
-    "parameters": ["event_requested", "event_blocked"],
-    "code": "def b_thread_controller():\n    # Request an event while blocking alternatives\n    yield {'request': 'MOVE_FORWARD', 'block': ['TURN_LEFT']}\n"
-  }
-]
+## 9. `snippets.json`
+
+Snippets are optional learning aids that students can insert into Monaco.
+
+Use snippets for:
+
+- generic API patterns,
+- repetitive boilerplate,
+- syntax templates,
+- instrumentation.
+
+Do not include a snippet that effectively reveals the entire assessed solution.
+
+## 10. `blocks.json`
+
+Blockly is optional. Use it when representing a computational relationship visually helps students understand the concept.
+
+The preferred direction is:
+
+```text
+blocks → generated code → Monaco
 ```
 
-### 3.5 `tests/public-tests.json`
+Do not promise reliable arbitrary code → Blockly reconstruction.
 
-Defines client-verifiable test cases executed against the student's code.
+## 11. `visual-nodes.json`
 
-```json
-[
-  {
-    "id": "test-sync",
-    "name": "Behavioral Synchronization Check",
-    "description": "Verifies that blocked events are never dispatched by the b-program sync coordinator.",
-    "testCode": "def test_sync():\n    bp = BProgram()\n    # Assert invariants\n    assert bp.evaluate_conflict() == True\ntest_sync()",
-    "weight": 25
-  }
-]
+React Flow is used for software structures, pipelines, agents, components, or interactions.
+
+The initial graph may provide:
+
+- a partial design that students complete,
+- a reference architecture they must inspect and modify,
+- node types required by the task.
+
+The visual activity should correspond to a learning outcome. Do not add a diagram merely for decoration.
+
+## 12. Registration
+
+The current Vite build imports module assets through `labs/registry.ts`.
+
+For Lab 01, the registry imports:
+
+- `manifest.json`,
+- `theory.md?raw`,
+- `lab-sheet.md?raw`,
+- starter source files with `?raw`,
+- JSON tests/snippets/blocks/visual nodes/report template.
+
+The registry should compose those assets into `LabManifest`. Do not duplicate the full contents of the files as TypeScript template strings.
+
+Future work may automate folder discovery, but explicit imports are acceptable while there are only eleven fixed course modules.
+
+## 13. Open-access persistence
+
+In the current open-access student mode, there is no user account.
+
+Each browser stores its own:
+
+- source files,
+- visual design,
+- report draft,
+- test statistics,
+- checkpoints,
+- local submission snapshot,
+- reading annotations.
+
+This prevents all anonymous students from writing into the same synthetic server-side user record.
+
+Students must be told that clearing browser data or moving to another computer does not transfer this local state. Word/PDF exports are the durable copy until a later central submission mechanism is introduced.
+
+## 14. Quality gate before unlocking a module
+
+Do not unlock a lab simply because the page renders.
+
+Before release, verify:
+
+1. Theory is technically correct.
+2. Lab tasks map to the intended course topic/CLO.
+3. Starter code does not contain the complete answer.
+4. Starter code actually runs up to the intentional TODO point.
+5. The final intended solution can run in Pyodide.
+6. Public tests fail meaningfully on incomplete work.
+7. Public tests pass on a correct implementation.
+8. Tests verify behavior, not superficial syntax.
+9. Visual tools are relevant and functional.
+10. Report sections match the practical evidence and analysis questions.
+11. Word report export works.
+12. Theory/lab-sheet Word and PDF export work.
+13. Annotation tools persist correctly.
+14. No instructor solution is shipped to the public browser bundle.
+15. The module is readable and usable on a normal laptop screen.
+
+Only then change the course release configuration so the module becomes available.
+
+## 15. Recommended GitHub workflow
+
+Develop one lab at a time:
+
+```text
+main
+  └── module-01-cleanup
+      └── review / test
+          └── merge
+              └── module-02-development
 ```
 
----
-
-## 4. Modularity and GitHub Lifecycle
-
-1. To add a new laboratory (e.g., `lab12-neuromorphic-testing`):
-   - Duplicate the laboratory template folder.
-   - Populate `manifest.json`, `instructions.md`, `report-template.json`, starter files, and test definitions.
-   - Register the folder ID in `/labs/registry.ts`.
-2. Commit and push to GitHub.
-3. Vercel automatically redeploys. The lab becomes instantly available to lecturers for activation and scheduling.
+Keep platform-engine changes separate from ordinary academic-content edits whenever practical. This makes it easier to review whether a change affects only one module or the whole teaching environment.

@@ -94,5 +94,11 @@ export interface LabManifest {
   blocks?: LabBlockDefinition[];
   visualDesign?: LabVisualGraph;
   tests: LabTestCase[];
+  /**
+   * Combined article used by legacy/generic modules.
+   * Content-driven modules may also provide theoryMarkdown and labSheetMarkdown.
+   */
   instructionsMarkdown: string;
+  theoryMarkdown?: string;
+  labSheetMarkdown?: string;
 }

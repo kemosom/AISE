@@ -2,31 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Play,
-  RotateCcw,
   CheckSquare,
-  Bookmark,
   FileText,
-  Send,
   Code,
   Layout,
   BookOpen,
-  Eye,
-  CheckCircle2,
-  Terminal,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
 import { apiClient } from '../lib/api-client';
-import { LabGuidePanel } from './LabGuidePanel';
 import { VisualDesignPanel } from './VisualDesignPanel';
 import { MonacoEditorPanel, type EditorFile } from './MonacoEditorPanel';
 import { OutputConsolePanel } from './OutputConsolePanel';
 import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
-import { SubmitLabModal } from './SubmitLabModal';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
+import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
+import { LabRegistry } from '../../labs/registry';
 
 interface LabWorkspaceProps {
   labId: string;
@@ -46,12 +40,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Active Main View: 'theory' (Medium style article) vs 'ide' vs 'report'
-  const [viewMode, setViewMode] = useState<'theory' | 'ide' | 'report'>('theory');
-
-  // IDE Panel Layout Selection for responsive/focused workflows
-  // 'quad': All 4 columns, 'split': 2 columns, 'editor-output': focused code & run
-  const [panelFocus, setPanelFocus] = useState<'all' | 'guide' | 'design' | 'code' | 'output'>('all');
+  // Keep the navigation explicit: theory, code, design, and report.
+  const [viewMode, setViewMode] = useState<'theory' | 'code' | 'design' | 'report'>('theory');
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
@@ -74,13 +64,41 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [reportSaveStatus, setReportSaveStatus] = useState<string>('All changes saved');
   const [checkpoints, setCheckpoints] = useState<any[]>([]);
 
-  // Submission State
-  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [submissionCompleted, setSubmissionCompleted] = useState(false);
-
   // Debounced auto-save timers
   const saveTimeoutRef = useRef<any>(null);
   const reportSaveTimeoutRef = useRef<any>(null);
+
+  // Open-access students share no server identity. Persist their personal
+  // workspace in this browser so one learner can never overwrite another
+  // learner's code/report through the synthetic "open-student" account.
+  const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
+  const localKey = (kind: string) => `aise:v2:${labId}:${kind}`;
+
+  const readLocal = async <T,>(kind: string): Promise<T | null> => {
+    if (!useLocalPersistence) return null;
+    try {
+      return await getBrowserValue<T>(localKey(kind));
+    } catch (err) {
+      console.warn(`Unable to read local ${kind}`, err);
+      return null;
+    }
+  };
+
+  const writeLocal = async (kind: string, value: unknown): Promise<void> => {
+    if (!useLocalPersistence) return;
+    await setBrowserValue(localKey(kind), value);
+  };
+
+  const createInitialReport = (labManifest: LabManifest): ReportState => ({
+    title: labManifest.reportTemplate.title,
+    studentName: '',
+    studentId: '',
+    sections: labManifest.reportTemplate.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      content: '',
+    })),
+  });
 
   useEffect(() => {
     loadLabWorkspace();
@@ -89,51 +107,100 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const loadLabWorkspace = async () => {
     setLoading(true);
     setError(null);
+
     try {
-      const data = await apiClient.get(`/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`);
-      setManifest(data.manifest);
+      // Open-access/Vercel mode is intentionally client-side. The complete
+      // laboratory manifest is bundled by Vite, so loading a lab must not
+      // depend on an Express /api route that does not exist in a static Vercel deployment.
+      if (useLocalPersistence) {
+        const loadedManifest = LabRegistry.getLab(labId);
+
+        if (!loadedManifest) {
+          throw new Error('Laboratory module not found.');
+        }
+
+        if (loadedManifest.labNumber !== 1) {
+          throw new Error('This laboratory is not released yet.');
+        }
+
+        setManifest(loadedManifest);
+        setLabMeta({
+          id: loadedManifest.id,
+          labNumber: loadedManifest.labNumber,
+          title: loadedManifest.title,
+          isUnlocked: true,
+          isPublished: true,
+        });
+
+        const [
+          savedFiles,
+          savedDesign,
+          savedReport,
+          savedCheckpoints,
+          savedSubmission,
+          savedTestStats,
+        ] = await Promise.all([
+          readLocal<EditorFile[]>('files'),
+          readLocal<any>('visual-design'),
+          readLocal<ReportState>('report'),
+          readLocal<any[]>('checkpoints'),
+          readLocal<any>('submission'),
+          readLocal<{ passed: number; total: number }>('test-stats'),
+        ]);
+
+        setFiles(
+          savedFiles && savedFiles.length > 0
+            ? savedFiles
+            : loadedManifest.starterFiles
+        );
+        setVisualGraph(
+          savedDesign || loadedManifest.visualDesign || { nodes: [], edges: [] }
+        );
+        setReportState(savedReport || createInitialReport(loadedManifest));
+        setCheckpoints(savedCheckpoints || []);
+        setTestStats(savedTestStats);
+        return;
+      }
+
+      // Optional authenticated/instructor deployment path.
+      const data = await apiClient.get(
+        `/api/labs/${labId}?preview=${isInstructorPreview ? 'true' : 'false'}`
+      );
+
+      const loadedManifest = data.manifest as LabManifest;
+      setManifest(loadedManifest);
       setLabMeta(data.lab);
 
-      // Load Workspace Files
       try {
         const wsData = await apiClient.get(`/api/workspaces/${labId}`);
-        setFiles(wsData.files || data.manifest.starterFiles);
+        setFiles(wsData.files || loadedManifest.starterFiles);
       } catch {
-        setFiles(data.manifest.starterFiles);
+        setFiles(loadedManifest.starterFiles);
       }
 
-      // Load Visual Design
       try {
         const vdData = await apiClient.get(`/api/visual-designs/${labId}`);
-        setVisualGraph(vdData.state || data.manifest.visualDesign || { nodes: [], edges: [] });
+        setVisualGraph(
+          vdData.state || loadedManifest.visualDesign || { nodes: [], edges: [] }
+        );
       } catch {
-        setVisualGraph(data.manifest.visualDesign || { nodes: [], edges: [] });
+        setVisualGraph(loadedManifest.visualDesign || { nodes: [], edges: [] });
       }
 
-      // Load Report
       try {
         const repData = await apiClient.get(`/api/reports/${labId}`);
-        setReportState(repData.report.contentJson);
+        setReportState(
+          repData.report?.contentJson || createInitialReport(loadedManifest)
+        );
       } catch {
-        // Fallback to template if not loaded
+        setReportState(createInitialReport(loadedManifest));
       }
 
-      // Check existing submission
-      try {
-        const subData = await apiClient.get(`/api/submissions/${labId}`);
-        if (subData.submission) {
-          setSubmissionCompleted(true);
-        }
-      } catch {
-        // ignore
-      }
-
-      // Checkpoints
       try {
         const cpData = await apiClient.get(`/api/checkpoints/${labId}`);
         setCheckpoints(cpData.checkpoints || []);
       } catch {
-        // ignore
+        setCheckpoints([]);
       }
     } catch (err: any) {
       setError(err.message || 'Error loading lab');
@@ -151,13 +218,23 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
+      if (useLocalPersistence) {
+        try {
+          await writeLocal('files', updated);
+          setCodeSaveStatus('Saved');
+        } catch {
+          setCodeSaveStatus('Save failed');
+        }
+        return;
+      }
+
       try {
         await apiClient.post(`/api/workspaces/${labId}`, { files: updated });
         setCodeSaveStatus('Saved');
       } catch {
         setCodeSaveStatus('Save failed');
       }
-    }, 1000);
+    }, 700);
   };
 
   const handleAddFile = (fileName: string) => {
@@ -169,6 +246,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const updated = [...files, newFile];
     setFiles(updated);
     setActiveFileIndex(updated.length - 1);
+    void writeLocal('files', updated);
   };
 
   const handleDeleteFile = (idx: number) => {
@@ -176,11 +254,22 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const updated = files.filter((_, i) => i !== idx);
     setFiles(updated);
     setActiveFileIndex(0);
+    writeLocal('files', updated);
   };
 
   // Save Visual Graph
   const handleUpdateVisualGraph = async (newGraph: any) => {
     setVisualGraph(newGraph);
+
+    if (useLocalPersistence) {
+      try {
+        await writeLocal('visual-design', newGraph);
+      } catch (err) {
+        console.error('Failed to save local visual design', err);
+      }
+      return;
+    }
+
     try {
       await apiClient.post(`/api/visual-designs/${labId}`, {
         designType: 'react-flow',
@@ -195,13 +284,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const handleRunCode = async () => {
     setIsRunningCode(true);
     try {
-      const activeFile = files[activeFileIndex] || files[0];
-      // Ensure all current workspace files are passed to Pyodide virtual filesystem
-      const allFiles = files.map((f, i) =>
-        i === activeFileIndex ? { ...f, content: activeFile.content } : f
-      );
+      const mainFile = files.find((file) => file.name === 'main.py') || files[0];
 
-      const result = await defaultCodeRunner.run(activeFile.content, allFiles);
+      if (!mainFile) {
+        throw new Error('main.py is not available in this workspace.');
+      }
+
+      // Run the laboratory entry point consistently, regardless of which file
+      // the student is currently viewing in Monaco.
+      const result = await defaultCodeRunner.run(mainFile.content, files);
       setExecResult(result);
     } catch (err: any) {
       setExecResult({
@@ -224,6 +315,16 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
+      if (useLocalPersistence) {
+        try {
+          await writeLocal('report', newReport);
+          setReportSaveStatus('Saved in this browser');
+        } catch {
+          setReportSaveStatus('Save failed');
+        }
+        return;
+      }
+
       try {
         await apiClient.post(`/api/reports/${labId}`, {
           title: newReport.title,
@@ -233,13 +334,29 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       } catch {
         setReportSaveStatus('Save failed');
       }
-    }, 1200);
+    }, 700);
   };
 
   // Checkpoints
   const handleCreateCheckpoint = async (label: string, snapshot: any) => {
+    if (useLocalPersistence) {
+      const checkpoint = {
+        id: `local-${Date.now()}`,
+        label,
+        snapshot,
+        createdAt: new Date().toISOString(),
+      };
+      const updated = [checkpoint, ...checkpoints];
+      setCheckpoints(updated);
+      await writeLocal('checkpoints', updated);
+      return;
+    }
+
     try {
-      const res = await apiClient.post(`/api/checkpoints/${labId}`, { label, snapshot });
+      const res = await apiClient.post(`/api/checkpoints/${labId}`, {
+        label,
+        snapshot,
+      });
       if (res.checkpoint) {
         setCheckpoints((prev) => [res.checkpoint, ...prev]);
       }
@@ -250,7 +367,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   // Evidence Insertion Handlers
   const handleAddCodeSnapshotToReport = (snapshot: { title: string; code: string }) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
+    const targetSection = reportState.sections.find((s) => s.id === 'guardrail') || reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
     if (!targetSection) return;
 
     const curSnaps = targetSection.codeSnapshots || [];
@@ -292,7 +409,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddDesignToReport = (summary: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'methodology') || reportState.sections[0];
+    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
@@ -310,7 +427,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
-    const newContent = `${currentContent}[Automated Verification Results]\n${testSummary}`;
+    const newContent = `${currentContent}[Requirement Verification Results]\n${testSummary}`;
 
     const updatedSections = reportState.sections.map((s) =>
       s.id === targetSection.id ? { ...s, content: newContent } : s
@@ -325,31 +442,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     handleContentChange(newContent);
   };
 
-  // Submit Lab (Creates immutable database snapshot)
-  const handleConfirmSubmit = async () => {
-    await apiClient.post(`/api/submissions/${labId}`, {
-      reportSnapshot: reportState,
-      codeSnapshot: files,
-      visualDesignSnapshot: visualGraph,
-      testResultsSnapshot: {
-        total: testStats?.total ?? 4,
-        passed: testStats?.passed ?? 0,
-        details: [
-          { name: 'Synchronization Invariant Check', passed: (testStats?.passed ?? 0) > 0, message: 'All b-threads yielded valid RWB specs.' },
-          { name: 'Blocked Event Suppression Check', passed: (testStats?.passed ?? 0) > 1, message: 'Overflow prevention prevented overflow.' },
-          { name: 'Deadlock Freedom Invariant', passed: (testStats?.passed ?? 0) > 2, message: 'Clean termination achieved.' },
-          { name: 'Trace Verification', passed: (testStats?.passed ?? 0) > 3, message: 'Simulation history verified.' },
-        ],
-      },
-    });
 
-    setSubmissionCompleted(true);
-  };
 
   if (loading) {
     return (
       <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center bg-slate-50 text-xs text-slate-500 font-mono">
-        Initializing AISE Laboratory Workspace & Pyodide Environment...
+        Loading laboratory workspace...
       </div>
     );
   }
@@ -401,109 +499,81 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </div>
         </div>
 
-        {/* Center Mode Switcher: Theory vs IDE vs Report */}
-        <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+        {/* Compact workspace navigation */}
+        <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200 text-xs">
           <button
             onClick={() => setViewMode('theory')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'theory'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-blue-900" />
-            <span>Theory & Labsheet</span>
+            <BookOpen className="w-3.5 h-3.5" />
+            Theory
           </button>
           <button
-            onClick={() => setViewMode('ide')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
-              viewMode === 'ide'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+            onClick={() => setViewMode('code')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'code'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <Code className="w-3.5 h-3.5 text-blue-900" />
-            <span>IDE Workspace</span>
+            <Code className="w-3.5 h-3.5" />
+            Code
+          </button>
+          <button
+            onClick={() => setViewMode('design')}
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+              viewMode === 'design'
+                ? 'bg-white text-slate-950 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Layout className="w-3.5 h-3.5" />
+            Design
           </button>
           <button
             onClick={() => setViewMode('report')}
-            className={`px-3 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center space-x-1.5 ${
+            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
               viewMode === 'report'
-                ? 'bg-white text-slate-900 shadow-xs font-semibold'
+                ? 'bg-white text-slate-950 shadow-xs'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <FileText className="w-3.5 h-3.5 text-indigo-900" />
-            <span>Lab Report ({filledSectionsCount}/{reportState.sections.length})</span>
+            <FileText className="w-3.5 h-3.5" />
+            Report
           </button>
         </div>
 
-        {/* Right Action Buttons */}
-        <div className="flex items-center space-x-2">
-          {viewMode === 'ide' && (
+        {/* Only show execution controls when coding */}
+        <div className="flex items-center gap-2">
+          {viewMode === 'code' && (
             <>
-              {/* Panel Focus Switcher on smaller laptops */}
-              <div className="hidden md:flex items-center space-x-1 bg-slate-100 p-0.5 rounded border border-slate-200 text-[11px]">
-                <button
-                  onClick={() => setPanelFocus('all')}
-                  className={`px-2 py-0.5 rounded cursor-pointer ${
-                    panelFocus === 'all' ? 'bg-white text-slate-900 font-semibold' : 'text-slate-600'
-                  }`}
-                  title="Show all 4 panels"
-                >
-                  All Panels
-                </button>
-                <button
-                  onClick={() => setPanelFocus('code')}
-                  className={`px-2 py-0.5 rounded cursor-pointer ${
-                    panelFocus === 'code' ? 'bg-white text-slate-900 font-semibold' : 'text-slate-600'
-                  }`}
-                  title="Focus Code Editor"
-                >
-                  Code Focus
-                </button>
-              </div>
-
               <button
                 onClick={() => setIsTestHarnessOpen(!isTestHarnessOpen)}
-                className={`inline-flex items-center space-x-1 px-2.5 py-1 text-xs font-medium rounded border cursor-pointer transition-colors ${
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded border cursor-pointer transition-colors ${
                   isTestHarnessOpen
                     ? 'bg-blue-50 text-blue-900 border-blue-300'
                     : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                 }`}
               >
-                <CheckSquare className="w-3.5 h-3.5 text-blue-900" />
-                <span>
-                  {testStats === null
-                    ? 'Tests (Not Run)'
-                    : `Tests (${testStats.passed}/${testStats.total})`}
-                </span>
+                <CheckSquare className="w-3.5 h-3.5" />
+                {testStats === null
+                  ? 'Verify Requirements'
+                  : `Verified ${testStats.passed}/${testStats.total}`}
               </button>
 
               <button
                 onClick={handleRunCode}
                 disabled={isRunningCode}
-                className="inline-flex items-center space-x-1 px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{isRunningCode ? 'Running...' : 'Run Python'}</span>
+                {isRunningCode ? 'Running...' : 'Run Python'}
               </button>
             </>
-          )}
-
-          {submissionCompleted ? (
-            <div className="flex items-center space-x-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded text-xs font-semibold">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Submitted</span>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsSubmitModalOpen(true)}
-              className="inline-flex items-center space-x-1 px-3.5 py-1 bg-slate-900 hover:bg-slate-800 text-white rounded text-xs font-semibold cursor-pointer"
-            >
-              <Send className="w-3.5 h-3.5" />
-              <span>Submit Lab</span>
-            </button>
           )}
         </div>
       </div>
@@ -517,41 +587,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               manifest={manifest}
               studentName={reportState.studentName || user.name}
               studentId={reportState.studentId || user.studentId}
-              onBeginLab={() => setViewMode('ide')}
-              onSwitchToReport={() => setViewMode('report')}
+              onBeginLab={() => setViewMode('code')}
             />
           </div>
         )}
 
-        {/* VIEW 1: IDE WORKSPACE */}
-        {viewMode === 'ide' && (
-          <div className="h-full flex overflow-hidden">
-            {/* Panel 1: Lab Guide (Markdown instructions) */}
-            {(panelFocus === 'all' || panelFocus === 'guide') && (
-              <div className="w-72 lg:w-80 shrink-0 h-full hidden md:block">
-                <LabGuidePanel
-                  instructionsMarkdown={manifest.instructionsMarkdown}
-                  learningOutcomes={manifest.learningOutcomes}
-                />
-              </div>
-            )}
-
-            {/* Panel 2: Visual Design (React Flow / Blockly / Palette) */}
-            {(panelFocus === 'all' || panelFocus === 'design') && (
-              <div className="w-72 lg:w-80 shrink-0 h-full hidden xl:block">
-                <VisualDesignPanel
-                  snippets={manifest.snippets}
-                  blocks={manifest.blocks}
-                  visualGraph={visualGraph}
-                  onUpdateVisualGraph={handleUpdateVisualGraph}
-                  onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
-                  onAddDesignToReport={handleAddDesignToReport}
-                />
-              </div>
-            )}
-
-            {/* Panel 3: Monaco Code Editor */}
-            <div className="flex-1 min-w-[320px] h-full">
+        {/* VIEW 1: CODE WORKSPACE */}
+        {viewMode === 'code' && (
+          <div className="h-full flex overflow-hidden bg-slate-950">
+            <div className="flex-1 min-w-0 h-full">
               <MonacoEditorPanel
                 files={files}
                 activeFileIndex={activeFileIndex}
@@ -563,24 +607,48 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                 onAddCodeToReport={handleAddCodeSnapshotToReport}
               />
             </div>
-
-            {/* Panel 4: Output Console & Matplotlib Plots */}
-            {(panelFocus === 'all' || panelFocus === 'output') && (
-              <div className="w-80 lg:w-96 shrink-0 h-full hidden sm:block">
-                <OutputConsolePanel
-                  result={execResult}
-                  isRunning={isRunningCode}
-                  onClearConsole={() => setExecResult(null)}
-                  onRestartRuntime={() => defaultCodeRunner.reset()}
-                  onAddOutputToReport={handleAddOutputToReport}
-                  onAddPlotToReport={handleAddPlotToReport}
-                />
-              </div>
-            )}
+            <div className="w-[32%] min-w-[300px] max-w-[430px] shrink-0 h-full border-l border-slate-800">
+              <OutputConsolePanel
+                result={execResult}
+                isRunning={isRunningCode}
+                onClearConsole={() => setExecResult(null)}
+                onRestartRuntime={() => defaultCodeRunner.reset()}
+                onAddOutputToReport={handleAddOutputToReport}
+                onAddPlotToReport={handleAddPlotToReport}
+              />
+            </div>
           </div>
         )}
 
-        {/* VIEW 2: LAB REPORT WORKSPACE */}
+        {/* VIEW 2: DESIGN WORKSPACE */}
+        {viewMode === 'design' && (
+          <div className="h-full flex overflow-hidden bg-slate-950">
+            <div className="w-[52%] min-w-[460px] shrink-0 h-full border-r border-slate-800">
+              <VisualDesignPanel
+                snippets={manifest.snippets}
+                blocks={manifest.blocks}
+                visualGraph={visualGraph}
+                onUpdateVisualGraph={handleUpdateVisualGraph}
+                onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
+                onAddDesignToReport={handleAddDesignToReport}
+              />
+            </div>
+            <div className="flex-1 min-w-0 h-full">
+              <MonacoEditorPanel
+                files={files}
+                activeFileIndex={activeFileIndex}
+                onSelectFile={setActiveFileIndex}
+                onChangeContent={handleContentChange}
+                onAddFile={handleAddFile}
+                onDeleteFile={handleDeleteFile}
+                saveStatus={codeSaveStatus}
+                onAddCodeToReport={handleAddCodeSnapshotToReport}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* VIEW 3: LAB REPORT WORKSPACE */}
         {viewMode === 'report' && (
           <div className="h-full">
             <ReportWorkspace
@@ -616,26 +684,21 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               files={files}
               onAddTestResultsToReport={handleAddTestResultsToReport}
               onTestRunComplete={(passed, total) => {
-                setTestStats({ passed, total });
-                apiClient.post(`/api/labs/${labId}/test-run`, { passed, total }).catch(() => {});
+                const stats = { passed, total };
+                setTestStats(stats);
+
+                if (useLocalPersistence) {
+                  void writeLocal('test-stats', stats);
+                } else {
+                  apiClient
+                    .post(`/api/labs/${labId}/test-run`, stats)
+                    .catch(() => {});
+                }
               }}
             />
           </div>
         )}
 
-        {/* Submit Confirmation Modal */}
-        {isSubmitModalOpen && (
-          <SubmitLabModal
-            labNumber={manifest.labNumber}
-            labTitle={manifest.title}
-            testPassedCount={testStats ? testStats.passed : 0}
-            totalTests={manifest.tests.length}
-            reportSectionsFilled={filledSectionsCount}
-            totalReportSections={reportState.sections.length}
-            onConfirmSubmit={handleConfirmSubmit}
-            onClose={() => setIsSubmitModalOpen(false)}
-          />
-        )}
       </div>
     </div>
   );

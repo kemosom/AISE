@@ -1,235 +1,21 @@
 import type { LabManifest, LabTaskItem } from './types';
 
-// Import reference assets for Lab 01
+// Lab 01 is content-driven. Edit files inside labs/lab01-behavioral-programming/
+// rather than duplicating teaching content in this registry.
+import lab01Metadata from './lab01-behavioral-programming/manifest.json';
+import lab01Theory from './lab01-behavioral-programming/theory.md?raw';
+import lab01LabSheet from './lab01-behavioral-programming/lab-sheet.md?raw';
+import lab01MainPy from './lab01-behavioral-programming/starter/main.py?raw';
+import lab01HelpersPy from './lab01-behavioral-programming/starter/helpers.py?raw';
+import lab01RiskModelPy from './lab01-behavioral-programming/starter/risk_model.py?raw';
 import lab01Snippets from './lab01-behavioral-programming/snippets.json';
 import lab01Blocks from './lab01-behavioral-programming/blocks.json';
 import lab01VisualNodes from './lab01-behavioral-programming/visual-nodes.json';
 import lab01Tests from './lab01-behavioral-programming/tests/public-tests.json';
 import lab01ReportTemplate from './lab01-behavioral-programming/report-template.json';
 
-const lab01Instructions = `# Lab 01: AI for Software Design: Behavioral Programming
-
-**Course:** MAI5124 AI in Software Engineering  
-**Unit:** Software Design & Behavioral Specification  
-**Estimated Time:** 3 Hours
-
----
-
-### 1. Overview & Context
-Traditional software architectures enforce centralized coordination logic through monolithic state machines or branching control flows. When requirements change or new safety constraints emerge, modifying a centralized system often introduces catastrophic regression faults.
-
-**Behavioral Programming (BP)** is an operational paradigm founded on independent strands of behavior called **b-threads**.
-- Each b-thread represents a distinct, autonomous requirement or safety invariant.
-- At every synchronization point, b-threads announce their intentions using three modalities:
-  - **Requested events (R):** Events this thread proposes for immediate execution.
-  - **Waited-for events (W):** Events this thread is interested in listening to.
-  - **Blocked events (B):** Events this thread strictly prohibits from occurring.
-- An impartial execution coordinator (Arbiter) selects an event that is **requested by at least one b-thread** and **blocked by none**.
-
----
-
-### 2. Learning Outcomes
-1. **Formulate concurrent software requirements** as independent, non-interfering b-threads.
-2. **Apply the Request-Wait-Block (RWB) protocol** to enforce critical safety invariants without rewriting core business logic.
-3. **Execute and analyze behavioral event traces** using Pyodide in Python.
-4. **Evaluate conflict resolution** and verify deadlock-free operation through automated assertion suites.
-5. **Formulate a structured academic technical report** incorporating code, execution traces, visual topologies, and analytical discussion.
-
----
-
-### 3. Required Tasks
-- **Task 1:** Inspect \`helpers.py\` to understand the \`BProgram\` coordinator. In \`main.py\`, implement \`add_hot_water\` and \`add_cold_water\` b-threads.
-- **Task 2:** Implement the \`overflow_prevention\` safety monitor b-thread that dynamically blocks water filling once volume capacity reaches 6 units and triggers \`DRAIN_VALVE\`.
-- **Task 3:** In the Visual Designer panel, adjust the coordination pipeline or inspect the visual nodes.
-- **Task 4:** Run public tests (Toolbar > "Run Tests") to confirm passing verification.
-- **Task 5:** Write your observations in the **Report** workspace, attach snapshots of your output, and download or submit your Word report.`;
-
-const lab01MainPy = `"""
-MAI5124 AI in Software Engineering
-Lab 01: Behavioral Programming Reference Implementation
-
-Student: Ahmed Ali (24012345)
-"""
-from helpers import BProgram
-
-def add_hot_water():
-    """B-Thread: Requests HOT_WATER 4 times."""
-    for i in range(4):
-        yield {
-            'request': ['HOT_WATER'],
-            'waitFor': ['COLD_WATER'],
-            'block': []
-        }
-
-def add_cold_water():
-    """B-Thread: Requests COLD_WATER 4 times."""
-    for i in range(4):
-        yield {
-            'request': ['COLD_WATER'],
-            'waitFor': ['HOT_WATER'],
-            'block': []
-        }
-
-def overflow_prevention():
-    """
-    Safety Invariant B-Thread:
-    Maintains liquid volume state and blocks water injection
-    when capacity threshold is reached.
-    """
-    capacity = 0
-    max_threshold = 6
-
-    while True:
-        if capacity >= max_threshold:
-            # Enforce safety invariant: strictly BLOCK positive events
-            yield {
-                'request': ['DRAIN_VALVE'],
-                'waitFor': ['DRAIN_VALVE'],
-                'block': ['HOT_WATER', 'COLD_WATER']
-            }
-            capacity -= 2
-        else:
-            event = yield {
-                'request': [],
-                'waitFor': ['HOT_WATER', 'COLD_WATER', 'DRAIN_VALVE'],
-                'block': []
-            }
-            if event in ['HOT_WATER', 'COLD_WATER']:
-                capacity += 1
-            elif event == 'DRAIN_VALVE':
-                capacity = max(0, capacity - 2)
-
-def main():
-    print("=" * 60)
-    print("AISE Lab Studio: Lab 01 Behavioral Simulation Running...")
-    print("=" * 60)
-
-    bp = BProgram()
-    bp.add_bthread(add_hot_water)
-    bp.add_bthread(add_cold_water)
-    bp.add_bthread(overflow_prevention)
-
-    trace = bp.run(max_steps=20)
-
-    print("\\n--- Simulation Summary ---")
-    print(f"Total Events Dispatched: {len(trace)}")
-    print(f"Event Trace: {' -> '.join(trace)}")
-    print("Safety Invariant: Overflow safely mitigated by coordinator.")
-
-if __name__ == '__main__':
-    main()
-`;
-
-const lab01HelpersPy = `"""
-Behavioral Programming Engine for MAI5124 Lab 01.
-Implements the Request-Wait-Block (RWB) synchronization coordinator.
-"""
-from typing import Dict, List, Set, Any, Generator
-
-class Event:
-    def __init__(self, name: str, payload: Any = None):
-        self.name = name
-        self.payload = payload
-
-    def __repr__(self):
-        return f"Event('{self.name}')"
-
-    def __eq__(self, other):
-        if isinstance(other, str):
-            return self.name == other
-        if isinstance(other, Event):
-            return self.name == other.name
-        return False
-
-    def __hash__(self):
-        return hash(self.name)
-
-
-class BProgram:
-    def __init__(self):
-        self.threads: List[Generator] = []
-        self.history: List[str] = []
-
-    def add_bthread(self, generator_func):
-        """Register a generator as a behavioral thread."""
-        gen = generator_func()
-        self.threads.append(gen)
-
-    def run(self, max_steps: int = 50) -> List[str]:
-        current_syncs: List[Dict[str, Any]] = []
-        active_threads: List[Generator] = []
-
-        for t in self.threads:
-            try:
-                sync_spec = next(t)
-                current_syncs.append(sync_spec)
-                active_threads.append(t)
-            except StopIteration:
-                pass
-
-        step = 0
-        while active_threads and step < max_steps:
-            step += 1
-            requested: Set[str] = set()
-            blocked: Set[str] = set()
-
-            for spec in current_syncs:
-                req = spec.get('request', [])
-                if isinstance(req, str):
-                    req = [req]
-                requested.update(req)
-
-                blk = spec.get('block', [])
-                if isinstance(blk, str):
-                    blk = [blk]
-                blocked.update(blk)
-
-            candidates = [e for e in requested if e not in blocked]
-            if not candidates:
-                break
-
-            selected_event = candidates[0]
-            self.history.append(selected_event)
-            print(f"[STEP {step:02d}] Dispatched Event: >> {selected_event} <<")
-
-            new_syncs = []
-            new_active = []
-
-            for t, spec in zip(active_threads, current_syncs):
-                req = spec.get('request', [])
-                if isinstance(req, str):
-                    req = [req]
-                wfor = spec.get('waitFor', [])
-                if isinstance(wfor, str):
-                    wfor = [wfor]
-
-                interested = (selected_event in req) or (selected_event in wfor)
-                if interested:
-                    try:
-                        next_spec = t.send(selected_event)
-                        new_syncs.append(next_spec)
-                        new_active.append(t)
-                    except StopIteration:
-                        pass
-                else:
-                    new_syncs.append(spec)
-                    new_active.append(t)
-
-            current_syncs = new_syncs
-            active_threads = new_active
-
-        return self.history
-`;
-
 // Curriculum-aligned task catalog mapping for all MAI5124 laboratories
 export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
-  'lab01-behavioral-programming': [
-    { id: 'l1-t1', title: 'B-Thread Concurrent Formulation', description: 'Implement add_hot_water and add_cold_water generators with RWB protocol', category: 'code' },
-    { id: 'l1-t2', title: 'Overflow Prevention Safety Monitor', description: 'Implement dynamic blocking monitor at threshold capacity = 6', category: 'code' },
-    { id: 'l1-t3', title: 'Visual Coordination Pipeline', description: 'Configure event topology and b-thread nodes in Visual Designer', category: 'design' },
-    { id: 'l1-t4', title: 'Automated Assertion Verification', description: 'Run public test suite to verify deadlock-free operation', category: 'test' },
-    { id: 'l1-t5', title: 'Technical Report & Final Submission', description: 'Author required analytical sections and submit academic report', category: 'submission' },
-  ],
   'lab02-requirement-prioritization': [
     { id: 'l2-t1', title: 'Requirement Text Pre-Processing', description: 'Clean, tokenize, and compute TF-IDF vector embeddings', category: 'code' },
     { id: 'l2-t2', title: 'Machine Learning Classifier', description: 'Train supervised model to predict priority classes (High/Medium/Low)', category: 'code' },
@@ -402,51 +188,28 @@ function createLabShell(
   };
 }
 
-// Registry Map of all 11 Laboratories + Practical Exam
+// Registry Map of the 11 MAI5124 laboratory modules
 const labRegistryMap: Map<string, LabManifest> = new Map();
 
-// Lab 01 - Full Reference Implementation
+// Lab 01 - Content-driven reference module.
+// Theory, lab sheet, starter code, tests, snippets, blocks, visual nodes and
+// report structure all live in the Lab 01 folder so lecturers can edit the
+// module without touching application code.
 labRegistryMap.set('lab01-behavioral-programming', {
-  id: 'lab01-behavioral-programming',
-  labNumber: 1,
-  week: 1,
-  title: 'AI for Software Design: Behavioral Programming',
-  shortDescription: 'Explore b-thread prioritization, event request/wait-for/block mechanics, and AI conflict coordination.',
-  estimatedDuration: '3 hours',
-  language: 'python',
-  runner: 'pyodide',
-  packages: ['numpy', 'matplotlib'],
-  features: {
-    visualDesigner: true,
-    blockly: true,
-    functionPalette: true,
-    testRunner: true,
-    reportEditor: true,
-    webPreview: false,
-  },
-  learningOutcomes: [
-    'Formulate concurrent software requirements as independent, non-interfering b-threads.',
-    'Apply the Request-Wait-Block (RWB) protocol to enforce critical safety invariants without rewriting core business logic.',
-    'Execute and analyze behavioral event traces using Pyodide in Python.',
-    'Evaluate conflict resolution and verify deadlock-free operation through automated assertion suites.',
-    'Formulate a structured academic technical report incorporating code, execution traces, visual topologies, and analytical discussion.',
-  ],
-  tasks: LAB_TASKS_CATALOG['lab01-behavioral-programming'],
+  ...(lab01Metadata as any),
   starterFiles: [
     { name: 'main.py', language: 'python', content: lab01MainPy },
+    { name: 'risk_model.py', language: 'python', content: lab01RiskModelPy },
     { name: 'helpers.py', language: 'python', content: lab01HelpersPy },
-    {
-      name: 'README.md',
-      language: 'markdown',
-      content: '# Lab 01: Behavioral Programming\n\nRun `main.py` using the Run button in the top toolbar to start the simulation.',
-    },
   ],
   reportTemplate: lab01ReportTemplate as any,
   snippets: lab01Snippets as any,
   blocks: lab01Blocks as any,
   visualDesign: lab01VisualNodes as any,
   tests: lab01Tests as any,
-  instructionsMarkdown: lab01Instructions,
+  theoryMarkdown: lab01Theory,
+  labSheetMarkdown: lab01LabSheet,
+  instructionsMarkdown: `${lab01Theory}\n\n---\n\n${lab01LabSheet}`,
 });
 
 // Lab 02
@@ -629,23 +392,7 @@ labRegistryMap.set(
   )
 );
 
-// Practical Exam
-labRegistryMap.set(
-  'exam-code-review',
-  createLabShell(
-    'exam-code-review',
-    12,
-    12,
-    'Practical Examination: AI-Assisted Code Review',
-    'Timed practical assessment examining critical vulnerability detection and automated patch validation.',
-    [
-      'Perform comprehensive security and architectural audit on unvetted codebase.',
-      'Synthesize automated remediation patches satisfying all security invariants.',
-      'Author formal technical review report under examination constraints.',
-    ],
-    `# Practical Examination: AI-Assisted Code Review\n# MAI5124 Examination Rules Apply\n\nprint("Examination Mode Active.")\n`
-  )
-);
+
 
 export class LabRegistry {
   static getLab(labId: string): LabManifest | undefined {

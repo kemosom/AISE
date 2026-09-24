@@ -182,42 +182,19 @@ finally:
     }
   }
 
-  // Pure simulation fallback for robust self-containment
-  private runSimulatedPython(code: string, files?: Array<{ name: string; content: string }>, startTime = performance.now()): ExecutionResult {
-    const lines = code.split('\n');
-    const logs: string[] = [];
-    logs.push("============================================================");
-    logs.push("AISE Lab Studio: Lab 01 Behavioral Simulation Running...");
-    logs.push("============================================================");
-
-    if (code.includes('BProgram')) {
-      logs.push("[STEP 01] Dispatched Event: >> HOT_WATER <<");
-      logs.push("[STEP 02] Dispatched Event: >> COLD_WATER <<");
-      logs.push("[STEP 03] Dispatched Event: >> HOT_WATER <<");
-      logs.push("[STEP 04] Dispatched Event: >> COLD_WATER <<");
-      logs.push("[STEP 05] Dispatched Event: >> HOT_WATER <<");
-      logs.push("[STEP 06] Dispatched Event: >> COLD_WATER <<");
-      logs.push("[STEP 07] Dispatched Event: >> DRAIN_VALVE <<");
-      logs.push("\n--- Simulation Summary ---");
-      logs.push("Total Events Dispatched: 7");
-      logs.push("Event Trace: HOT_WATER -> COLD_WATER -> HOT_WATER -> COLD_WATER -> HOT_WATER -> COLD_WATER -> DRAIN_VALVE");
-      logs.push("Safety Invariant: Overflow safely mitigated by coordinator.");
-    } else {
-      for (const line of lines) {
-        if (line.trim().startsWith('print(')) {
-          const match = line.match(/print\((?:f?["'])(.*?)(?:["'])\)/);
-          if (match) logs.push(match[1]);
-        }
-      }
-      if (logs.length === 3) {
-        logs.push("Program executed successfully with 0 exit code.");
-      }
-    }
-
+  // Do not fabricate laboratory results if the Python runtime cannot load.
+  // A false simulation would undermine requirement verification.
+  private runSimulatedPython(
+    _code: string,
+    _files?: Array<{ name: string; content: string }>,
+    startTime = performance.now()
+  ): ExecutionResult {
     return {
-      stdout: logs.join('\n'),
-      stderr: '',
-      exitCode: 0,
+      stdout: '',
+      stderr:
+        'The browser Python runtime could not be loaded. Check your network connection and reload the page before running or verifying the lab.',
+      error: 'Pyodide runtime unavailable',
+      exitCode: 1,
       executionTimeMs: Math.round(performance.now() - startTime),
       plots: [],
     };
