@@ -1,115 +1,177 @@
-# Lab 01 Practical: Add a Safety Requirement Without Rewriting Existing Behaviour
+# Lab 01 Practical: Guarding an AI-Assisted Release Decision
 
-**Scenario:** Smart fluid-mixing controller  
-**Recommended practical time:** 90 minutes
+**Scenario:** AI-assisted pull-request release workflow  
+**Recommended practical time:** 90–120 minutes
 
 ## Objective
 
-Use Behavioral Programming to add one independent overflow-safety requirement to an existing controller and verify that the tank-capacity invariant is preserved.
-
-## Course alignment
-
-This practical supports the course outcomes concerned with understanding AI-related software-engineering concepts and selecting/applying appropriate methods and tools.
-
-**Programming is not the learning outcome by itself.** The code is the mechanism used to apply the design method, observe its behaviour, and verify the result.
+Integrate a supplied AI defect-risk prediction into a software release workflow, then add an independent Behavioral Programming guardrail that prevents unsafe AI-driven deployment decisions.
 
 ## What is already provided
 
-You receive:
+The starter project contains:
 
-- the `BProgram` coordinator in `helpers.py`,
-- a working hot-water b-thread,
-- a working cold-water b-thread,
-- a baseline program that runs without safety,
-- volume tracing,
-- automated public tests.
+- `risk_model.py`: a supplied supervised k-NN defect-risk model,
+- `helpers.py`: the Behavioral Programming coordinator,
+- `main.py`: pull-request scenarios and the AI recommendation behaviour,
+- automated requirement checks.
 
-You do **not** build the system from scratch.
+You are not expected to build the AI model or Behavioral Programming engine from scratch.
 
-The only function you must implement is:
+Your main implementation task is:
 
 ```python
-overflow_prevention()
+def release_guardrail(change, prediction):
+    ...
 ```
 
-## Task 1: Run the unsafe baseline
+## Scenario used first
 
-Open `main.py` and click **Run Python** without changing anything.
+The default pull request is intentionally interesting.
 
-The starter uses:
+Its structural code-change features look similar to historically low-risk changes, so the AI recommends **DEPLOY**.
+
+However, the current software pipeline contains evidence that should override that recommendation.
+
+Run the baseline before reading the implementation of the guardrail.
+
+## Task 1: Run the AI-only baseline
+
+Open `main.py` and click **Run Python** without editing anything.
+
+The starter begins with:
 
 ```python
-ENABLE_SAFETY = False
+ENABLE_GUARDRAIL = False
 ```
 
-The program should run normally and show:
+Record:
 
-- the event trace,
-- the volume after each event,
-- a failed safety check.
+- AI risk label,
+- AI confidence,
+- failed-test count,
+- critical security findings,
+- final release decision.
 
-That failure is intentional. It demonstrates the problem before the safety requirement is added.
+The program should run successfully. There is no intentional Python exception.
 
-## Task 2: Implement `overflow_prevention()`
+Ask yourself:
+
+> Is the AI recommendation alone sufficient to authorize deployment?
+
+## Task 2: Implement `release_guardrail()`
 
 Complete the marked TODO.
 
-Your b-thread must:
+Use these release policies:
 
-1. maintain its own estimate of tank volume,
-2. observe `HOT_WATER`, `COLD_WATER`, and `DRAIN_VALVE`,
-3. allow fill events while volume is below `MAX_CAPACITY`,
-4. when volume reaches `MAX_CAPACITY`:
-   - block `HOT_WATER`,
-   - block `COLD_WATER`,
-   - request `DRAIN_VALVE`,
-5. after a drain event, reduce volume by `DRAIN_AMOUNT` without going below zero.
+### Hard release block
 
-Do **not** add safety checks inside `add_hot_water()` or `add_cold_water()`.
+If either condition is true:
 
-## Task 3: Enable safety
+```text
+failed_tests > 0
+critical_security_findings > 0
+```
+
+the b-thread must:
+
+- block `DEPLOY`,
+- request `BLOCK_RELEASE`.
+
+### Human-review requirement
+
+If there is no hard release block, but either condition is true:
+
+```text
+prediction confidence < MIN_AI_CONFIDENCE
+test coverage < MIN_TEST_COVERAGE
+```
+
+the b-thread must:
+
+- block `DEPLOY`,
+- request `HUMAN_REVIEW`.
+
+### Otherwise
+
+Do not request a competing decision. Observe the AI decision and allow it to proceed.
+
+Do not modify `predict_risk()` to enforce these policies. The purpose is to keep the AI model and engineering policy separate.
+
+## Task 3: Enable the guardrail
 
 Change:
 
 ```python
-ENABLE_SAFETY = False
+ENABLE_GUARDRAIL = False
 ```
 
 to:
 
 ```python
-ENABLE_SAFETY = True
+ENABLE_GUARDRAIL = True
 ```
 
-Run the program again.
+Run the same pull request again.
 
-A correct run should still execute all required fill events, introduce drain events when necessary, and never exceed `MAX_CAPACITY`.
+Compare:
 
-## Task 4: Verify
+```text
+AI-only decision
+vs
+AI + software guardrail decision
+```
 
-Open **Tests** and run all public tests.
+## Task 4: Explore the supplied cases
 
-Use the test messages to diagnose any failure.
+Change `ACTIVE_CASE` and inspect at least these scenarios:
 
-## Task 5: Report
+- a normal low-risk pull request,
+- a low-risk AI prediction with failed tests,
+- a low-risk AI prediction with a critical security finding,
+- a structurally high-risk pull request.
 
-In the report, include:
+For each case, distinguish between:
 
-- a short explanation of your `overflow_prevention()` logic,
-- unsafe versus safe execution evidence,
-- public-test results,
-- the BP design diagram,
-- a short answer to both questions:
+1. what the AI predicts,
+2. what the software workflow finally allows.
 
-1. Why is a separate safety b-thread preferable to duplicating capacity checks inside both fill functions?
-2. Does BP remove complexity, or does it move some complexity into event coordination?
+## Task 5: Verify Requirements
+
+Click **Verify Requirements**.
+
+The verification suite checks that:
+
+- the supplied AI model produces valid predictions,
+- the AI-only workflow can expose an unsafe recommendation,
+- failed tests prevent deployment,
+- critical security findings prevent deployment,
+- low-confidence or low-coverage cases require review,
+- safe changes can still deploy,
+- the guardrail does not rewrite the AI model.
+
+## Task 6: Report
+
+Include:
+
+- one AI-only baseline result,
+- the corresponding guardrail-enabled result,
+- requirement-verification results,
+- the system design diagram,
+- a short response to the following:
+
+1. Why should the AI prediction remain separate from release policy?
+2. What could happen if every safety rule were embedded directly inside the AI model?
+3. Does a high-confidence AI prediction prove that deployment is safe?
+4. Which parts of this system should remain deterministic even if the AI model changes?
 
 ## Completion checklist
 
-- [ ] Unsafe baseline executed
-- [ ] `overflow_prevention()` implemented
-- [ ] `ENABLE_SAFETY = True`
-- [ ] Safe execution verified
-- [ ] All public tests passed
+- [ ] AI-only baseline executed
+- [ ] `release_guardrail()` implemented
+- [ ] `ENABLE_GUARDRAIL = True`
+- [ ] At least four pull-request cases explored
+- [ ] All requirements verified
 - [ ] Evidence added to report
 - [ ] Report exported to Word
