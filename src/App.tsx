@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import type { AuthUserPublic } from '../lib/auth/types';
 import { apiClient } from './lib/api-client';
+import { LabRegistry } from '../labs/registry';
+import { getBrowserValue } from './lib/browser-persistence';
 import { Header } from './components/Header';
 import { StudentDashboard, type LabSummary } from './components/StudentDashboard';
 import { LecturerDashboard } from './components/LecturerDashboard';
@@ -40,13 +42,56 @@ export default function App() {
   const fetchLabs = async () => {
     setLabsLoading(true);
     setLabsError(null);
+
     try {
-      const data = await apiClient.get('/api/labs');
-      // Lab release state comes from the course configuration. Only completed
-      // modules should be unlocked; unfinished modules remain visible but locked.
-      setLabs(data.labs || []);
+      const manifests = LabRegistry.getAllLabs();
+
+      const localSubmissionStates = await Promise.all(
+        manifests.map(async (manifest) => {
+          try {
+            return Boolean(
+              await getBrowserValue(`aise:${manifest.id}:submission`)
+            );
+          } catch {
+            return false;
+          }
+        })
+      );
+
+      const summaries: LabSummary[] = manifests.map((manifest, index) => {
+        const isUnlocked = manifest.labNumber === 1;
+        const isSubmitted = localSubmissionStates[index];
+
+        return {
+          id: manifest.id,
+          labNumber: manifest.labNumber,
+          week: manifest.week,
+          title: manifest.title,
+          shortDescription: manifest.shortDescription,
+          estimatedDuration: manifest.estimatedDuration,
+          isUnlocked,
+          isPublished: true,
+          status: isSubmitted
+            ? 'Submitted'
+            : isUnlocked
+            ? 'Available'
+            : 'Locked',
+          progressPercentage: isSubmitted ? 100 : 0,
+          completedTasks: isSubmitted ? manifest.tasks?.length || 0 : 0,
+          totalTasks: manifest.tasks?.length || 0,
+          tasks: (manifest.tasks || []).map((task) => ({
+            ...task,
+            completed: isSubmitted,
+          })),
+          isSubmitted,
+          submittedAt: null,
+          examMode: manifest.labNumber === 12,
+        };
+      });
+
+      setLabs(summaries);
     } catch (err: any) {
-      console.error('Failed to fetch labs list:', err);
+      console.error('Failed to load bundled labs:', err);
       setLabsError(err.message || 'Unable to load laboratory modules.');
     } finally {
       setLabsLoading(false);
