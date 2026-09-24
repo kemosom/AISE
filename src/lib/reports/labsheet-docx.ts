@@ -360,7 +360,7 @@ export async function generateLabsheetDocx(options: LabsheetDocxOptions): Promis
             spacing: { before: 0, after: 60 },
             children: [
               new TextRun({
-                text: 'SUNWAY UNIVERSITY • DEPARTMENT OF COMPUTING',
+                text: 'SUNWAY UNIVERSITY',
                 bold: true,
                 font: 'Arial',
                 size: 20,
