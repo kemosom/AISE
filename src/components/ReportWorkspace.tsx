@@ -240,11 +240,21 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     try {
       const { blob, fileName } = await generateCurrentDocx();
 
+      const databaseReportSnapshot = {
+        ...reportState,
+        sections: reportState.sections.map((section) => ({
+          ...section,
+          images: (section.images || []).map((image) => ({
+            caption: image.caption || '',
+          })),
+        })),
+      };
+
       const receipt = await submitLabReportToSupabase({
         labId,
         studentName,
         studentId,
-        reportSnapshot: reportState,
+        reportSnapshot: databaseReportSnapshot,
         codeSnapshot: codeFiles,
         testSnapshot: testStats || { passed: 0, total: 0 },
         docxBlob: blob,
