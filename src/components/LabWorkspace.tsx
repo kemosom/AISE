@@ -523,17 +523,19 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <Code className="w-3.5 h-3.5" />
             Code
           </button>
-          <button
-            onClick={() => setViewMode('design')}
-            className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-              viewMode === 'design'
-                ? 'bg-white text-slate-950 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Layout className="w-3.5 h-3.5" />
-            Design
-          </button>
+          {manifest.features.visualDesigner && (
+            <button
+              onClick={() => setViewMode('design')}
+              className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'design'
+                  ? 'bg-white text-slate-950 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Layout className="w-3.5 h-3.5" />
+              Design
+            </button>
+          )}
           <button
             onClick={() => setViewMode('report')}
             className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
@@ -621,7 +623,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         )}
 
         {/* VIEW 2: DESIGN WORKSPACE */}
-        {viewMode === 'design' && (
+        {manifest.features.visualDesigner && viewMode === 'design' && (
           <div className="h-full flex overflow-hidden bg-slate-950">
             <div className="w-[52%] min-w-[460px] shrink-0 h-full border-r border-slate-800">
               <VisualDesignPanel
