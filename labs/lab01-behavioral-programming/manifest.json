@@ -95,8 +95,8 @@
     },
     {
       "id": "l1-t8",
-      "title": "Complete and export the report",
-      "description": "Explain your strategy choice, baseline, guardrail logic, scenario results, critical interpretation, and how this pattern could transfer to the Final Project. Export the report to Word.",
+      "title": "Complete, submit, and export the report",
+      "description": "Complete the engineering decision, baseline, guardrail logic, scenario results, critical analysis, and conclusion. Submit the final report to Supabase, then keep a Word copy for your records.",
       "category": "report",
       "action": "report"
     }
