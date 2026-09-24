@@ -199,13 +199,6 @@ labRegistryMap.set('lab01-behavioral-programming', {
   starterFiles: [
     { name: 'main.py', language: 'python', content: lab01MainPy },
     { name: 'helpers.py', language: 'python', content: lab01HelpersPy },
-    {
-      name: 'README.md',
-      language: 'markdown',
-      content:
-        '# Lab 01: Behavioral Programming\n\n' +
-        'Read Theory & Labsheet first. Then complete the TODO sections in main.py, run the program, verify the public tests, and document evidence in the integrated report.',
-    },
   ],
   reportTemplate: lab01ReportTemplate as any,
   snippets: lab01Snippets as any,
