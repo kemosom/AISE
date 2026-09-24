@@ -26,7 +26,7 @@ Integrated Report
 Word export
 ```
 
-Only laboratories whose teaching content is ready should be unlocked. **Lab 01 is the current reference module.** Labs 02–11 remain visible as future modules while they are developed.
+Only laboratories whose teaching content is ready should be unlocked. **Lab 01 is the current reference module.** Labs 02–11 remain visible as future modules while they are developed. There is no practical-exam module in the current course design; learning across the laboratories should feed into the Final Project.
 
 ## Open-access persistence
 
@@ -128,19 +128,17 @@ For normal academic editing of a laboratory, you should **not need to edit React
 
 ## Lab 01 academic design
 
-Lab 01 introduces Behavioral Programming as a requirement-oriented software-design technique. It focuses on:
+Lab 01 uses a realistic **AI-assisted software release** scenario.
 
-- independent b-threads,
-- Request-Wait-Block synchronization,
-- deterministic event coordination,
-- safety as an independently composed requirement,
-- executable invariant verification,
-- modularity and coupling,
-- deadlock/completion reasoning.
+Students work with a supplied supervised k-nearest-neighbours defect-risk model that produces a release-risk prediction from historical software-change characteristics. Behavioral Programming is then used to keep AI recommendations separate from deterministic engineering policies such as failed-test blocking, critical-security blocking, confidence thresholds, and human review.
 
-The starter code intentionally does **not** contain the complete solution. Students receive one worked functional b-thread and complete the remaining functional behavior, safety behavior, and program composition themselves.
+The core learning question is:
 
-Public tests verify the behavior semantically, including the tank-volume safety invariant over the actual execution trace.
+> How should an AI recommendation be integrated into a software workflow without allowing the AI component to violate explicit engineering requirements?
+
+Students do not build the AI model or BP engine from scratch. They run an AI-only baseline, implement one independent `release_guardrail()` b-thread, enable it, explore multiple pull-request cases, verify the stated requirements, and interpret the difference between **AI prediction** and **software authority**.
+
+This practical is designed to contribute a reusable pattern for the course Final Project: **AI prediction/recommendation + explicit software policy/guardrail + measurable verification**.
 
 ## Repository structure
 
