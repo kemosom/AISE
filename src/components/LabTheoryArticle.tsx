@@ -79,7 +79,6 @@ interface LabTheoryArticleProps {
   studentName?: string;
   studentId?: string;
   onBeginLab: () => void;
-  onSwitchToReport?: () => void;
 }
 
 export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
@@ -87,7 +86,6 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   studentName,
   studentId,
   onBeginLab,
-  onSwitchToReport,
 }) => {
   // Reading Progress State (0 to 100%)
   const [scrollProgress, setScrollProgress] = useState(0);
