@@ -2,22 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowLeft,
   Play,
-  RotateCcw,
   CheckSquare,
-  Bookmark,
   FileText,
   Send,
   Code,
   Layout,
   BookOpen,
-  Eye,
   CheckCircle2,
-  Terminal,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
 import { apiClient } from '../lib/api-client';
-import { LabGuidePanel } from './LabGuidePanel';
 import { VisualDesignPanel } from './VisualDesignPanel';
 import { MonacoEditorPanel, type EditorFile } from './MonacoEditorPanel';
 import { OutputConsolePanel } from './OutputConsolePanel';
@@ -51,9 +46,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Active Main View: 'theory' (Medium style article) vs 'ide' vs 'report'
   const [viewMode, setViewMode] = useState<'theory' | 'ide' | 'report'>('theory');
 
-  // IDE Panel Layout Selection for responsive/focused workflows
-  // 'quad': All 4 columns, 'split': 2 columns, 'editor-output': focused code & run
-  const [panelFocus, setPanelFocus] = useState<'all' | 'guide' | 'design' | 'code' | 'output'>('all');
+  // Keep the IDE deliberately simple: either code + console, or design + code.
+  const [workspaceMode, setWorkspaceMode] = useState<'code' | 'design'>('code');
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
@@ -308,13 +302,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const handleRunCode = async () => {
     setIsRunningCode(true);
     try {
-      const activeFile = files[activeFileIndex] || files[0];
-      // Ensure all current workspace files are passed to Pyodide virtual filesystem
-      const allFiles = files.map((f, i) =>
-        i === activeFileIndex ? { ...f, content: activeFile.content } : f
-      );
+      const mainFile = files.find((file) => file.name === 'main.py') || files[0];
 
-      const result = await defaultCodeRunner.run(activeFile.content, allFiles);
+      if (!mainFile) {
+        throw new Error('main.py is not available in this workspace.');
+      }
+
+      // Run the laboratory entry point consistently, regardless of which file
+      // the student is currently viewing in Monaco.
+      const result = await defaultCodeRunner.run(mainFile.content, files);
       setExecResult(result);
     } catch (err: any) {
       setExecResult({
@@ -563,7 +559,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5 text-blue-900" />
-            <span>Theory & Labsheet</span>
+            <span>Theory & Lab Sheet</span>
           </button>
           <button
             onClick={() => setViewMode('ide')}
@@ -593,25 +589,28 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         <div className="flex items-center space-x-2">
           {viewMode === 'ide' && (
             <>
-              {/* Panel Focus Switcher on smaller laptops */}
-              <div className="hidden md:flex items-center space-x-1 bg-slate-100 p-0.5 rounded border border-slate-200 text-[11px]">
+              <div className="hidden md:flex items-center bg-slate-100 p-0.5 rounded border border-slate-200 text-[11px]">
                 <button
-                  onClick={() => setPanelFocus('all')}
-                  className={`px-2 py-0.5 rounded cursor-pointer ${
-                    panelFocus === 'all' ? 'bg-white text-slate-900 font-semibold' : 'text-slate-600'
+                  onClick={() => setWorkspaceMode('code')}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded cursor-pointer ${
+                    workspaceMode === 'code'
+                      ? 'bg-white text-slate-950 font-semibold shadow-xs'
+                      : 'text-slate-600'
                   }`}
-                  title="Show all 4 panels"
                 >
-                  All Panels
+                  <Code className="w-3.5 h-3.5" />
+                  Code
                 </button>
                 <button
-                  onClick={() => setPanelFocus('code')}
-                  className={`px-2 py-0.5 rounded cursor-pointer ${
-                    panelFocus === 'code' ? 'bg-white text-slate-900 font-semibold' : 'text-slate-600'
+                  onClick={() => setWorkspaceMode('design')}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded cursor-pointer ${
+                    workspaceMode === 'design'
+                      ? 'bg-white text-slate-950 font-semibold shadow-xs'
+                      : 'text-slate-600'
                   }`}
-                  title="Focus Code Editor"
                 >
-                  Code Focus
+                  <Layout className="w-3.5 h-3.5" />
+                  Design
                 </button>
               </div>
 
@@ -675,59 +674,59 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
         {/* VIEW 1: IDE WORKSPACE */}
         {viewMode === 'ide' && (
-          <div className="h-full flex overflow-hidden">
-            {/* Panel 1: Lab Guide (Markdown instructions) */}
-            {(panelFocus === 'all' || panelFocus === 'guide') && (
-              <div className="w-72 lg:w-80 shrink-0 h-full hidden md:block">
-                <LabGuidePanel
-                  instructionsMarkdown={
-                    manifest.labSheetMarkdown || manifest.instructionsMarkdown
-                  }
-                  learningOutcomes={manifest.learningOutcomes}
-                />
-              </div>
-            )}
-
-            {/* Panel 2: Visual Design (React Flow / Blockly / Palette) */}
-            {(panelFocus === 'all' || panelFocus === 'design') && (
-              <div className="w-72 lg:w-80 shrink-0 h-full hidden xl:block">
-                <VisualDesignPanel
-                  snippets={manifest.snippets}
-                  blocks={manifest.blocks}
-                  visualGraph={visualGraph}
-                  onUpdateVisualGraph={handleUpdateVisualGraph}
-                  onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
-                  onAddDesignToReport={handleAddDesignToReport}
-                />
-              </div>
-            )}
-
-            {/* Panel 3: Monaco Code Editor */}
-            <div className="flex-1 min-w-[320px] h-full">
-              <MonacoEditorPanel
-                files={files}
-                activeFileIndex={activeFileIndex}
-                onSelectFile={setActiveFileIndex}
-                onChangeContent={handleContentChange}
-                onAddFile={handleAddFile}
-                onDeleteFile={handleDeleteFile}
-                saveStatus={codeSaveStatus}
-                onAddCodeToReport={handleAddCodeSnapshotToReport}
-              />
-            </div>
-
-            {/* Panel 4: Output Console & Matplotlib Plots */}
-            {(panelFocus === 'all' || panelFocus === 'output') && (
-              <div className="w-80 lg:w-96 shrink-0 h-full hidden sm:block">
-                <OutputConsolePanel
-                  result={execResult}
-                  isRunning={isRunningCode}
-                  onClearConsole={() => setExecResult(null)}
-                  onRestartRuntime={() => defaultCodeRunner.reset()}
-                  onAddOutputToReport={handleAddOutputToReport}
-                  onAddPlotToReport={handleAddPlotToReport}
-                />
-              </div>
+          <div className="h-full flex overflow-hidden bg-slate-950">
+            {workspaceMode === 'code' ? (
+              <>
+                {/* Default working view: code gets most of the screen, console stays visible. */}
+                <div className="flex-1 min-w-0 h-full">
+                  <MonacoEditorPanel
+                    files={files}
+                    activeFileIndex={activeFileIndex}
+                    onSelectFile={setActiveFileIndex}
+                    onChangeContent={handleContentChange}
+                    onAddFile={handleAddFile}
+                    onDeleteFile={handleDeleteFile}
+                    saveStatus={codeSaveStatus}
+                    onAddCodeToReport={handleAddCodeSnapshotToReport}
+                  />
+                </div>
+                <div className="w-[34%] min-w-[320px] max-w-[470px] shrink-0 h-full border-l border-slate-800">
+                  <OutputConsolePanel
+                    result={execResult}
+                    isRunning={isRunningCode}
+                    onClearConsole={() => setExecResult(null)}
+                    onRestartRuntime={() => defaultCodeRunner.reset()}
+                    onAddOutputToReport={handleAddOutputToReport}
+                    onAddPlotToReport={handleAddPlotToReport}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Design view: visual model beside the source, without a third guide panel. */}
+                <div className="w-[46%] min-w-[420px] shrink-0 h-full border-r border-slate-800">
+                  <VisualDesignPanel
+                    snippets={manifest.snippets}
+                    blocks={manifest.blocks}
+                    visualGraph={visualGraph}
+                    onUpdateVisualGraph={handleUpdateVisualGraph}
+                    onInsertCodeToEditor={handleInsertCodeIntoActiveEditor}
+                    onAddDesignToReport={handleAddDesignToReport}
+                  />
+                </div>
+                <div className="flex-1 min-w-0 h-full">
+                  <MonacoEditorPanel
+                    files={files}
+                    activeFileIndex={activeFileIndex}
+                    onSelectFile={setActiveFileIndex}
+                    onChangeContent={handleContentChange}
+                    onAddFile={handleAddFile}
+                    onDeleteFile={handleDeleteFile}
+                    saveStatus={codeSaveStatus}
+                    onAddCodeToReport={handleAddCodeSnapshotToReport}
+                  />
+                </div>
+              </>
             )}
           </div>
         )}
