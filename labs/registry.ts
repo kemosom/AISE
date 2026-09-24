@@ -212,6 +212,8 @@ labRegistryMap.set('lab01-behavioral-programming', {
   blocks: lab01Blocks as any,
   visualDesign: lab01VisualNodes as any,
   tests: lab01Tests as any,
+  theoryMarkdown: lab01Theory,
+  labSheetMarkdown: lab01LabSheet,
   instructionsMarkdown: `${lab01Theory}\n\n---\n\n${lab01LabSheet}`,
 });
 
