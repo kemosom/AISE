@@ -8,6 +8,7 @@ import {
   GraduationCap,
   ShieldCheck,
   Table2,
+  Target,
 } from 'lucide-react';
 
 interface InstructorAdminPanelProps {
@@ -15,7 +16,7 @@ interface InstructorAdminPanelProps {
   onExit: () => void;
 }
 
-type AdminTab = 'guide' | 'solution' | 'results' | 'report' | 'masters';
+type AdminTab = 'guide' | 'alignment' | 'solution' | 'results' | 'report' | 'masters';
 
 export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
   data,
@@ -34,6 +35,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
 
   const tabs: Array<{ id: AdminTab; label: string; icon: React.ReactNode }> = [
     { id: 'guide', label: 'Teaching Guide', icon: <BookOpenCheck className="w-4 h-4" /> },
+    { id: 'alignment', label: 'CLO/PLO + Decision', icon: <Target className="w-4 h-4" /> },
     { id: 'solution', label: 'Complete Answer', icon: <Code2 className="w-4 h-4" /> },
     { id: 'results', label: 'Expected Results', icon: <Table2 className="w-4 h-4" /> },
     { id: 'report', label: 'Sample Report', icon: <Clipboard className="w-4 h-4" /> },
@@ -102,6 +104,117 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                 </div>
               </section>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'alignment' && data.courseAlignment && data.engineeringDecision && (
+          <div className="space-y-5">
+            <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-200">
+                <h2 className="text-sm font-semibold text-slate-950">Lab 01 CLO/PLO contribution</h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Use this to explain the academic purpose of the lab and avoid over-claiming alignment.
+                </p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {data.courseAlignment.map((item: any) => (
+                  <div key={item.clo} className="p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs font-bold text-slate-950">
+                        {item.clo} → {item.plo}
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-600">
+                        {item.contribution}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-700">
+                      {item.instructorRationale}
+                    </p>
+                    <div className="mt-3">
+                      <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                        Evidence expected from students
+                      </div>
+                      <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-600">
+                        {item.studentEvidence.map((evidence: string) => (
+                          <li key={evidence} className="flex gap-2">
+                            <span className="text-blue-700">•</span>
+                            <span>{evidence}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-200">
+                <h2 className="text-sm font-semibold text-slate-950">
+                  {data.engineeringDecision.title}
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Recommended answer: {data.engineeringDecision.recommendedStrategy}
+                </p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-slate-50 text-slate-600">
+                    <tr>
+                      <th className="text-left px-4 py-3">Criterion</th>
+                      <th className="text-left px-4 py-3">A: Direct AI</th>
+                      <th className="text-left px-4 py-3">B: Policy in model</th>
+                      <th className="text-left px-4 py-3">C: Separated</th>
+                      <th className="text-left px-4 py-3">Instructor rationale</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {data.engineeringDecision.comparison.map((row: any) => (
+                      <tr key={row.criterion} className="align-top">
+                        <td className="px-4 py-3 font-semibold text-slate-900">{row.criterion}</td>
+                        <td className="px-4 py-3 text-slate-600">{row.strategyA}</td>
+                        <td className="px-4 py-3 text-slate-600">{row.strategyB}</td>
+                        <td className="px-4 py-3 font-semibold text-slate-900">{row.strategyC}</td>
+                        <td className="px-4 py-3 max-w-md text-slate-600">{row.reason}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section className="bg-white border border-slate-200 rounded-lg p-5">
+              <h2 className="text-sm font-semibold text-slate-950">Model answer</h2>
+              <p className="mt-3 text-sm leading-7 text-slate-700">
+                {data.engineeringDecision.sampleAnswer}
+              </p>
+
+              <h3 className="mt-5 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Marking indicators
+              </h3>
+              <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-600">
+                {data.engineeringDecision.markingIndicators.map((item: string) => (
+                  <li key={item} className="flex gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {data.courseWideRule && (
+              <section className="bg-amber-50 border border-amber-200 rounded-lg p-5">
+                <h2 className="text-sm font-semibold text-amber-950">{data.courseWideRule.title}</h2>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
+                  {data.courseWideRule.points.map((item: string) => (
+                    <li key={item} className="flex gap-2">
+                      <span>•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
         )}
 
@@ -210,6 +323,16 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
 
         {activeTab === 'report' && (
           <div className="space-y-4">
+            {data.engineeringDecision?.sampleReportSection && (
+              <section className="bg-white border border-slate-200 rounded-lg p-5">
+                <h2 className="text-sm font-semibold text-slate-950">
+                  {data.engineeringDecision.sampleReportSection.title}
+                </h2>
+                <p className="mt-3 text-sm leading-7 text-slate-700 whitespace-pre-line">
+                  {data.engineeringDecision.sampleReportSection.content}
+                </p>
+              </section>
+            )}
             {data.sampleReport.map((section: any) => (
               <section key={section.title} className="bg-white border border-slate-200 rounded-lg p-5">
                 <h2 className="text-sm font-semibold text-slate-950">{section.title}</h2>
