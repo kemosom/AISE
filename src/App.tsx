@@ -9,6 +9,8 @@ import { LecturerDashboard } from './components/LecturerDashboard';
 import { LecturerSubmissionsView } from './components/LecturerSubmissionsView';
 import { LecturerSubmissionInspector } from './components/LecturerSubmissionInspector';
 import { LabWorkspace } from './components/LabWorkspace';
+import { InstructorAccessModal } from './components/InstructorAccessModal';
+import { InstructorAdminPanel } from './components/InstructorAdminPanel';
 
 const DEFAULT_OPEN_USER: AuthUserPublic = {
   id: 'open-student',
@@ -22,7 +24,7 @@ export default function App() {
   const [user, setUser] = useState<AuthUserPublic>(DEFAULT_OPEN_USER);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<
-    'dashboard' | 'lab' | 'students' | 'submissions' | 'inspect'
+    'dashboard' | 'lab' | 'students' | 'submissions' | 'inspect' | 'instructor'
   >('dashboard');
   const [activeLabId, setActiveLabId] = useState<string | null>(null);
   const [isInstructorPreview, setIsInstructorPreview] = useState(false);
@@ -30,6 +32,10 @@ export default function App() {
   const [labs, setLabs] = useState<LabSummary[]>([]);
   const [labsLoading, setLabsLoading] = useState(false);
   const [labsError, setLabsError] = useState<string | null>(null);
+  const [showInstructorAccess, setShowInstructorAccess] = useState(false);
+  const [instructorUnlockLoading, setInstructorUnlockLoading] = useState(false);
+  const [instructorUnlockError, setInstructorUnlockError] = useState<string | null>(null);
+  const [instructorData, setInstructorData] = useState<any | null>(null);
 
   useEffect(() => {
     // Current teaching mode is deliberately open access. Student identity is
@@ -98,6 +104,57 @@ export default function App() {
     }
   };
 
+  const handleInstructorTrigger = () => {
+    if (instructorData) {
+      setActiveView('instructor');
+      return;
+    }
+
+    setInstructorUnlockError(null);
+    setShowInstructorAccess(true);
+  };
+
+  const handleInstructorUnlock = async (code: string) => {
+    setInstructorUnlockLoading(true);
+    setInstructorUnlockError(null);
+
+    try {
+      const response = await fetch('/api/instructor', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          payload.error || 'Unable to unlock instructor materials.'
+        );
+      }
+
+      setInstructorData(payload.data);
+      setShowInstructorAccess(false);
+      setActiveView('instructor');
+    } catch (err: any) {
+      setInstructorUnlockError(
+        err.message || 'Unable to unlock instructor materials.'
+      );
+    } finally {
+      setInstructorUnlockLoading(false);
+    }
+  };
+
+  const handleExitInstructor = () => {
+    setInstructorData(null);
+    setInstructorUnlockError(null);
+    setShowInstructorAccess(false);
+    setActiveView('dashboard');
+    fetchLabs();
+  };
+
   const handleSelectLab = (labId: string) => {
     setActiveLabId(labId);
     setIsInstructorPreview(false);
@@ -150,10 +207,17 @@ export default function App() {
           setActiveView('dashboard');
           fetchLabs();
         }}
+        onInstructorAccess={handleInstructorTrigger}
       />
 
       {/* Main Routed Content */}
       <main className="flex-1 flex flex-col">
+        {activeView === 'instructor' && instructorData && (
+          <InstructorAdminPanel
+            data={instructorData}
+            onExit={handleExitInstructor}
+          />
+        )}
         {/* VIEW: LAB WORKSPACE (STUDENT OR PREVIEW) */}
         {activeView === 'lab' && activeLabId && (
           <LabWorkspace
@@ -223,6 +287,18 @@ export default function App() {
           />
         )}
       </main>
+
+      {showInstructorAccess && (
+        <InstructorAccessModal
+          onClose={() => {
+            setShowInstructorAccess(false);
+            setInstructorUnlockError(null);
+          }}
+          onUnlock={handleInstructorUnlock}
+          isLoading={instructorUnlockLoading}
+          error={instructorUnlockError}
+        />
+      )}
     </div>
   );
 }
