@@ -2,9 +2,15 @@
 MAI5124 AI in Software Engineering
 Lab 01: Behavioral Programming
 
-Complete the TODO sections. Do not put the tank-safety rule inside the
-functional fill b-threads. The purpose of the lab is to keep requirements
-independent and coordinate them through BProgram.
+STUDENT TASK
+------------
+1. Run this file once with ENABLE_SAFETY = False.
+2. Observe the unsafe baseline.
+3. Implement overflow_prevention().
+4. Set ENABLE_SAFETY = True.
+5. Run again and verify the public tests.
+
+The functional hot-water and cold-water behaviours are already provided.
 """
 
 from helpers import BProgram
@@ -17,9 +23,13 @@ FILL_CYCLES = 5
 MAX_CAPACITY = 8
 DRAIN_AMOUNT = 3
 
+# Keep False for the first baseline run.
+# Change to True only after implementing overflow_prevention().
+ENABLE_SAFETY = False
+
 
 def add_hot_water():
-    """Worked example: request HOT_WATER exactly FILL_CYCLES times."""
+    """Existing functional requirement: request HOT_WATER."""
     for _ in range(FILL_CYCLES):
         yield {
             "request": [HOT_WATER],
@@ -29,48 +39,60 @@ def add_hot_water():
 
 
 def add_cold_water():
-    """
-    TODO 1:
-    Implement the cold-water functional b-thread.
-
-    Requirements:
-    - request COLD_WATER exactly FILL_CYCLES times;
-    - do not implement capacity or drain logic here.
-    """
-    raise NotImplementedError("TODO: implement add_cold_water()")
-    yield
+    """Existing functional requirement: request COLD_WATER."""
+    for _ in range(FILL_CYCLES):
+        yield {
+            "request": [COLD_WATER],
+            "waitFor": [],
+            "block": [],
+        }
 
 
 def overflow_prevention():
     """
-    TODO 2:
-    Implement an independent safety b-thread.
+    TODO: Implement the independent safety requirement.
 
-    Track the observed tank volume. When the volume reaches MAX_CAPACITY,
-    block HOT_WATER and COLD_WATER and request DRAIN_VALVE. After draining,
-    subtract DRAIN_AMOUNT without allowing the tracked volume to become
-    negative.
+    Required behaviour:
+    - track the observed tank volume;
+    - while volume < MAX_CAPACITY, observe relevant events;
+    - when volume >= MAX_CAPACITY, block HOT_WATER and COLD_WATER
+      and request DRAIN_VALVE;
+    - after DRAIN_VALVE, subtract DRAIN_AMOUNT without going below zero.
+
+    Hint:
+    A b-thread receives the selected event from:
+
+        event = yield {
+            "request": [...],
+            "waitFor": [...],
+            "block": [...],
+        }
     """
-    raise NotImplementedError("TODO: implement overflow_prevention()")
+
+    # Write your implementation here.
+    # Keep this function as a generator by retaining the unreachable yield
+    # until you replace the TODO with your own loop.
+    return
     yield
 
 
-def build_program():
-    """
-    TODO 3:
-    Register all three b-threads and return the configured BProgram.
-    """
+def build_program(enable_safety=None):
+    """Build the controller with or without the safety requirement."""
+    if enable_safety is None:
+        enable_safety = ENABLE_SAFETY
+
     bp = BProgram()
+    bp.add_bthread(add_hot_water)
+    bp.add_bthread(add_cold_water)
 
-    # Example:
-    # bp.add_bthread(add_hot_water)
+    if enable_safety:
+        bp.add_bthread(overflow_prevention)
 
-    raise NotImplementedError("TODO: register all required b-threads")
     return bp
 
 
 def calculate_volume_trace(trace):
-    """Convert an event trace to volume-after-event values."""
+    """Return the tank volume after every dispatched event."""
     volume = 0
     volumes = []
 
@@ -89,6 +111,7 @@ def main():
     print("=" * 58)
     print("MAI5124 Lab 01 | Behavioral Programming")
     print("=" * 58)
+    print(f"Safety protection: {'ON' if ENABLE_SAFETY else 'OFF'}")
 
     bp = build_program()
     trace = bp.run(max_steps=50)
@@ -100,15 +123,23 @@ def main():
     print("\nVolume after each event:")
     print(volumes)
 
-    if volumes and max(volumes) <= MAX_CAPACITY:
-        print(f"Safety check: PASS (maximum observed volume = {max(volumes)})")
-    elif not volumes:
-        print("Safety check: no events were produced.")
+    max_volume = max(volumes, default=0)
+
+    if max_volume <= MAX_CAPACITY:
+        print(
+            f"\nSafety check: PASS "
+            f"(maximum observed volume = {max_volume}, limit = {MAX_CAPACITY})"
+        )
     else:
         print(
-            f"Safety check: FAIL (observed {max(volumes)} > "
-            f"MAX_CAPACITY={MAX_CAPACITY})"
+            f"\nSafety check: FAIL "
+            f"(maximum observed volume = {max_volume}, limit = {MAX_CAPACITY})"
         )
+        if not ENABLE_SAFETY:
+            print(
+                "This failure is expected for Task 1. "
+                "Implement overflow_prevention() and enable safety."
+            )
 
     return trace
 
