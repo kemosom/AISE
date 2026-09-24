@@ -15,7 +15,7 @@ import {
   User,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
-import { apiFetch } from '../lib/api-client';
+import { generateDocxReport } from '../../lib/reports/docx-generator';
 
 export interface ReportSectionItem {
   id: string;
@@ -136,38 +136,49 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
 
   const handleDownloadDocx = async () => {
     setIsDownloadingDocx(true);
-    try {
-      const studentName = reportState.studentName?.trim() || user.name || 'Student';
-      const studentId = reportState.studentId?.trim() || user.studentId || '';
 
-      const res = await apiFetch(`/api/reports/${labId}/docx`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          studentId: user.id,
-          reportData: {
-            ...reportState,
-            studentName,
-            studentId,
-          },
+    try {
+      const studentName =
+        reportState.studentName?.trim() || user.name || 'Student';
+      const studentId =
+        reportState.studentId?.trim() || user.studentId || '';
+
+      const blob = await generateDocxReport({
+        courseCode: 'MAI5124',
+        courseTitle: 'AI in Software Engineering',
+        labNumber,
+        labTitle,
+        studentName,
+        studentId,
+        studentEmail: '',
+        submissionDate: new Date().toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
         }),
+        sections: reportState.sections,
       });
 
-      if (!res.ok) throw new Error('Failed to generate Word report');
-
-      const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const cleanName = studentName.replace(/[^a-zA-Z0-9]/g, '_') || 'Student';
-      const cleanId = studentId.replace(/[^a-zA-Z0-9]/g, '_') || 'Submission';
-      a.download = `MAI5124_Lab${String(labNumber).padStart(2, '0')}_${cleanId}_${cleanName}.docx`;
+
+      const cleanName =
+        studentName.replace(/[^a-zA-Z0-9]/g, '_') || 'Student';
+      const cleanId =
+        studentId.replace(/[^a-zA-Z0-9]/g, '_') || 'Submission';
+
+      a.download = `MAI5124_Lab${String(labNumber).padStart(
+        2,
+        '0'
+      )}_${cleanId}_${cleanName}.docx`;
+
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert(err.message);
+      alert(err.message || 'Failed to generate Word report');
     } finally {
       setIsDownloadingDocx(false);
     }
