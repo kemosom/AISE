@@ -1,39 +1,38 @@
 [
   {
-    "type": "bthread_request",
-    "message0": "request event %1 while blocking %2",
+    "type": "bp_request",
+    "message0": "request event %1",
     "args0": [
-      { "type": "field_input", "name": "REQ", "text": "HOT_WATER" },
-      { "type": "field_input", "name": "BLK", "text": "DRAIN_VALVE" }
+      { "type": "field_input", "name": "EVENT", "text": "HOT_WATER" }
     ],
     "previousStatement": null,
     "nextStatement": null,
-    "colour": 210,
-    "tooltip": "Yields an event request with an optional block list",
-    "codeGenerator": "yield {'request': ['{REQ}'], 'waitFor': [], 'block': ['{BLK}']}\n"
+    "colour": 215,
+    "tooltip": "Create a synchronization point that requests one event.",
+    "codeGenerator": "yield {\"request\": [\"{{EVENT}}\"], \"waitFor\": [], \"block\": []}"
   },
   {
-    "type": "bthread_wait",
+    "type": "bp_wait",
     "message0": "wait for event %1",
     "args0": [
-      { "type": "field_input", "name": "WAIT", "text": "COLD_WATER" }
+      { "type": "field_input", "name": "EVENT", "text": "HOT_WATER" }
     ],
     "previousStatement": null,
     "nextStatement": null,
-    "colour": 160,
-    "tooltip": "Waits for an event to be dispatched by another thread",
-    "codeGenerator": "event = yield {'request': [], 'waitFor': ['{WAIT}'], 'block': []}\n"
+    "colour": 170,
+    "tooltip": "Observe an event without requesting it.",
+    "codeGenerator": "event = yield {\"request\": [], \"waitFor\": [\"{{EVENT}}\"], \"block\": []}"
   },
   {
-    "type": "bthread_safety_block",
-    "message0": "safety rule: strictly block %1 when condition holds",
+    "type": "bp_block",
+    "message0": "block event %1",
     "args0": [
-      { "type": "field_input", "name": "BLOCKED", "text": "HOT_WATER" }
+      { "type": "field_input", "name": "EVENT", "text": "HOT_WATER" }
     ],
     "previousStatement": null,
     "nextStatement": null,
     "colour": 0,
-    "tooltip": "Enforces a strict safety invariant block",
-    "codeGenerator": "yield {'request': [], 'waitFor': [], 'block': ['{BLOCKED}']}\n"
+    "tooltip": "Forbid an event at the current synchronization point.",
+    "codeGenerator": "yield {\"request\": [], \"waitFor\": [], \"block\": [\"{{EVENT}}\"]}"
   }
 ]
