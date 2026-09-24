@@ -82,7 +82,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // workspace in this browser so one learner can never overwrite another
   // learner's code/report through the synthetic "open-student" account.
   const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
-  const localKey = (kind: string) => `aise:${labId}:${kind}`;
+  const localKey = (kind: string) => `aise:v2:${labId}:${kind}`;
 
   const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
