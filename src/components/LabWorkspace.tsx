@@ -646,7 +646,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               studentName={reportState.studentName || user.name}
               studentId={reportState.studentId || user.studentId}
               onBeginLab={() => setViewMode('ide')}
-              onSwitchToReport={() => setViewMode('report')}
             />
           </div>
         )}
