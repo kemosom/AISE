@@ -635,6 +635,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               saveStatus={reportSaveStatus}
               checkpoints={checkpoints}
               onCreateCheckpoint={handleCreateCheckpoint}
+              codeFiles={files}
+              testStats={testStats}
             />
           </div>
         )}
