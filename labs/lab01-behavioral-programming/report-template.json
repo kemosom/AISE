@@ -2,34 +2,40 @@
   "title": "Lab 01 Report: Safe AI-Assisted Software Release",
   "sections": [
     {
+      "id": "engineering-decision",
+      "title": "1. Engineering Decision Before Coding",
+      "required": true,
+      "placeholder": "Compare direct AI authority, model-embedded policy, and separated AI + deterministic policy using auditability, maintainability, deterministic constraints, retraining dependence, and human-review handling. Justify the most appropriate strategy for this scenario."
+    },
+    {
       "id": "ai-baseline",
-      "title": "1. AI-Only Baseline",
+      "title": "2. AI-Only Baseline",
       "required": true,
       "placeholder": "Describe the supplied defect-risk prediction for PR-1042 and explain why the AI-only release decision is insufficient."
     },
     {
       "id": "guardrail",
-      "title": "2. Behavioral Release Guardrail",
+      "title": "3. Behavioral Release Guardrail",
       "required": true,
       "placeholder": "Explain your release_guardrail() logic and how Request-Wait-Block separates software policy from the AI model."
     },
     {
       "id": "results",
-      "title": "3. Scenario Results and Requirement Verification",
+      "title": "4. Scenario Results and Requirement Verification",
       "required": true,
-      "placeholder": "Compare at least four pull-request cases. Add console output and requirement-verification results, then interpret the differences between the AI-only and guarded decisions."
+      "placeholder": "Compare at least four pull-request cases. Add console output and requirement-verification results, then interpret the differences between AI prediction and final software decision."
     },
     {
       "id": "analysis",
-      "title": "4. Critical Analysis",
+      "title": "5. Critical Analysis",
       "required": true,
-      "placeholder": "Discuss why AI confidence is not equivalent to release safety, why deterministic constraints should remain separate, and when human review is necessary."
+      "placeholder": "Discuss AI confidence, deterministic authority, auditability, retraining dependence, human review, and what should remain stable if the AI model changes."
     },
     {
       "id": "project-transfer",
-      "title": "5. Transfer to the Final Project",
+      "title": "6. Transfer to the Final Project",
       "required": true,
-      "placeholder": "Identify one way the same pattern could be reused in your final AI-powered software-engineering project: AI prediction/recommendation + explicit policy/guardrail + measurable verification."
+      "placeholder": "Identify one realistic way the same pattern could be reused in your final AI-powered software-engineering project and name the AI and system-level metrics that could be evaluated."
     }
   ]
 }

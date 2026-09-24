@@ -125,6 +125,30 @@ labs/
 
 For normal academic editing of a laboratory, you should **not need to edit React components**.
 
+## Course-wide academic design rule
+
+Labs 1–11 are not independent coding exercises. Each laboratory must contribute deliberately toward the course CLO/PLO structure and the Final Project.
+
+The standing design rule is:
+
+```text
+real software-engineering problem
+        ↓
+AI concept / method / tool
+        ↓
+compare or justify alternatives
+        ↓
+apply the selected approach
+        ↓
+verify or measure behavior
+        ↓
+critically interpret the evidence
+        ↓
+transfer the capability toward the Final Project
+```
+
+Every lab must state its **primary, secondary, or preparatory** CLO/PLO contribution. Do not claim CLO3/PLO7 merely because a number is displayed; students must actually interpret quantitative evidence when that outcome is targeted. Likewise, CLO2/PLO2 requires a genuine selection or justification task, not only following a preselected method.
+
 ## Lab 01 academic design
 
 Lab 01 uses a realistic **AI-assisted software release** scenario.
@@ -135,7 +159,7 @@ The core learning question is:
 
 > How should an AI recommendation be integrated into a software workflow without allowing the AI component to violate explicit engineering requirements?
 
-Students do not build the AI model or BP engine from scratch. They run an AI-only baseline, implement one independent `release_guardrail()` b-thread, enable it, explore multiple pull-request cases, verify the stated requirements, and interpret the difference between **AI prediction** and **software authority**.
+Students first compare three integration strategies and justify the most appropriate architecture using auditability, maintainability, deterministic enforcement, retraining dependence, and human-review handling. They then run an AI-only baseline, implement one independent `release_guardrail()` b-thread, enable it, explore multiple pull-request cases, verify the stated requirements, and interpret the difference between **AI prediction** and **software authority**.
 
 This practical is designed to contribute a reusable pattern for the course Final Project: **AI prediction/recommendation + explicit software policy/guardrail + measurable verification**.
 

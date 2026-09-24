@@ -65,7 +65,14 @@ export interface LabTaskItem {
   title: string;
   description: string;
   completed?: boolean;
-  category?: 'code' | 'design' | 'test' | 'report' | 'submission';
+  category?: 'code' | 'design' | 'analysis' | 'test' | 'report' | 'submission';
+}
+
+export interface LabCourseAlignment {
+  clo: string;
+  plo: string;
+  contribution: 'primary' | 'secondary' | 'preparatory';
+  evidence: string;
 }
 
 export interface LabManifest {
@@ -87,6 +94,7 @@ export interface LabManifest {
     webPreview: boolean;
   };
   learningOutcomes: string[];
+  courseAlignment?: LabCourseAlignment[];
   tasks?: LabTaskItem[];
   starterFiles: LabStarterFile[];
   reportTemplate: LabReportTemplate;

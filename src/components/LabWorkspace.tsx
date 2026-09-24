@@ -100,6 +100,31 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     })),
   });
 
+  const mergeReportWithTemplate = (
+    saved: ReportState | null,
+    labManifest: LabManifest
+  ): ReportState => {
+    if (!saved) return createInitialReport(labManifest);
+
+    const existingById = new Map(
+      (saved.sections || []).map((section) => [section.id, section])
+    );
+
+    return {
+      title: labManifest.reportTemplate.title,
+      studentName: saved.studentName || '',
+      studentId: saved.studentId || '',
+      sections: labManifest.reportTemplate.sections.map((templateSection) => {
+        const existing = existingById.get(templateSection.id);
+        return {
+          id: templateSection.id,
+          title: templateSection.title,
+          content: existing?.content || '',
+        };
+      }),
+    };
+  };
+
   useEffect(() => {
     loadLabWorkspace();
   }, [labId]);
@@ -156,7 +181,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         setVisualGraph(
           savedDesign || loadedManifest.visualDesign || { nodes: [], edges: [] }
         );
-        setReportState(savedReport || createInitialReport(loadedManifest));
+        setReportState(mergeReportWithTemplate(savedReport, loadedManifest));
         setCheckpoints(savedCheckpoints || []);
         setTestStats(savedTestStats);
         return;
@@ -190,7 +215,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       try {
         const repData = await apiClient.get(`/api/reports/${labId}`);
         setReportState(
-          repData.report?.contentJson || createInitialReport(loadedManifest)
+          mergeReportWithTemplate(repData.report?.contentJson || null, loadedManifest)
         );
       } catch {
         setReportState(createInitialReport(loadedManifest));

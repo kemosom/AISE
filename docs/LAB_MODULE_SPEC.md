@@ -1,7 +1,7 @@
 # AISE Lab Studio Laboratory Module Specification
 
 **Course:** MAI5124 AI in Software Engineering  
-**Module format version:** 2.0
+**Module format version:** 2.1
 
 ## 1. Principle
 
@@ -18,7 +18,7 @@ lab-sheet.md
     ↓
 Begin Lab
     ↓
-starter code + visual tools
+starter code + optional learning tools
     ↓
 public tests
     ↓
@@ -49,6 +49,38 @@ report-template.json
 
 Not every laboratory needs Blockly, reusable snippets, or a visual graph. Disable features in the manifest when they do not improve the learning activity.
 
+
+## 2.1 Master's-level CLO/PLO alignment rule
+
+Every MAI5124 laboratory must make its academic purpose explicit. A student, reviewer, or quality-assurance panel should be able to see **why the activity exists**, which CLO/PLO it develops, and how that capability transfers toward the Final Project.
+
+For this course, use the following mapping:
+
+- **CLO1 → PLO1:** investigation and critical understanding of AI applications, concepts, issues, and limitations in software-engineering domains.
+- **CLO2 → PLO2:** selection, justification, and application of appropriate AI methods/tools or AI-integration approaches for software systems.
+- **CLO3 → PLO7:** interpretation of quantitative evidence and metrics to determine the performance of AI-powered software. This should be developed progressively and assessed substantively in the Final Project.
+
+Do **not** force every lab to claim all three CLOs/PLOs. State the contribution honestly as:
+
+- `primary`,
+- `secondary`, or
+- `preparatory`.
+
+A Master's-level practical must go beyond execution. Each lab should contain at least one activity requiring students to **compare, select, justify, evaluate, interpret, or critique** an AI/SE approach. Coding may be used as evidence or experimentation, but programming syntax alone is not the learning outcome.
+
+Each lab sheet must therefore include:
+
+1. an explicit **Course alignment** section,
+2. at least one **engineering/AI decision** before or during implementation,
+3. criteria by which the student must justify that decision,
+4. executable or quantitative evidence,
+5. critical interpretation of the result,
+6. a short **Final Project transfer** element where appropriate.
+
+Authenticity also matters. Prefer realistic software-engineering artefacts and workflows such as pull requests, requirements, code-review findings, defect data, tests, CI results, issue reports, release decisions, debugging traces, or software-maintenance records. Avoid toy scenarios unless the abstraction itself is the intended learning object.
+
+Optional platform features such as React Flow, Blockly, snippets, or visual designers must only be enabled when their use is directly tied to a learning outcome. Do not add them for decoration.
+
 ## 3. `manifest.json`
 
 The manifest contains module metadata and enabled capabilities. It should not contain long theory text or starter source code.
@@ -75,9 +107,23 @@ Example:
     "webPreview": false
   },
   "learningOutcomes": [
-    "Model software requirements as independent behavioral threads.",
-    "Apply Request-Wait-Block synchronization.",
-    "Verify a safety invariant using executable assertions."
+    "Investigate an AI application in a software-engineering workflow.",
+    "Compare and justify alternative AI-integration approaches.",
+    "Verify and interpret the behavior of the selected approach."
+  ],
+  "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Investigate the AI application and its limitations."
+    },
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "secondary",
+      "evidence": "Compare, justify, and apply an appropriate method."
+    }
   ],
   "tasks": [
     {
@@ -103,6 +149,7 @@ Example:
 - `packages`: approved Pyodide packages if required.
 - `features`: turn optional workspace engines on/off.
 - `learningOutcomes`: outcomes specific to this practical.
+- `courseAlignment`: explicit CLO/PLO contribution, level, and evidence.
 - `tasks`: high-level completion structure.
 
 ## 4. `theory.md`
@@ -142,7 +189,7 @@ Recommended structure:
 - critical-analysis questions,
 - completion checklist.
 
-A Master's-level lab should not collapse into "copy this code and run it." At least one task should require design reasoning, verification, comparison, interpretation, or critical evaluation.
+A Master's-level lab should not collapse into "copy this code and run it." At least one task must require a defensible method/architecture/tool decision using stated criteria, followed by verification or interpretation of evidence.
 
 ## 6. Starter code
 
@@ -323,20 +370,25 @@ Do not unlock a lab simply because the page renders.
 Before release, verify:
 
 1. Theory is technically correct.
-2. Lab tasks map to the intended course topic/CLO.
-3. Starter code does not contain the complete answer.
-4. Starter code actually runs up to the intentional TODO point.
-5. The final intended solution can run in Pyodide.
-6. Public tests fail meaningfully on incomplete work.
-7. Public tests pass on a correct implementation.
-8. Tests verify behavior, not superficial syntax.
-9. Visual tools are relevant and functional.
-10. Report sections match the practical evidence and analysis questions.
-11. Word report export works.
-12. Theory/lab-sheet Word and PDF export work.
-13. Annotation tools persist correctly.
-14. No instructor solution is shipped to the public browser bundle.
-15. The module is readable and usable on a normal laptop screen.
+2. The lab sheet states the intended CLO/PLO contribution explicitly.
+3. The claimed CLO/PLO level is defensible as primary, secondary, or preparatory.
+4. The activity is appropriate for Master's level and includes a genuine compare/select/justify/evaluate/interpret task.
+5. The scenario uses a realistic AI/software-engineering problem or artefact unless abstraction is itself the learning objective.
+6. Students must make and justify at least one engineering/AI decision rather than only follow a prescribed recipe.
+7. Starter code does not contain the complete answer.
+8. Starter code actually runs up to the intentional TODO point.
+9. The final intended solution can run in Pyodide.
+10. Public tests fail meaningfully on incomplete work.
+11. Public tests pass on a correct implementation.
+12. Tests verify behavior, not superficial syntax.
+13. Quantitative metrics are interpreted when CLO3/PLO7 is targeted, not merely displayed.
+14. Optional visual/block tools are enabled only when they contribute directly to a learning outcome.
+15. Report sections capture decision rationale, evidence, interpretation, and Final Project transfer where appropriate.
+16. Word report export works.
+17. Theory/lab-sheet Word and PDF export work.
+18. Annotation tools persist correctly.
+19. No instructor solution is shipped to the public browser bundle.
+20. The module is readable and usable on a normal laptop screen.
 
 Only then change the course release configuration so the module becomes available.
 
