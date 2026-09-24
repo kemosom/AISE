@@ -104,10 +104,10 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Load saved annotations for this lab
   useEffect(() => {
     try {
-      const savedStrokes = localStorage.getItem(`lab_strokes_${manifest.id}`);
+      const savedStrokes = localStorage.getItem(`lab_strokes_v2_${manifest.id}`);
       if (savedStrokes) setStrokes(JSON.parse(savedStrokes));
 
-      const savedNotes = localStorage.getItem(`lab_notes_${manifest.id}`);
+      const savedNotes = localStorage.getItem(`lab_notes_v2_${manifest.id}`);
       if (savedNotes) setNotes(JSON.parse(savedNotes));
     } catch {
       // ignore
@@ -117,7 +117,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Persist strokes & notes
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_strokes_${manifest.id}`, JSON.stringify(strokes));
+      localStorage.setItem(`lab_strokes_v2_${manifest.id}`, JSON.stringify(strokes));
     } catch {
       // ignore
     }
@@ -125,7 +125,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_notes_${manifest.id}`, JSON.stringify(notes));
+      localStorage.setItem(`lab_notes_v2_${manifest.id}`, JSON.stringify(notes));
     } catch {
       // ignore
     }
@@ -974,10 +974,10 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Load saved annotations for this lab
   useEffect(() => {
     try {
-      const savedStrokes = localStorage.getItem(`lab_strokes_${manifest.id}`);
+      const savedStrokes = localStorage.getItem(`lab_strokes_v2_${manifest.id}`);
       if (savedStrokes) setStrokes(JSON.parse(savedStrokes));
 
-      const savedNotes = localStorage.getItem(`lab_notes_${manifest.id}`);
+      const savedNotes = localStorage.getItem(`lab_notes_v2_${manifest.id}`);
       if (savedNotes) setNotes(JSON.parse(savedNotes));
     } catch {
       // ignore
@@ -987,7 +987,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Persist strokes & notes
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_strokes_${manifest.id}`, JSON.stringify(strokes));
+      localStorage.setItem(`lab_strokes_v2_${manifest.id}`, JSON.stringify(strokes));
     } catch {
       // ignore
     }
@@ -995,7 +995,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_notes_${manifest.id}`, JSON.stringify(notes));
+      localStorage.setItem(`lab_notes_v2_${manifest.id}`, JSON.stringify(notes));
     } catch {
       // ignore
     }
@@ -1867,10 +1867,10 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Load saved annotations for this lab
   useEffect(() => {
     try {
-      const savedStrokes = localStorage.getItem(`lab_strokes_${manifest.id}`);
+      const savedStrokes = localStorage.getItem(`lab_strokes_v2_${manifest.id}`);
       if (savedStrokes) setStrokes(JSON.parse(savedStrokes));
 
-      const savedNotes = localStorage.getItem(`lab_notes_${manifest.id}`);
+      const savedNotes = localStorage.getItem(`lab_notes_v2_${manifest.id}`);
       if (savedNotes) setNotes(JSON.parse(savedNotes));
     } catch {
       // ignore
@@ -1880,7 +1880,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Persist strokes & notes
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_strokes_${manifest.id}`, JSON.stringify(strokes));
+      localStorage.setItem(`lab_strokes_v2_${manifest.id}`, JSON.stringify(strokes));
     } catch {
       // ignore
     }
@@ -1888,7 +1888,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem(`lab_notes_${manifest.id}`, JSON.stringify(notes));
+      localStorage.setItem(`lab_notes_v2_${manifest.id}`, JSON.stringify(notes));
     } catch {
       // ignore
     }
