@@ -1,41 +1,41 @@
 {
-  "title": "Lab 01 Technical Report: Behavioral Programming",
+  "title": "Lab 01 Report: Behavioral Programming for Modular Software Design",
   "sections": [
     {
-      "id": "objective",
-      "title": "1. Laboratory Objectives",
+      "id": "concepts",
+      "title": "1. Behavioral Programming Concepts",
       "required": true,
-      "placeholder": "Articulate the design principles of behavioral programming and the objectives of coordinating independent concurrent threads."
-    },
-    {
-      "id": "methodology",
-      "title": "2. Theoretical Methodology",
-      "required": true,
-      "placeholder": "Explain the Request-Wait-Block (RWB) protocol, candidate event evaluation formula, and how conflict arbitration works."
+      "placeholder": "Explain Request-Wait-Block synchronization in your own words and state how the candidate event set is formed."
     },
     {
       "id": "implementation",
-      "title": "3. Implementation & B-Thread Design",
+      "title": "2. Implementation",
       "required": true,
-      "placeholder": "Detail your implementation of add_hot_water, add_cold_water, and the overflow_prevention safety monitor."
+      "placeholder": "Describe your cold-water b-thread, safety b-thread, and build_program configuration. Explain how you kept safety logic separate from functional behavior."
     },
     {
       "id": "results",
-      "title": "4. Execution Results & Empirical Evidence",
+      "title": "3. Results and Verification Evidence",
       "required": true,
-      "placeholder": "Insert your console trace output, generated event plot, and public automated test run results."
+      "placeholder": "Insert your execution trace, relevant output, visual architecture, and public test evidence. State the maximum observed tank volume."
     },
     {
-      "id": "discussion",
-      "title": "5. Critical Analysis & Answers to Questions",
+      "id": "modularity",
+      "title": "4. Modularity Stress Test",
       "required": true,
-      "placeholder": "Analyze the advantages of behavioral programming over monolithic state machines regarding software maintainability and incremental safety rules."
+      "placeholder": "Report what happened when MAX_CAPACITY and DRAIN_AMOUNT were changed. Did the functional b-threads need modification?"
+    },
+    {
+      "id": "critical-analysis",
+      "title": "5. Critical Analysis",
+      "required": true,
+      "placeholder": "Answer the lab-sheet critical-analysis questions, including coupling, invariant verification, deadlock, and where AI could be integrated."
     },
     {
       "id": "conclusion",
-      "title": "6. Conclusion & Future Refinements",
+      "title": "6. Conclusion",
       "required": true,
-      "placeholder": "Summarize key findings, verification conclusions, and potential extensions to multi-agent cyber-physical systems."
+      "placeholder": "Summarize what the experiment demonstrated about requirement modularity, deterministic coordination, and executable safety verification."
     }
   ]
 }
