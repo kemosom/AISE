@@ -195,7 +195,7 @@ Include:
 2. What could happen if every deterministic rule were embedded inside the AI model?
 3. Does a high-confidence AI prediction prove that deployment is safe?
 4. Which parts of the workflow should remain deterministic even if the AI model changes?
-5. Which measurable aspects of this architecture could later be evaluated in the Final Project?
+5. What is the main conclusion you draw from comparing the AI-only and guarded workflows?
 
 ## Completion checklist
 
@@ -207,5 +207,6 @@ Include:
 - [ ] At least four pull-request cases explored
 - [ ] All requirements verified
 - [ ] Results interpreted, not only reported
-- [ ] Final Project transfer identified
-- [ ] Report exported to Word
+- [ ] Conclusion completed
+- [ ] Final report submitted to Supabase
+- [ ] Word copy retained for your records
