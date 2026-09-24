@@ -1,37 +1,37 @@
 [
   {
-    "id": "test-engine-initial-state",
-    "name": "Behavioral Engine Initial State",
-    "description": "Checks that a new BProgram starts with no registered threads or dispatched events.",
-    "testCode": "from helpers import BProgram\nbp = BProgram()\nassert bp.threads == [], 'A new BProgram must start with no registered b-threads'\nassert bp.history == [], 'A new BProgram must start with an empty event history'",
-    "weight": 10
-  },
-  {
-    "id": "test-functional-bthreads",
-    "name": "Functional B-Threads",
-    "description": "Verifies that the hot and cold functional requirements request the correct events for the configured number of cycles.",
-    "testCode": "import main\n\ndef collect_requests(factory, event_name):\n    gen = factory()\n    requests = []\n    selected = None\n    while True:\n        try:\n            spec = next(gen) if selected is None else gen.send(selected)\n        except StopIteration:\n            break\n        assert isinstance(spec, dict), 'Each b-thread must yield a synchronization dictionary'\n        req = spec.get('request', [])\n        requests.extend(req if isinstance(req, list) else [req])\n        selected = event_name\n    return requests\n\nhot = collect_requests(main.add_hot_water, main.HOT_WATER)\ncold = collect_requests(main.add_cold_water, main.COLD_WATER)\nassert hot == [main.HOT_WATER] * main.FILL_CYCLES, 'add_hot_water must request HOT_WATER exactly FILL_CYCLES times'\nassert cold == [main.COLD_WATER] * main.FILL_CYCLES, 'add_cold_water must request COLD_WATER exactly FILL_CYCLES times'",
+    "id": "test-functional-behaviours",
+    "name": "Supplied Functional Behaviours",
+    "description": "Checks that the existing hot-water and cold-water b-threads still generate the required fill events.",
+    "testCode": "import main\n\ntrace = main.build_program(enable_safety=False).run(max_steps=50)\nassert trace.count(main.HOT_WATER) == main.FILL_CYCLES, 'Hot-water behaviour was changed or broken'\nassert trace.count(main.COLD_WATER) == main.FILL_CYCLES, 'Cold-water behaviour was changed or broken'",
     "weight": 20
   },
   {
-    "id": "test-deterministic-selection",
-    "name": "Deterministic Event Selection",
-    "description": "Confirms that identical program configurations produce the same event trace.",
-    "testCode": "import main\ntrace_a = main.build_program().run(max_steps=50)\ntrace_b = main.build_program().run(max_steps=50)\nassert trace_a == trace_b, f'Expected deterministic traces, got {trace_a} and {trace_b}'",
+    "id": "test-baseline-demonstrates-problem",
+    "name": "Unsafe Baseline Demonstrates the Problem",
+    "description": "Confirms that the supplied baseline exceeds capacity when the safety b-thread is disabled.",
+    "testCode": "import main\n\ntrace = main.build_program(enable_safety=False).run(max_steps=50)\nvolumes = main.calculate_volume_trace(trace)\nassert max(volumes) > main.MAX_CAPACITY, 'The baseline should demonstrate an overflow when safety is disabled'",
     "weight": 15
   },
   {
-    "id": "test-required-events",
-    "name": "Integrated Event Behavior",
-    "description": "Checks that both functional fill events and the safety drain behavior occur in the integrated execution.",
-    "testCode": "import main\ntrace = main.build_program().run(max_steps=50)\nassert trace.count(main.HOT_WATER) == main.FILL_CYCLES, 'Integrated trace must contain all HOT_WATER requests'\nassert trace.count(main.COLD_WATER) == main.FILL_CYCLES, 'Integrated trace must contain all COLD_WATER requests'\nassert main.DRAIN_VALVE in trace, 'Safety behavior must request at least one DRAIN_VALVE event'",
-    "weight": 20
+    "id": "test-safety-enabled",
+    "name": "Safety Requirement Enabled",
+    "description": "Checks that the student has enabled the completed safety b-thread for the normal program run.",
+    "testCode": "import main\nassert main.ENABLE_SAFETY is True, 'After implementing overflow_prevention(), set ENABLE_SAFETY = True'",
+    "weight": 15
+  },
+  {
+    "id": "test-deterministic-safe-trace",
+    "name": "Deterministic Safe Execution",
+    "description": "Confirms that the completed safe configuration produces a repeatable event trace.",
+    "testCode": "import main\n\ntrace_a = main.build_program(enable_safety=True).run(max_steps=50)\ntrace_b = main.build_program(enable_safety=True).run(max_steps=50)\nassert trace_a == trace_b, f'Expected deterministic traces, got {trace_a} and {trace_b}'",
+    "weight": 15
   },
   {
     "id": "test-volume-safety-invariant",
-    "name": "Tank Safety Invariant",
-    "description": "Reconstructs tank volume after every dispatched event and verifies that capacity is never exceeded.",
-    "testCode": "import main\ntrace = main.build_program().run(max_steps=50)\nvolume = 0\nmax_seen = 0\nfor step, event in enumerate(trace, start=1):\n    if event in (main.HOT_WATER, main.COLD_WATER):\n        volume += 1\n    elif event == main.DRAIN_VALVE:\n        volume = max(0, volume - main.DRAIN_AMOUNT)\n    max_seen = max(max_seen, volume)\n    assert volume <= main.MAX_CAPACITY, f'Safety violation at step {step}: volume={volume}, MAX_CAPACITY={main.MAX_CAPACITY}'\nassert max_seen == main.MAX_CAPACITY, 'The test scenario should reach the capacity boundary so the safety rule is exercised'",
+    "name": "Tank Capacity Invariant",
+    "description": "Reconstructs tank volume after every dispatched event and verifies that the completed safety b-thread prevents overflow.",
+    "testCode": "import main\n\ntrace = main.build_program(enable_safety=True).run(max_steps=50)\nassert main.DRAIN_VALVE in trace, 'The safety b-thread must request at least one DRAIN_VALVE event'\nassert trace.count(main.HOT_WATER) == main.FILL_CYCLES, 'Safety must not suppress required HOT_WATER events permanently'\nassert trace.count(main.COLD_WATER) == main.FILL_CYCLES, 'Safety must not suppress required COLD_WATER events permanently'\nvolume = 0\nfor step, event in enumerate(trace, start=1):\n    if event in (main.HOT_WATER, main.COLD_WATER):\n        volume += 1\n    elif event == main.DRAIN_VALVE:\n        volume = max(0, volume - main.DRAIN_AMOUNT)\n    assert volume <= main.MAX_CAPACITY, f'Safety violation at step {step}: volume={volume}, limit={main.MAX_CAPACITY}'",
     "weight": 35
   }
 ]
