@@ -5,7 +5,21 @@
 
 ## Objective
 
-Integrate a supplied AI defect-risk prediction into a software release workflow, then add an independent Behavioral Programming guardrail that prevents unsafe AI-driven deployment decisions.
+Evaluate alternative ways of integrating an AI defect-risk predictor into a software release workflow, justify an appropriate architecture, then implement and verify an independent Behavioral Programming guardrail.
+
+## Course alignment
+
+**Primary alignment: CLO1 → PLO1**
+
+You investigate an AI application in software engineering, identify the limitations of AI-only release decisions, and distinguish model prediction from software authority.
+
+**Secondary alignment: CLO2 → PLO2**
+
+You compare alternative integration strategies, justify an appropriate method for the release-governance problem, and apply that method to the supplied software system.
+
+**Preparation for CLO3 → PLO7**
+
+You interpret risk probability and model confidence in context. Full quantitative evaluation of AI-powered software is developed across later labs and the Final Project.
 
 ## What is already provided
 
@@ -25,17 +39,32 @@ def release_guardrail(change, prediction):
     ...
 ```
 
-## Scenario used first
+## Task 1: Engineering decision before coding
 
-The default pull request is intentionally interesting.
+Before running the implementation, compare these three approaches:
 
-Its structural code-change features look similar to historically low-risk changes, so the AI recommends **DEPLOY**.
+**A. Direct AI authority**  
+The AI model directly decides DEPLOY / REVIEW / BLOCK.
 
-However, the current software pipeline contains evidence that should override that recommendation.
+**B. Put all release rules inside the AI model**  
+CI, security, and release-policy information are absorbed into one learned decision model.
 
-Run the baseline before reading the implementation of the guardrail.
+**C. Separate AI prediction from deterministic release policy**  
+The AI provides risk evidence and recommendations, while explicit software rules retain authority over release constraints.
 
-## Task 1: Run the AI-only baseline
+Evaluate the three approaches using:
+
+1. auditability,
+2. maintainability,
+3. deterministic enforcement of non-negotiable requirements,
+4. dependence on model retraining,
+5. handling of uncertainty and human review.
+
+Write a short justification for the strategy you consider most appropriate for this scenario.
+
+You will implement Strategy C in the practical, but your justification must explain why it fits this problem.
+
+## Task 2: Run the AI-only baseline
 
 Open `main.py` and click **Run Python** without editing anything.
 
@@ -48,22 +77,19 @@ ENABLE_GUARDRAIL = False
 Record:
 
 - AI risk label,
+- risk probability,
 - AI confidence,
 - failed-test count,
 - critical security findings,
 - final release decision.
 
-The program should run successfully. There is no intentional Python exception.
+Ask:
 
-Ask yourself:
+> Is a model recommendation sufficient evidence to authorize deployment?
 
-> Is the AI recommendation alone sufficient to authorize deployment?
-
-## Task 2: Implement `release_guardrail()`
+## Task 3: Implement `release_guardrail()`
 
 Complete the marked TODO.
-
-Use these release policies:
 
 ### Hard release block
 
@@ -97,9 +123,9 @@ the b-thread must:
 
 Do not request a competing decision. Observe the AI decision and allow it to proceed.
 
-Do not modify `predict_risk()` to enforce these policies. The purpose is to keep the AI model and engineering policy separate.
+Do not modify `predict_risk()` to enforce these policies. The purpose is to keep AI inference and software policy separate.
 
-## Task 3: Enable the guardrail
+## Task 4: Enable the guardrail
 
 Change:
 
@@ -123,21 +149,25 @@ vs
 AI + software guardrail decision
 ```
 
-## Task 4: Explore the supplied cases
+Explain what changed and, equally importantly, what did **not** change in the AI model.
 
-Change `ACTIVE_CASE` and inspect at least these scenarios:
+## Task 5: Explore the supplied cases
+
+Change `ACTIVE_CASE` and inspect at least:
 
 - a normal low-risk pull request,
 - a low-risk AI prediction with failed tests,
 - a low-risk AI prediction with a critical security finding,
-- a structurally high-risk pull request.
+- a structurally high-risk pull request,
+- a low-confidence boundary case.
 
 For each case, distinguish between:
 
 1. what the AI predicts,
-2. what the software workflow finally allows.
+2. what the software workflow finally permits,
+3. which component has decision authority and why.
 
-## Task 5: Verify Requirements
+## Task 6: Verify Requirements
 
 Click **Verify Requirements**.
 
@@ -148,29 +178,34 @@ The verification suite checks that:
 - failed tests prevent deployment,
 - critical security findings prevent deployment,
 - low-confidence or low-coverage cases require review,
-- safe changes can still deploy,
-- the guardrail does not rewrite the AI model.
+- safe changes can still deploy.
 
-## Task 6: Report
+## Task 7: Report
 
 Include:
 
+- your engineering-decision comparison and justified strategy,
 - one AI-only baseline result,
 - the corresponding guardrail-enabled result,
-- requirement-verification results,
+- results from at least four pull-request cases,
+- requirement-verification evidence,
 - a short response to the following:
 
-1. Why should the AI prediction remain separate from release policy?
-2. What could happen if every safety rule were embedded directly inside the AI model?
+1. Why should AI prediction remain separate from release policy?
+2. What could happen if every deterministic rule were embedded inside the AI model?
 3. Does a high-confidence AI prediction prove that deployment is safe?
-4. Which parts of this system should remain deterministic even if the AI model changes?
+4. Which parts of the workflow should remain deterministic even if the AI model changes?
+5. Which measurable aspects of this architecture could later be evaluated in the Final Project?
 
 ## Completion checklist
 
+- [ ] Three integration strategies compared
+- [ ] Strategy choice justified using engineering criteria
 - [ ] AI-only baseline executed
 - [ ] `release_guardrail()` implemented
 - [ ] `ENABLE_GUARDRAIL = True`
 - [ ] At least four pull-request cases explored
 - [ ] All requirements verified
-- [ ] Evidence added to report
+- [ ] Results interpreted, not only reported
+- [ ] Final Project transfer identified
 - [ ] Report exported to Word
