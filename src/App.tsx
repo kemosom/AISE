@@ -30,22 +30,12 @@ export default function App() {
   const [labsError, setLabsError] = useState<string | null>(null);
 
   useEffect(() => {
-    checkCurrentUser();
+    // Current teaching mode is deliberately open access. Student identity is
+    // entered only in the report, not at application entry.
+    apiClient.clearToken();
+    setUser(DEFAULT_OPEN_USER);
+    fetchLabs().finally(() => setLoading(false));
   }, []);
-
-  const checkCurrentUser = async () => {
-    try {
-      const data = await apiClient.get('/api/auth/me');
-      if (data?.user) {
-        setUser(data.user);
-      }
-    } catch {
-      // open student access
-    } finally {
-      fetchLabs();
-      setLoading(false);
-    }
-  };
 
   const fetchLabs = async () => {
     setLabsLoading(true);
@@ -60,21 +50,6 @@ export default function App() {
       setLabsError(err.message || 'Unable to load laboratory modules.');
     } finally {
       setLabsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await apiClient.post('/api/auth/logout');
-    } catch {
-      // ignore
-    } finally {
-      apiClient.clearToken();
-      setUser(DEFAULT_OPEN_USER);
-      setActiveLabId(null);
-      setIsInstructorPreview(false);
-      setSelectedSubmission(null);
-      setActiveView('dashboard');
     }
   };
 
@@ -124,7 +99,6 @@ export default function App() {
             fetchLabs();
           }
         }}
-        onLogout={handleLogout}
         isInstructorPreview={isInstructorPreview}
         onExitPreview={() => {
           setIsInstructorPreview(false);
