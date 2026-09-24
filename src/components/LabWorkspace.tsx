@@ -561,8 +561,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               >
                 <CheckSquare className="w-3.5 h-3.5" />
                 {testStats === null
-                  ? 'Tests'
-                  : `Tests ${testStats.passed}/${testStats.total}`}
+                  ? 'Verify Requirements'
+                  : `Verified ${testStats.passed}/${testStats.total}`}
               </button>
 
               <button
