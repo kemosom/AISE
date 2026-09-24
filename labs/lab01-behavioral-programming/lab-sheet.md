@@ -1,71 +1,75 @@
 # Lab 01 Practical: Add a Safety Requirement Without Rewriting Existing Behaviour
 
 **Scenario:** Smart fluid-mixing controller  
-**Recommended practical time:** 90–120 minutes
+**Recommended practical time:** 90 minutes
 
 ## Objective
 
-Use Behavioral Programming to add an overflow-safety requirement to an existing working controller, then verify that the new requirement preserves the tank-capacity invariant.
+Use Behavioral Programming to add one independent overflow-safety requirement to an existing controller and verify that the tank-capacity invariant is preserved.
+
+## Course alignment
+
+This practical supports the course outcomes concerned with understanding AI-related software-engineering concepts and selecting/applying appropriate methods and tools.
+
+**Programming is not the learning outcome by itself.** The code is the mechanism used to apply the design method, observe its behaviour, and verify the result.
 
 ## What is already provided
 
-The starter project already contains:
+You receive:
 
-- a working `BProgram` coordinator in `helpers.py`,
+- the `BProgram` coordinator in `helpers.py`,
 - a working hot-water b-thread,
 - a working cold-water b-thread,
-- a working baseline program that runs **without** the safety b-thread,
-- automatic volume tracing,
-- public verification tests.
+- a baseline program that runs without safety,
+- volume tracing,
+- automated public tests.
 
-You are **not** expected to build the whole system from scratch.
+You do **not** build the system from scratch.
 
-Your main coding task is to implement:
+The only function you must implement is:
 
 ```python
 overflow_prevention()
 ```
 
-and then enable it.
-
 ## Task 1: Run the unsafe baseline
 
 Open `main.py` and click **Run Python** without changing anything.
 
-The baseline intentionally runs with:
+The starter uses:
 
 ```python
 ENABLE_SAFETY = False
 ```
 
-Observe:
+The program should run normally and show:
 
 - the event trace,
-- the tank-volume trace,
-- the final safety message.
+- the volume after each event,
+- a failed safety check.
 
-The baseline should run successfully, but it should demonstrate why a safety requirement is needed.
+That failure is intentional. It demonstrates the problem before the safety requirement is added.
 
 ## Task 2: Implement `overflow_prevention()`
 
-Complete only the marked TODO inside `overflow_prevention()`.
+Complete the marked TODO.
 
 Your b-thread must:
 
 1. maintain its own estimate of tank volume,
 2. observe `HOT_WATER`, `COLD_WATER`, and `DRAIN_VALVE`,
-3. allow normal fill events while volume is below `MAX_CAPACITY`,
+3. allow fill events while volume is below `MAX_CAPACITY`,
 4. when volume reaches `MAX_CAPACITY`:
    - block `HOT_WATER`,
    - block `COLD_WATER`,
    - request `DRAIN_VALVE`,
 5. after a drain event, reduce volume by `DRAIN_AMOUNT` without going below zero.
 
-Do **not** edit `add_hot_water()` or `add_cold_water()` to add safety checks.
+Do **not** add safety checks inside `add_hot_water()` or `add_cold_water()`.
 
-## Task 3: Enable safety and compare
+## Task 3: Enable safety
 
-After implementing the safety b-thread, change:
+Change:
 
 ```python
 ENABLE_SAFETY = False
@@ -79,42 +83,26 @@ ENABLE_SAFETY = True
 
 Run the program again.
 
-Compare the unsafe and safe executions.
+A correct run should still execute all required fill events, introduce drain events when necessary, and never exceed `MAX_CAPACITY`.
 
-A correct safe execution should:
+## Task 4: Verify
 
-- still produce all required hot-water and cold-water events,
-- introduce at least one drain event,
-- never exceed `MAX_CAPACITY`.
+Open **Tests** and run all public tests.
 
-## Task 4: Run the public tests
+Use the test messages to diagnose any failure.
 
-Open **Tests** and run all tests.
+## Task 5: Report
 
-The tests check:
+In the report, include:
 
-- the supplied functional behaviours,
-- the unsafe baseline,
-- activation of the safety b-thread,
-- deterministic execution,
-- the complete tank-volume safety invariant.
-
-If a test fails, use the failure message to correct your implementation.
-
-## Task 5: Document the result
-
-Use the **Design** view to inspect or refine the BP architecture, then add relevant evidence to the report.
-
-Your report should contain:
-
-- a short explanation of your safety b-thread,
-- baseline versus safe execution evidence,
+- a short explanation of your `overflow_prevention()` logic,
+- unsafe versus safe execution evidence,
 - public-test results,
-- the BP architecture,
-- a short discussion answering:
+- the BP design diagram,
+- a short answer to both questions:
 
-  1. Why is it better to keep the safety rule in a separate b-thread instead of adding capacity checks inside both fill functions?
-  2. Does BP remove complexity, or does it move some complexity into event coordination?
+1. Why is a separate safety b-thread preferable to duplicating capacity checks inside both fill functions?
+2. Does BP remove complexity, or does it move some complexity into event coordination?
 
 ## Completion checklist
 
