@@ -1,43 +1,4 @@
 {
-  "nodes": [
-    {
-      "id": "pr",
-      "data": { "label": "Pull Request + CI Evidence", "kind": "input" },
-      "position": { "x": 20, "y": 125 }
-    },
-    {
-      "id": "ai-model",
-      "data": { "label": "k-NN Defect-Risk Model", "kind": "ai" },
-      "position": { "x": 250, "y": 35 }
-    },
-    {
-      "id": "ai-thread",
-      "data": { "label": "AI Recommendation b-thread", "kind": "bthread" },
-      "position": { "x": 485, "y": 35 }
-    },
-    {
-      "id": "guardrail",
-      "data": { "label": "Release Guardrail b-thread", "kind": "safety" },
-      "position": { "x": 485, "y": 220 }
-    },
-    {
-      "id": "coordinator",
-      "data": { "label": "Behavioral Coordinator", "kind": "coordinator" },
-      "position": { "x": 735, "y": 125 }
-    },
-    {
-      "id": "decision",
-      "data": { "label": "DEPLOY / HUMAN_REVIEW / BLOCK_RELEASE", "kind": "output" },
-      "position": { "x": 985, "y": 125 }
-    }
-  ],
-  "edges": [
-    { "id": "e-pr-ai", "source": "pr", "target": "ai-model", "label": "change features" },
-    { "id": "e-ai-thread", "source": "ai-model", "target": "ai-thread", "label": "risk + confidence" },
-    { "id": "e-pr-policy", "source": "pr", "target": "guardrail", "label": "CI/security evidence" },
-    { "id": "e-ai-policy", "source": "ai-model", "target": "guardrail", "label": "confidence" },
-    { "id": "e-thread-bp", "source": "ai-thread", "target": "coordinator", "label": "request/block" },
-    { "id": "e-guard-bp", "source": "guardrail", "target": "coordinator", "label": "request/block" },
-    { "id": "e-decision", "source": "coordinator", "target": "decision", "label": "selected event" }
-  ]
+  "nodes": [],
+  "edges": []
 }
