@@ -17,7 +17,7 @@ Word or PDF export
     ↓
 Begin Lab
     ↓
-Visual Design + Monaco Editor + Pyodide
+Monaco Editor + Pyodide
     ↓
 Run + Tests
     ↓
@@ -35,7 +35,6 @@ There is no student login in the current teaching mode.
 For open-access students, the following are stored locally in the student's browser:
 
 - working code files,
-- visual-design state,
 - report draft,
 - test statistics,
 - checkpoints,
@@ -56,7 +55,6 @@ The server still contains infrastructure that can support an authenticated deplo
 - Tailwind CSS
 - Monaco Editor
 - Pyodide for real Python execution in the browser
-- React Flow for visual software design
 - Blockly for block-to-code activities
 - `docx` for genuine Microsoft Word generation
 - local browser persistence for open-access student work

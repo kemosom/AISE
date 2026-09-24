@@ -158,7 +158,6 @@ Include:
 - one AI-only baseline result,
 - the corresponding guardrail-enabled result,
 - requirement-verification results,
-- the system design diagram,
 - a short response to the following:
 
 1. Why should the AI prediction remain separate from release policy?

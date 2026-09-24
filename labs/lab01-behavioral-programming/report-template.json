@@ -17,7 +17,7 @@
       "id": "results",
       "title": "3. Scenario Results and Requirement Verification",
       "required": true,
-      "placeholder": "Compare at least four pull-request cases. Add console output, requirement-verification results, and the system design diagram."
+      "placeholder": "Compare at least four pull-request cases. Add console output and requirement-verification results, then interpret the differences between the AI-only and guarded decisions."
     },
     {
       "id": "analysis",
