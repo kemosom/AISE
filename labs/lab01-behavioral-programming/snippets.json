@@ -1,34 +1,26 @@
 [
   {
-    "id": "sync-template",
+    "id": "hard-block-policy",
+    "category": "Release Policy",
+    "name": "Hard Block Synchronization",
+    "description": "Template for a deterministic release block. Decide when it should be used.",
+    "parameters": [],
+    "code": "yield {\n    \"request\": [BLOCK_RELEASE],\n    \"waitFor\": [],\n    \"block\": [DEPLOY],\n}"
+  },
+  {
+    "id": "human-review-policy",
+    "category": "Release Policy",
+    "name": "Human Review Synchronization",
+    "description": "Template for requiring human review while preventing automatic deployment.",
+    "parameters": [],
+    "code": "yield {\n    \"request\": [HUMAN_REVIEW],\n    \"waitFor\": [],\n    \"block\": [DEPLOY],\n}"
+  },
+  {
+    "id": "observe-ai-decision",
     "category": "Behavioral Programming",
-    "name": "Synchronization Point",
-    "description": "Insert a blank Request-Wait-Block synchronization dictionary.",
+    "name": "Observe AI Decision",
+    "description": "Observe the final AI-requested event without competing with it.",
     "parameters": [],
-    "code": "yield {\n    \"request\": [],\n    \"waitFor\": [],\n    \"block\": [],\n}"
-  },
-  {
-    "id": "wait-for-fill-events",
-    "category": "Behavioral Programming",
-    "name": "Observe Fill Events",
-    "description": "Wait for the two fill events without requesting or blocking them.",
-    "parameters": [],
-    "code": "event = yield {\n    \"request\": [],\n    \"waitFor\": [HOT_WATER, COLD_WATER],\n    \"block\": [],\n}"
-  },
-  {
-    "id": "safety-action-template",
-    "category": "Safety",
-    "name": "Safety Action Template",
-    "description": "Template for requesting a drain while blocking both fill events. Use only after you understand why the condition is required.",
-    "parameters": [],
-    "code": "yield {\n    \"request\": [DRAIN_VALVE],\n    \"waitFor\": [DRAIN_VALVE],\n    \"block\": [HOT_WATER, COLD_WATER],\n}"
-  },
-  {
-    "id": "volume-update-template",
-    "category": "Utilities",
-    "name": "Volume Update",
-    "description": "Update a local volume counter from the selected event.",
-    "parameters": ["event"],
-    "code": "if event in (HOT_WATER, COLD_WATER):\n    volume += 1\nelif event == DRAIN_VALVE:\n    volume = max(0, volume - DRAIN_AMOUNT)"
+    "code": "yield {\n    \"request\": [],\n    \"waitFor\": [DEPLOY, HUMAN_REVIEW],\n    \"block\": [],\n}"
   }
 ]
