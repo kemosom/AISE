@@ -3,7 +3,7 @@
   "labNumber": 1,
   "week": 1,
   "title": "Safe AI-Assisted Software Release with Behavioral Programming",
-  "shortDescription": "Integrate an AI defect-risk recommendation into a pull-request workflow, then constrain unsafe release decisions using independent behavioral guardrails.",
+  "shortDescription": "Compare alternative AI-integration strategies, then integrate an AI defect-risk recommendation into a pull-request workflow using independently verifiable software guardrails.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
@@ -16,42 +16,68 @@
     "reportEditor": true,
     "webPreview": false
   },
+  "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Investigate the use and limitations of AI defect-risk prediction within a software release workflow."
+    },
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "secondary",
+      "evidence": "Compare AI-integration strategies, justify an appropriate architecture, and apply Behavioral Programming as the selected control method."
+    },
+    {
+      "clo": "CLO3",
+      "plo": "PLO7",
+      "contribution": "preparatory",
+      "evidence": "Interpret risk probability and confidence in context as preparation for later quantitative system evaluation and the Final Project."
+    }
+  ],
   "learningOutcomes": [
-    "Explain the difference between an AI prediction and an enforceable software-engineering requirement.",
-    "Apply Behavioral Programming to integrate AI recommendations with independent release guardrails.",
-    "Implement deterministic constraints for failed tests, security findings, confidence, and coverage without modifying the AI model.",
-    "Verify that an AI-enabled software workflow satisfies explicit release requirements across multiple pull-request scenarios.",
-    "Critically evaluate when AI recommendations require deterministic controls or human review."
+    "Investigate the role and limitations of AI defect-risk prediction in a software-engineering release workflow.",
+    "Compare alternative AI-integration strategies using auditability, maintainability, safety, retraining dependence, and human-review requirements.",
+    "Justify and apply a separated AI-recommendation and deterministic-policy architecture using Behavioral Programming.",
+    "Implement explicit constraints for failed tests, security findings, confidence, and coverage without modifying the AI model.",
+    "Verify and critically interpret the behavior of the combined AI-enabled software workflow across multiple pull-request scenarios."
   ],
   "tasks": [
     {
       "id": "l1-t1",
-      "title": "Inspect an AI-only release decision",
-      "description": "Run the supplied defect-risk model and observe how an AI recommendation can conflict with current CI or security evidence.",
-      "category": "code"
+      "title": "Evaluate AI-integration strategies",
+      "description": "Compare direct AI authority, model-embedded policy, and separated AI-plus-policy architectures using software-engineering criteria.",
+      "category": "analysis"
     },
     {
       "id": "l1-t2",
+      "title": "Inspect an AI-only release decision",
+      "description": "Run the supplied defect-risk model and identify how an AI recommendation can conflict with current CI or security evidence.",
+      "category": "analysis"
+    },
+    {
+      "id": "l1-t3",
       "title": "Implement the release guardrail",
       "description": "Complete an independent behavioral policy that can block deployment or require human review.",
       "category": "code"
     },
     {
-      "id": "l1-t3",
+      "id": "l1-t4",
       "title": "Compare release scenarios",
       "description": "Evaluate safe, failed-test, security, low-confidence, and high-risk pull-request cases.",
       "category": "analysis"
     },
     {
-      "id": "l1-t4",
+      "id": "l1-t5",
       "title": "Verify requirements",
       "description": "Run executable checks over the combined AI and software-policy workflow.",
       "category": "test"
     },
     {
-      "id": "l1-t5",
-      "title": "Interpret and report",
-      "description": "Document evidence and explain why AI decisions require explicit software-engineering controls.",
+      "id": "l1-t6",
+      "title": "Interpret and transfer",
+      "description": "Explain the engineering decision, interpret evidence, and identify how the pattern transfers to the Final Project.",
       "category": "report"
     }
   ]
