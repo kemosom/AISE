@@ -3,8 +3,8 @@
   "labNumber": 1,
   "week": 1,
   "title": "AI for Software Design: Behavioral Programming",
-  "shortDescription": "Model independent software requirements as b-threads, coordinate them through Request-Wait-Block synchronization, and verify a safety invariant.",
-  "estimatedDuration": "3 hours",
+  "shortDescription": "Run an unsafe behavioral controller, add one independent overflow-safety b-thread, and verify the capacity invariant.",
+  "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
   "packages": [],
@@ -17,41 +17,33 @@
     "webPreview": false
   },
   "learningOutcomes": [
-    "Model software requirements as independent behavioral threads.",
-    "Apply Request-Wait-Block synchronization to coordinate concurrent requirements.",
-    "Implement a safety invariant without modifying the functional behavior threads.",
-    "Verify behavioral traces using executable assertions rather than structural checks alone.",
-    "Critically evaluate modularity, coupling, determinism, and deadlock in requirement-oriented software design."
+    "Explain Request-Wait-Block synchronization in a behavioral program.",
+    "Add an independent safety requirement without rewriting existing functional behaviours.",
+    "Verify a software safety invariant using execution traces and automated tests."
   ],
   "tasks": [
     {
       "id": "l1-t1",
-      "title": "Understand the behavioral coordinator",
-      "description": "Trace how BProgram collects requests and blocks, selects events, and resumes interested b-threads.",
+      "title": "Run the unsafe baseline",
+      "description": "Execute the supplied hot/cold controller and observe the capacity violation.",
       "category": "code"
     },
     {
       "id": "l1-t2",
-      "title": "Complete functional behavior",
-      "description": "Implement the cold-water b-thread from the supplied hot-water example.",
+      "title": "Implement overflow prevention",
+      "description": "Complete the independent safety b-thread and enable it.",
       "category": "code"
     },
     {
       "id": "l1-t3",
-      "title": "Implement the safety invariant",
-      "description": "Create an independent overflow-prevention b-thread that blocks fill events and requests draining at capacity.",
-      "category": "code"
-    },
-    {
-      "id": "l1-t4",
-      "title": "Model and verify the design",
-      "description": "Complete the visual architecture and pass semantic public tests over the execution trace.",
+      "title": "Verify the invariant",
+      "description": "Run the safe controller and pass the public behavioral tests.",
       "category": "test"
     },
     {
-      "id": "l1-t5",
-      "title": "Analyse and report",
-      "description": "Stress-test configuration changes and document evidence and critical analysis in the integrated report.",
+      "id": "l1-t4",
+      "title": "Document the result",
+      "description": "Capture the design, execution evidence, and software-engineering interpretation in the report.",
       "category": "report"
     }
   ]
