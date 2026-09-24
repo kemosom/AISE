@@ -400,10 +400,11 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   return (
     <div
       ref={containerRef}
+      data-labsheet-print-root
       className="relative flex-1 bg-[#FAFAFA] overflow-y-auto text-slate-900 font-sans selection:bg-amber-100 selection:text-amber-900"
     >
       {/* 1. TOP READING PROGRESS BAR (MEDIUM STYLE) */}
-      <div className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-200">
+      <div data-labsheet-no-print className="fixed top-0 left-0 right-0 z-50 h-1 bg-slate-200">
         <div
           className="h-full bg-blue-900 transition-all duration-150 ease-out"
           style={{ width: `${scrollProgress}%` }}
@@ -411,7 +412,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
       </div>
 
       {/* 2. STICKY FLOATING ANNOTATION TOOLBAR */}
-      <aside aria-label="Annotation tools" className="sticky top-4 z-40 max-w-3xl mx-auto px-4 pointer-events-none mb-6">
+      <aside data-labsheet-no-print aria-label="Annotation tools" className="sticky top-4 z-40 max-w-3xl mx-auto px-4 pointer-events-none mb-6">
         <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl shadow-xl p-2 px-3 flex items-center justify-between pointer-events-auto gap-2">
           {/* Main Annotation Tools */}
           <div className="flex items-center space-x-1">
@@ -592,15 +593,6 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
               <span className="hidden md:inline">PDF</span>
             </button>
 
-            {/* Direct Begin Lab Fast CTA */}
-            <button
-              onClick={onBeginLab}
-              title="Launch interactive coding & test workspace"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-all ml-1"
-            >
-              <span>Begin Lab</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
       </aside>
@@ -704,29 +696,14 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                 SU
               </div>
               <div>
-                <p className="font-semibold text-slate-900">Sunway University Computing</p>
+                <p className="font-semibold text-slate-900">Sunway University</p>
                 <p className="text-[11px] text-slate-500">
                   Artificial Intelligence in Software Engineering
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleExportDocx}
-                className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-medium cursor-pointer"
-              >
-                <FileDown className="w-3.5 h-3.5 text-blue-900" />
-                <span>Export Word (.docx)</span>
-              </button>
-              <button
-                onClick={handlePrintPdf}
-                className="inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-medium cursor-pointer"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Print / PDF</span>
-              </button>
-            </div>
+
           </div>
         </header>
 
@@ -896,90 +873,23 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
           })}
         </div>
 
-        {/* 7. STARTER FILES & SPECIFICATIONS OVERVIEW */}
-        {manifest.starterFiles && manifest.starterFiles.length > 0 && (
-          <div className="my-10 p-6 bg-white rounded-2xl border border-slate-200 shadow-xs font-sans">
-            <div className="flex items-center space-x-2 text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
-              <Layers className="w-4 h-4 text-blue-900" />
-              <span>Workspace Starter Modules</span>
+        <section data-labsheet-no-print className="mt-10 pt-7 border-t border-slate-200 font-sans">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-900">Ready for the practical</p>
+              <h3 className="mt-1 text-xl font-semibold text-slate-950">Continue to the coding workspace</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600 max-w-xl">
+                Run the baseline, complete one safety function, run the tests, then document the result.
+              </p>
             </div>
-            <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-              When you begin the lab, the following files will be automatically loaded into your interactive coding environment:
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {manifest.starterFiles.map((file, fIdx) => (
-                <div
-                  key={fIdx}
-                  className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex flex-col justify-between"
-                >
-                  <div className="flex items-center space-x-2 font-mono text-xs font-semibold text-slate-800">
-                    <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                    <span>{file.name}</span>
-                  </div>
-                  <span className="text-[10px] text-slate-500 uppercase mt-2 font-mono">
-                    {file.language} file
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 8. GRAND "BEGIN LAB" CALL TO ACTION CARD AT THE END OF THEORY */}
-        <section className="mt-14 pt-8 border-t-2 border-slate-200 font-sans">
-          <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-8 sm:p-10 shadow-2xl relative overflow-hidden">
-            {/* Ambient Background Glow */}
-            <div className="absolute -top-24 -right-24 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div className="max-w-xl">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-semibold uppercase tracking-wider mb-3 border border-blue-400/30">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Theory & Specifications Complete</span>
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                  Ready to Implement Your Solution?
-                </h3>
-                <p className="text-slate-300 text-sm mt-2 leading-relaxed">
-                  Proceed to the interactive workspace to write your Python implementation, execute behavioral threads with Pyodide, inspect event logs, and build your technical report.
-                </p>
-              </div>
-
-              {/* Begin Lab Primary Button */}
-              <div className="shrink-0 flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={onBeginLab}
-                  className="inline-flex items-center justify-center space-x-2 px-6 py-4 bg-white hover:bg-slate-100 text-slate-950 rounded-2xl text-sm font-bold shadow-lg hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
-                >
-                  <span>Begin Lab</span>
-                  <ArrowRight className="w-4 h-4 text-blue-900" />
-                </button>
-              </div>
-            </div>
-
-            {/* Quick Summary Pill Bar */}
-            <div className="relative z-10 mt-6 pt-6 border-t border-white/10 flex flex-wrap items-center gap-4 text-xs text-slate-300">
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Pyodide In-Browser Runner</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                <span>Multi-File IDE (`main.py`, `helpers.py`)</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                <span>Public Verification Tests</span>
-              </span>
-              <span>•</span>
-              <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                <span>Word (.docx) Report Generator</span>
-              </span>
-            </div>
+            <button
+              type="button"
+              onClick={onBeginLab}
+              className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-950 hover:bg-slate-800 text-white rounded-md text-sm font-semibold transition-colors cursor-pointer"
+            >
+              Begin Lab
+              <ArrowRight className="w-4 h-4" />
+            </button>
           </div>
         </section>
       </article>
