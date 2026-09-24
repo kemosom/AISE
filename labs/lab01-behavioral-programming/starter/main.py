@@ -1,74 +1,117 @@
 """
 MAI5124 AI in Software Engineering
-Lab 01: Behavioral Programming Reference Implementation
+Lab 01: Behavioral Programming
 
-Student: Ahmed Ali (24012345)
+Complete the TODO sections. Do not put the tank-safety rule inside the
+functional fill b-threads. The purpose of the lab is to keep requirements
+independent and coordinate them through BProgram.
 """
+
 from helpers import BProgram
 
+HOT_WATER = "HOT_WATER"
+COLD_WATER = "COLD_WATER"
+DRAIN_VALVE = "DRAIN_VALVE"
+
+FILL_CYCLES = 5
+MAX_CAPACITY = 8
+DRAIN_AMOUNT = 3
+
+
 def add_hot_water():
-    """B-Thread: Requests HOT_WATER 4 times."""
-    for i in range(4):
+    """Worked example: request HOT_WATER exactly FILL_CYCLES times."""
+    for _ in range(FILL_CYCLES):
         yield {
-            'request': ['HOT_WATER'],
-            'waitFor': ['COLD_WATER'],
-            'block': []
+            "request": [HOT_WATER],
+            "waitFor": [],
+            "block": [],
         }
 
+
 def add_cold_water():
-    """B-Thread: Requests COLD_WATER 4 times."""
-    for i in range(4):
-        yield {
-            'request': ['COLD_WATER'],
-            'waitFor': ['HOT_WATER'],
-            'block': []
-        }
+    """
+    TODO 1:
+    Implement the cold-water functional b-thread.
+
+    Requirements:
+    - request COLD_WATER exactly FILL_CYCLES times;
+    - do not implement capacity or drain logic here.
+    """
+    raise NotImplementedError("TODO: implement add_cold_water()")
+    yield
+
 
 def overflow_prevention():
     """
-    Safety Invariant B-Thread:
-    Maintains liquid volume state and blocks water injection
-    when capacity threshold is reached.
-    """
-    capacity = 0
-    max_threshold = 6
+    TODO 2:
+    Implement an independent safety b-thread.
 
-    while True:
-        if capacity >= max_threshold:
-            # Enforce safety invariant: strictly BLOCK positive events
-            yield {
-                'request': ['DRAIN_VALVE'],
-                'waitFor': ['DRAIN_VALVE'],
-                'block': ['HOT_WATER', 'COLD_WATER']
-            }
-            capacity -= 2
-        else:
-            event = yield {
-                'request': [],
-                'waitFor': ['HOT_WATER', 'COLD_WATER', 'DRAIN_VALVE'],
-                'block': []
-            }
-            if event in ['HOT_WATER', 'COLD_WATER']:
-                capacity += 1
-            elif event == 'DRAIN_VALVE':
-                capacity = max(0, capacity - 2)
+    Track the observed tank volume. When the volume reaches MAX_CAPACITY,
+    block HOT_WATER and COLD_WATER and request DRAIN_VALVE. After draining,
+    subtract DRAIN_AMOUNT without allowing the tracked volume to become
+    negative.
+    """
+    raise NotImplementedError("TODO: implement overflow_prevention()")
+    yield
+
+
+def build_program():
+    """
+    TODO 3:
+    Register all three b-threads and return the configured BProgram.
+    """
+    bp = BProgram()
+
+    # Example:
+    # bp.add_bthread(add_hot_water)
+
+    raise NotImplementedError("TODO: register all required b-threads")
+    return bp
+
+
+def calculate_volume_trace(trace):
+    """Convert an event trace to volume-after-event values."""
+    volume = 0
+    volumes = []
+
+    for event in trace:
+        if event in (HOT_WATER, COLD_WATER):
+            volume += 1
+        elif event == DRAIN_VALVE:
+            volume = max(0, volume - DRAIN_AMOUNT)
+
+        volumes.append(volume)
+
+    return volumes
+
 
 def main():
-    print("=" * 60)
-    print("AISE Lab Studio: Lab 01 Behavioral Simulation Running...")
-    print("=" * 60)
+    print("=" * 58)
+    print("MAI5124 Lab 01 | Behavioral Programming")
+    print("=" * 58)
 
-    bp = BProgram()
-    bp.add_bthread(add_hot_water)
-    bp.add_bthread(add_cold_water)
-    bp.add_bthread(overflow_prevention)
+    bp = build_program()
+    trace = bp.run(max_steps=50)
+    volumes = calculate_volume_trace(trace)
 
-    trace = bp.run(max_steps=20)
+    print("\nEvent trace:")
+    print(" -> ".join(trace) if trace else "(no events dispatched)")
 
-    print("\n--- Simulation Summary ---")
-    print(f"Total Events Dispatched: {len(trace)}")
-    print(f"Event Trace: {' -> '.join(trace)}")
-    print("Safety Invariant: Overflow safely mitigated by coordinator.")
+    print("\nVolume after each event:")
+    print(volumes)
 
-if __name__ == '__main__':
+    if volumes and max(volumes) <= MAX_CAPACITY:
+        print(f"Safety check: PASS (maximum observed volume = {max(volumes)})")
+    elif not volumes:
+        print("Safety check: no events were produced.")
+    else:
+        print(
+            f"Safety check: FAIL (observed {max(volumes)} > "
+            f"MAX_CAPACITY={MAX_CAPACITY})"
+        )
+
+    return trace
+
+
+if __name__ == "__main__":
     main()
