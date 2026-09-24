@@ -13,9 +13,14 @@ import {
   Code,
   CheckCircle,
   User,
+  Send,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import { generateDocxReport } from '../../lib/reports/docx-generator';
+import {
+  submitLabReportToSupabase,
+  type LabSubmissionReceipt,
+} from '../lib/supabase-submission';
 
 export interface ReportSectionItem {
   id: string;
@@ -43,6 +48,8 @@ interface ReportWorkspaceProps {
   saveStatus: string;
   checkpoints: any[];
   onCreateCheckpoint: (label: string, snapshot: any) => Promise<void>;
+  codeFiles?: Array<{ name: string; language: string; content: string }>;
+  testStats?: { passed: number; total: number } | null;
 }
 
 export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
@@ -56,12 +63,18 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   saveStatus,
   checkpoints,
   onCreateCheckpoint,
+  codeFiles = [],
+  testStats = null,
 }) => {
   const [activeSectionId, setActiveSectionId] = useState(
     reportState.sections[0]?.id || 'objective'
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isDownloadingDocx, setIsDownloadingDocx] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionReceipt, setSubmissionReceipt] =
+    useState<LabSubmissionReceipt | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   // Checkpoint input
   const [checkpointLabel, setCheckpointLabel] = useState('');
@@ -134,44 +147,50 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     onUpdateReportState({ ...reportState, sections: updatedSections });
   };
 
+  const generateCurrentDocx = async () => {
+    const studentName =
+      reportState.studentName?.trim() || user.name || 'Student';
+    const studentId =
+      reportState.studentId?.trim() || user.studentId || '';
+
+    const blob = await generateDocxReport({
+      courseCode: 'MAI5124',
+      courseTitle: 'AI in Software Engineering',
+      labNumber,
+      labTitle,
+      studentName,
+      studentId,
+      studentEmail: '',
+      submissionDate: new Date().toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }),
+      sections: reportState.sections,
+    });
+
+    const cleanName =
+      studentName.replace(/[^a-zA-Z0-9]/g, '_') || 'Student';
+    const cleanId =
+      studentId.replace(/[^a-zA-Z0-9]/g, '_') || 'Submission';
+
+    const fileName = `MAI5124_Lab${String(labNumber).padStart(
+      2,
+      '0'
+    )}_${cleanId}_${cleanName}.docx`;
+
+    return { blob, fileName, studentName, studentId };
+  };
+
   const handleDownloadDocx = async () => {
     setIsDownloadingDocx(true);
 
     try {
-      const studentName =
-        reportState.studentName?.trim() || user.name || 'Student';
-      const studentId =
-        reportState.studentId?.trim() || user.studentId || '';
-
-      const blob = await generateDocxReport({
-        courseCode: 'MAI5124',
-        courseTitle: 'AI in Software Engineering',
-        labNumber,
-        labTitle,
-        studentName,
-        studentId,
-        studentEmail: '',
-        submissionDate: new Date().toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }),
-        sections: reportState.sections,
-      });
-
+      const { blob, fileName } = await generateCurrentDocx();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-
-      const cleanName =
-        studentName.replace(/[^a-zA-Z0-9]/g, '_') || 'Student';
-      const cleanId =
-        studentId.replace(/[^a-zA-Z0-9]/g, '_') || 'Submission';
-
-      a.download = `MAI5124_Lab${String(labNumber).padStart(
-        2,
-        '0'
-      )}_${cleanId}_${cleanName}.docx`;
+      a.download = fileName;
 
       document.body.appendChild(a);
       a.click();
@@ -181,6 +200,62 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
       alert(err.message || 'Failed to generate Word report');
     } finally {
       setIsDownloadingDocx(false);
+    }
+  };
+
+  const handleSubmitReport = async () => {
+    setSubmissionError(null);
+
+    const studentName = reportState.studentName?.trim();
+    const studentId = reportState.studentId?.trim();
+
+    if (!studentName || !studentId) {
+      setSubmissionError(
+        'Enter your full name and student ID before submitting.'
+      );
+      return;
+    }
+
+    const incompleteSections = reportState.sections.filter(
+      (section) => !section.content?.trim()
+    );
+
+    if (incompleteSections.length > 0) {
+      setSubmissionError(
+        `Complete all report sections before submitting. Missing: ${incompleteSections
+          .map((section) => section.title)
+          .join(', ')}`
+      );
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Submit this report to the lecturer? The final Word document will be stored in Supabase and this browser will not be able to submit the same lab again.'
+    );
+
+    if (!confirmed) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const { blob, fileName } = await generateCurrentDocx();
+
+      const receipt = await submitLabReportToSupabase({
+        labId,
+        studentName,
+        studentId,
+        reportSnapshot: reportState,
+        codeSnapshot: codeFiles,
+        testSnapshot: testStats || { passed: 0, total: 0 },
+        docxBlob: blob,
+        docxFileName: fileName,
+      });
+
+      setSubmissionReceipt(receipt);
+    } catch (err: any) {
+      setSubmissionError(err.message || 'Report submission failed.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -234,8 +309,44 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
             <FileDown className="w-3.5 h-3.5" />
             <span>{isDownloadingDocx ? 'Generating DOCX...' : 'Download Word (.docx)'}</span>
           </button>
+
+          <button
+            onClick={handleSubmitReport}
+            disabled={isSubmitting || Boolean(submissionReceipt)}
+            className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-3.5 h-3.5" />
+            <span>
+              {submissionReceipt
+                ? 'Submitted'
+                : isSubmitting
+                ? 'Submitting...'
+                : 'Submit to Lecturer'}
+            </span>
+          </button>
         </div>
       </div>
+
+      {(submissionError || submissionReceipt) && (
+        <div
+          className={`mx-6 mt-3 rounded-md border px-4 py-2 text-xs ${
+            submissionReceipt
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+              : 'border-red-200 bg-red-50 text-red-700'
+          }`}
+        >
+          {submissionReceipt ? (
+            <span>
+              Report submitted successfully on{' '}
+              {new Date(submissionReceipt.submittedAt).toLocaleString()}.
+              The final Word document is stored in Supabase as{' '}
+              <strong>{submissionReceipt.fileName}</strong>.
+            </span>
+          ) : (
+            submissionError
+          )}
+        </div>
+      )}
 
       {/* Main Report Body */}
       <div className="flex-1 flex overflow-hidden">
