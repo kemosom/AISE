@@ -27,6 +27,7 @@ import { SubmitLabModal } from './SubmitLabModal';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
+import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
 
 interface LabWorkspaceProps {
   labId: string;
@@ -88,23 +89,19 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
   const localKey = (kind: string) => `aise:${labId}:${kind}`;
 
-  const readLocal = <T,>(kind: string): T | null => {
+  const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
     try {
-      const raw = window.localStorage.getItem(localKey(kind));
-      return raw ? (JSON.parse(raw) as T) : null;
-    } catch {
+      return await getBrowserValue<T>(localKey(kind));
+    } catch (err) {
+      console.warn(`Unable to read local ${kind}`, err);
       return null;
     }
   };
 
-  const writeLocal = (kind: string, value: unknown) => {
+  const writeLocal = async (kind: string, value: unknown): Promise<void> => {
     if (!useLocalPersistence) return;
-    try {
-      window.localStorage.setItem(localKey(kind), JSON.stringify(value));
-    } catch (err) {
-      console.warn(`Unable to save local ${kind}`, err);
-    }
+    await setBrowserValue(localKey(kind), value);
   };
 
   const createInitialReport = (labManifest: LabManifest): ReportState => ({
@@ -136,12 +133,21 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       setLabMeta(data.lab);
 
       if (useLocalPersistence) {
-        const savedFiles = readLocal<EditorFile[]>('files');
-        const savedDesign = readLocal<any>('visual-design');
-        const savedReport = readLocal<ReportState>('report');
-        const savedCheckpoints = readLocal<any[]>('checkpoints');
-        const savedSubmission = readLocal<any>('submission');
-        const savedTestStats = readLocal<{ passed: number; total: number }>('test-stats');
+        const [
+          savedFiles,
+          savedDesign,
+          savedReport,
+          savedCheckpoints,
+          savedSubmission,
+          savedTestStats,
+        ] = await Promise.all([
+          readLocal<EditorFile[]>('files'),
+          readLocal<any>('visual-design'),
+          readLocal<ReportState>('report'),
+          readLocal<any[]>('checkpoints'),
+          readLocal<any>('submission'),
+          readLocal<{ passed: number; total: number }>('test-stats'),
+        ]);
 
         setFiles(
           savedFiles && savedFiles.length > 0
@@ -214,7 +220,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(async () => {
       if (useLocalPersistence) {
-        writeLocal('files', updated);
+        await writeLocal('files', updated);
         setCodeSaveStatus('Saved');
         return;
       }
@@ -237,7 +243,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const updated = [...files, newFile];
     setFiles(updated);
     setActiveFileIndex(updated.length - 1);
-    writeLocal('files', updated);
+    void writeLocal('files', updated);
   };
 
   const handleDeleteFile = (idx: number) => {
@@ -253,7 +259,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     setVisualGraph(newGraph);
 
     if (useLocalPersistence) {
-      writeLocal('visual-design', newGraph);
+      await writeLocal('visual-design', newGraph);
       return;
     }
 
@@ -301,7 +307,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
       if (useLocalPersistence) {
-        writeLocal('report', newReport);
+        await writeLocal('report', newReport);
         setReportSaveStatus('Saved in this browser');
         return;
       }
@@ -329,7 +335,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       };
       const updated = [checkpoint, ...checkpoints];
       setCheckpoints(updated);
-      writeLocal('checkpoints', updated);
+      await writeLocal('checkpoints', updated);
       return;
     }
 
@@ -438,7 +444,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     };
 
     if (useLocalPersistence) {
-      writeLocal('submission', snapshot);
+      await writeLocal('submission', snapshot);
       setSubmissionCompleted(true);
       setIsSubmitModalOpen(false);
       return;
@@ -725,7 +731,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                 setTestStats(stats);
 
                 if (useLocalPersistence) {
-                  writeLocal('test-stats', stats);
+                  void writeLocal('test-stats', stats);
                 } else {
                   apiClient
                     .post(`/api/labs/${labId}/test-run`, stats)
