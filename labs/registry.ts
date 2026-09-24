@@ -15,13 +15,6 @@ import lab01ReportTemplate from './lab01-behavioral-programming/report-template.
 
 // Curriculum-aligned task catalog mapping for all MAI5124 laboratories
 export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
-  'lab01-behavioral-programming': [
-    { id: 'l1-t1', title: 'B-Thread Concurrent Formulation', description: 'Implement add_hot_water and add_cold_water generators with RWB protocol', category: 'code' },
-    { id: 'l1-t2', title: 'Overflow Prevention Safety Monitor', description: 'Implement dynamic blocking monitor at threshold capacity = 6', category: 'code' },
-    { id: 'l1-t3', title: 'Visual Coordination Pipeline', description: 'Configure event topology and b-thread nodes in Visual Designer', category: 'design' },
-    { id: 'l1-t4', title: 'Automated Assertion Verification', description: 'Run public test suite to verify deadlock-free operation', category: 'test' },
-    { id: 'l1-t5', title: 'Technical Report & Final Submission', description: 'Author required analytical sections and submit academic report', category: 'submission' },
-  ],
   'lab02-requirement-prioritization': [
     { id: 'l2-t1', title: 'Requirement Text Pre-Processing', description: 'Clean, tokenize, and compute TF-IDF vector embeddings', category: 'code' },
     { id: 'l2-t2', title: 'Machine Learning Classifier', description: 'Train supervised model to predict priority classes (High/Medium/Low)', category: 'code' },
