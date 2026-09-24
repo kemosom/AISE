@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Eye } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 
@@ -8,6 +8,7 @@ interface HeaderProps {
   onNavigate: (view: string) => void;
   isInstructorPreview?: boolean;
   onExitPreview?: () => void;
+  onInstructorAccess?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,8 +17,24 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigate,
   isInstructorPreview,
   onExitPreview,
+  onInstructorAccess,
 }) => {
   const isStudent = !user || user.role?.toUpperCase() === 'STUDENT';
+  const instructorClicksRef = useRef<number[]>([]);
+
+  const handleHiddenInstructorClick = () => {
+    const now = Date.now();
+    const recent = instructorClicksRef.current.filter(
+      (timestamp) => now - timestamp < 4000
+    );
+    recent.push(now);
+    instructorClicksRef.current = recent;
+
+    if (recent.length >= 5) {
+      instructorClicksRef.current = [];
+      onInstructorAccess?.();
+    }
+  };
 
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40">
@@ -40,19 +57,24 @@ export const Header: React.FC<HeaderProps> = ({
       )}
 
       <div className="max-w-7xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => onNavigate('dashboard')}
-          className="flex items-center gap-3 text-left"
-        >
-          <div className="w-7 h-7 rounded-md bg-slate-950 text-white flex items-center justify-center text-[10px] font-bold tracking-wide">
+        <div className="flex items-center gap-3 text-left">
+          <button
+            type="button"
+            onClick={handleHiddenInstructorClick}
+            className="w-7 h-7 rounded-md bg-slate-950 text-white flex items-center justify-center text-[10px] font-bold tracking-wide"
+            aria-label="AISE"
+          >
             AISE
-          </div>
-          <div className="leading-tight">
+          </button>
+          <button
+            type="button"
+            onClick={() => onNavigate('dashboard')}
+            className="leading-tight text-left"
+          >
             <div className="text-sm font-semibold text-slate-950">AISE Lab Studio</div>
             <div className="text-[10px] text-slate-400">MAI5124 · AI in Software Engineering</div>
-          </div>
-        </button>
+          </button>
+        </div>
 
         <nav className="flex items-center gap-1">
           <button
