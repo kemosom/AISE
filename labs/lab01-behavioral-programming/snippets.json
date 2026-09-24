@@ -1,34 +1,34 @@
 [
   {
-    "id": "bthread-producer",
-    "category": "Behavioral Threads",
-    "name": "Periodic Producer Thread",
-    "description": "Yields repeated event requests and synchronizes with peer event notifications.",
-    "parameters": ["event_name", "repetitions"],
-    "code": "def periodic_worker():\n    for _ in range(5):\n        yield {\n            'request': ['TASK_EXECUTE'],\n            'waitFor': ['TASK_COMPLETE'],\n            'block': []\n        }\n"
+    "id": "sync-template",
+    "category": "Behavioral Programming",
+    "name": "Synchronization Point",
+    "description": "Insert a blank Request-Wait-Block synchronization dictionary.",
+    "parameters": [],
+    "code": "yield {\n    \"request\": [],\n    \"waitFor\": [],\n    \"block\": [],\n}"
   },
   {
-    "id": "bthread-safety-monitor",
-    "category": "Behavioral Safety",
-    "name": "Safety Invariant Guard",
-    "description": "Monitors system events and dynamically blocks conflicting actions when a boundary condition is triggered.",
-    "parameters": ["blocked_events", "threshold"],
-    "code": "def safety_guard():\n    count = 0\n    while True:\n        if count >= 5:\n            yield {\n                'request': ['ALARM_TRIGGER'],\n                'waitFor': ['ALARM_CLEAR'],\n                'block': ['HAZARDOUS_ACTION']\n            }\n            count = 0\n        else:\n            e = yield {'request': [], 'waitFor': ['ACTION_SAMPLE'], 'block': []}\n            count += 1\n"
+    "id": "wait-for-fill-events",
+    "category": "Behavioral Programming",
+    "name": "Observe Fill Events",
+    "description": "Wait for the two fill events without requesting or blocking them.",
+    "parameters": [],
+    "code": "event = yield {\n    \"request\": [],\n    \"waitFor\": [HOT_WATER, COLD_WATER],\n    \"block\": [],\n}"
   },
   {
-    "id": "trace-plot-matplotlib",
-    "category": "Visualization",
-    "name": "Event Trace Plotter (Matplotlib)",
-    "description": "Generates a timeline scatter plot of dispatched behavioral events.",
-    "parameters": ["trace_history"],
-    "code": "import matplotlib.pyplot as plt\n\ndef plot_event_timeline(history):\n    plt.figure(figsize=(8, 3.5))\n    plt.plot(range(len(history)), history, 'o-', color='#1e3a8a', linewidth=1.5, markersize=6)\n    plt.title('Dispatched Event Trace Timeline (MAI5124)', fontsize=12, fontweight='bold')\n    plt.xlabel('Simulation Step')\n    plt.ylabel('Event')\n    plt.grid(True, linestyle='--', alpha=0.5)\n    plt.tight_layout()\n    plt.show()\n"
+    "id": "safety-action-template",
+    "category": "Safety",
+    "name": "Safety Action Template",
+    "description": "Template for requesting a drain while blocking both fill events. Use only after you understand why the condition is required.",
+    "parameters": [],
+    "code": "yield {\n    \"request\": [DRAIN_VALVE],\n    \"waitFor\": [DRAIN_VALVE],\n    \"block\": [HOT_WATER, COLD_WATER],\n}"
   },
   {
-    "id": "bthread-arbiter-diagnostic",
-    "category": "Debugging",
-    "name": "Diagnostic Trace Verifier",
-    "description": "Inspects history for consecutive duplicate event violations.",
-    "parameters": ["history"],
-    "code": "def verify_no_overflow(trace):\n    volume = 0\n    for evt in trace:\n        if evt in ['HOT_WATER', 'COLD_WATER']:\n            volume += 1\n        elif evt == 'DRAIN_VALVE':\n            volume -= 2\n        assert volume <= 6, f'Safety violation: tank volume exceeded 6 at {evt}'\n    print('Safety verification passed: No overflow events detected.')\n"
+    "id": "volume-update-template",
+    "category": "Utilities",
+    "name": "Volume Update",
+    "description": "Update a local volume counter from the selected event.",
+    "parameters": ["event"],
+    "code": "if event in (HOT_WATER, COLD_WATER):\n    volume += 1\nelif event == DRAIN_VALVE:\n    volume = max(0, volume - DRAIN_AMOUNT)"
   }
 ]
