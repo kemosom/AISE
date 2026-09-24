@@ -5,6 +5,7 @@ import {
   type FC,
   type MouseEvent as ReactMouseEvent,
   type TouchEvent as ReactTouchEvent,
+  type ReactNode,
 } from 'react';
 import {
   PenTool,
@@ -38,6 +39,39 @@ interface DrawingStroke {
   width: number;
   opacity: number;
   points: Array<{ x: number; y: number }>;
+}
+
+function renderInlineMarkdown(text: string): ReactNode[] {
+  const tokens = text.split(/(\*\*[^*]+\*\*|\`[^\`]+\`|\*[^*]+\*)/g);
+
+  return tokens
+    .filter(Boolean)
+    .map((token, index) => {
+      if (token.startsWith('**') && token.endsWith('**')) {
+        return (
+          <strong key={index} className="font-semibold text-slate-950">
+            {token.slice(2, -2)}
+          </strong>
+        );
+      }
+
+      if (token.startsWith('`') && token.endsWith('`')) {
+        return (
+          <code
+            key={index}
+            className="font-mono text-[0.9em] bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded"
+          >
+            {token.slice(1, -1)}
+          </code>
+        );
+      }
+
+      if (token.startsWith('*') && token.endsWith('*')) {
+        return <em key={index}>{token.slice(1, -1)}</em>;
+      }
+
+      return <span key={index}>{token}</span>;
+    });
 }
 
 interface LabTheoryArticleProps {
@@ -721,6 +755,11 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
             const trimmed = block.trim();
             if (!trimmed) return null;
 
+            // Horizontal separator between theory and practical sheet
+            if (trimmed === '---') {
+              return <hr key={idx} className="my-12 border-0 border-t border-slate-300" />;
+            }
+
             // Heading 1
             if (trimmed.startsWith('# ')) {
               return (
@@ -790,7 +829,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                     return (
                       <li key={itemIdx} className="flex items-start space-x-3 text-slate-700">
                         <span className="text-blue-600 font-bold text-lg leading-none mt-1">•</span>
-                        <span>{clean}</span>
+                        <span>{renderInlineMarkdown(clean)}</span>
                       </li>
                     );
                   })}
@@ -811,7 +850,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                         <span className="font-sans font-bold text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 mt-0.5">
                           {numMatch[1]}
                         </span>
-                        <span>{numMatch[2]}</span>
+                        <span>{renderInlineMarkdown(numMatch[2])}</span>
                       </li>
                     );
                   })}
@@ -827,7 +866,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
                   key={idx}
                   className="my-6 pl-5 border-l-4 border-blue-900 italic text-slate-700 font-serif text-[19px] leading-relaxed bg-blue-50/30 py-2 rounded-r-lg"
                 >
-                  {quoteContent}
+                  {renderInlineMarkdown(quoteContent)}
                 </blockquote>
               );
             }
@@ -835,7 +874,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
             // Standard narrative paragraph
             return (
               <p key={idx} className="leading-[1.85] text-slate-800">
-                {trimmed}
+                {renderInlineMarkdown(trimmed)}
               </p>
             );
           })}
