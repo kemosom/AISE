@@ -390,7 +390,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddDesignToReport = (summary: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'methodology') || reportState.sections[0];
+    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
@@ -633,7 +633,9 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             {(panelFocus === 'all' || panelFocus === 'guide') && (
               <div className="w-72 lg:w-80 shrink-0 h-full hidden md:block">
                 <LabGuidePanel
-                  instructionsMarkdown={manifest.instructionsMarkdown}
+                  instructionsMarkdown={
+                    manifest.labSheetMarkdown || manifest.instructionsMarkdown
+                  }
                   learningOutcomes={manifest.learningOutcomes}
                 />
               </div>
