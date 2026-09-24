@@ -1,7 +1,7 @@
 # AISE Lab Studio Laboratory Module Specification
 
 **Course:** MAI5124 AI in Software Engineering  
-**Module format version:** 2.0
+**Module format version:** 2.1
 
 ## 1. Principle
 
@@ -18,7 +18,7 @@ lab-sheet.md
     ↓
 Begin Lab
     ↓
-starter code + visual tools
+starter code + optional learning tools
     ↓
 public tests
     ↓
@@ -107,9 +107,23 @@ Example:
     "webPreview": false
   },
   "learningOutcomes": [
-    "Model software requirements as independent behavioral threads.",
-    "Apply Request-Wait-Block synchronization.",
-    "Verify a safety invariant using executable assertions."
+    "Investigate an AI application in a software-engineering workflow.",
+    "Compare and justify alternative AI-integration approaches.",
+    "Verify and interpret the behavior of the selected approach."
+  ],
+  "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Investigate the AI application and its limitations."
+    },
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "secondary",
+      "evidence": "Compare, justify, and apply an appropriate method."
+    }
   ],
   "tasks": [
     {
@@ -356,20 +370,25 @@ Do not unlock a lab simply because the page renders.
 Before release, verify:
 
 1. Theory is technically correct.
-2. Lab tasks map to the intended course topic/CLO.
-3. Starter code does not contain the complete answer.
-4. Starter code actually runs up to the intentional TODO point.
-5. The final intended solution can run in Pyodide.
-6. Public tests fail meaningfully on incomplete work.
-7. Public tests pass on a correct implementation.
-8. Tests verify behavior, not superficial syntax.
-9. Visual tools are relevant and functional.
-10. Report sections match the practical evidence and analysis questions.
-11. Word report export works.
-12. Theory/lab-sheet Word and PDF export work.
-13. Annotation tools persist correctly.
-14. No instructor solution is shipped to the public browser bundle.
-15. The module is readable and usable on a normal laptop screen.
+2. The lab sheet states the intended CLO/PLO contribution explicitly.
+3. The claimed CLO/PLO level is defensible as primary, secondary, or preparatory.
+4. The activity is appropriate for Master's level and includes a genuine compare/select/justify/evaluate/interpret task.
+5. The scenario uses a realistic AI/software-engineering problem or artefact unless abstraction is itself the learning objective.
+6. Students must make and justify at least one engineering/AI decision rather than only follow a prescribed recipe.
+7. Starter code does not contain the complete answer.
+8. Starter code actually runs up to the intentional TODO point.
+9. The final intended solution can run in Pyodide.
+10. Public tests fail meaningfully on incomplete work.
+11. Public tests pass on a correct implementation.
+12. Tests verify behavior, not superficial syntax.
+13. Quantitative metrics are interpreted when CLO3/PLO7 is targeted, not merely displayed.
+14. Optional visual/block tools are enabled only when they contribute directly to a learning outcome.
+15. Report sections capture decision rationale, evidence, interpretation, and Final Project transfer where appropriate.
+16. Word report export works.
+17. Theory/lab-sheet Word and PDF export work.
+18. Annotation tools persist correctly.
+19. No instructor solution is shipped to the public browser bundle.
+20. The module is readable and usable on a normal laptop screen.
 
 Only then change the course release configuration so the module becomes available.
 
