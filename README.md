@@ -237,7 +237,10 @@ Vercel also needs:
 
 ```text
 VITE_SUPABASE_URL=https://<project>.supabase.co
-VITE_SUPABASE_ANON_KEY=<project anon/publishable key>
+VITE_SUPABASE_PUBLISHABLE_KEY=<project publishable key>
+
+# Legacy projects may instead use:
+VITE_SUPABASE_ANON_KEY=<project anon key>
 ```
 
 The anon/publishable key is designed for browser use. Do not expose a Supabase service-role key in `VITE_*` variables.
