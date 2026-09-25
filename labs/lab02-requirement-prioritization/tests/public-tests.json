@@ -2,43 +2,50 @@
   {
     "id": "test-model-validity",
     "name": "NLP Model Produces Valid Priority Probabilities",
-    "description": "Checks that every candidate requirement receives a valid class probability distribution and confidence value.",
-    "testCode": "import main\nfrom priority_model import predict_priority\nfrom requirements_data import CANDIDATE_REQUIREMENTS\n\nfor requirement in CANDIDATE_REQUIREMENTS:\n    prediction = predict_priority(requirement)\n    assert prediction['label'] in ('HIGH', 'MEDIUM', 'LOW')\n    total = prediction['p_high'] + prediction['p_medium'] + prediction['p_low']\n    assert abs(total - 1.0) < 1e-9, f\"{requirement['id']}: probabilities do not sum to 1\"\n    assert 0.0 <= prediction['confidence'] <= 1.0\n    assert isinstance(prediction['evidence_tokens'], list)",
-    "weight": 15
+    "description": "Checks that the supplied classifier returns a valid probability distribution for every candidate requirement.",
+    "testCode": "from priority_model import predict_priority\nfrom requirements_data import CANDIDATE_REQUIREMENTS\n\nfor requirement in CANDIDATE_REQUIREMENTS:\n    prediction = predict_priority(requirement)\n    assert prediction['label'] in ('HIGH', 'MEDIUM', 'LOW')\n    total = prediction['p_high'] + prediction['p_medium'] + prediction['p_low']\n    assert abs(total - 1.0) < 1e-9\n    assert 0.0 <= prediction['confidence'] <= 1.0",
+    "weight": 10
   },
   {
     "id": "test-model-validation",
-    "name": "Historical Validation Performance Is Acceptable",
-    "description": "Verifies that the supplied supervised NLP model performs consistently on the held-out teaching validation set.",
-    "testCode": "from priority_model import evaluate_model\n\nmetrics = evaluate_model()\nassert metrics['accuracy'] >= 0.80, f\"Expected validation accuracy >= 0.80, got {metrics['accuracy']:.3f}\"\nassert metrics['macro_f1'] >= 0.80, f\"Expected macro-F1 >= 0.80, got {metrics['macro_f1']:.3f}\"",
-    "weight": 15
+    "name": "Historical Validation Performance Is Interpretable",
+    "description": "Checks that the supplied teaching model achieves acceptable validation accuracy and macro-F1 before it is used in release planning.",
+    "testCode": "from priority_model import evaluate_model\n\nmetrics = evaluate_model()\nassert metrics['accuracy'] >= 0.80\nassert metrics['macro_f1'] >= 0.80",
+    "weight": 10
   },
   {
     "id": "test-baseline-behaviour",
-    "name": "Vote-Only Baseline Remains Transparent",
-    "description": "Confirms that the baseline score is determined only by normalized user votes and produces the expected budgeted release.",
-    "testCode": "import main\n\nfor requirement in main.CANDIDATE_REQUIREMENTS:\n    expected = min(requirement['user_votes'] / 100.0, 1.0)\n    assert abs(main.baseline_priority_score(requirement) - expected) < 1e-9\n\nplan = main.build_release_plan('BASELINE')\nselected = [row['id'] for row in plan['selected']]\nassert selected == ['REQ-205', 'REQ-203'], f'Unexpected baseline release: {selected}'\nassert plan['budget_used'] == 8",
-    "weight": 15
+    "name": "Vote-Only Baseline Is Reproducible",
+    "description": "Confirms the transparent baseline and its budgeted release plan.",
+    "testCode": "import main\n\nfor requirement in main.CANDIDATE_REQUIREMENTS:\n    expected = min(requirement['user_votes'] / 100.0, 1.0)\n    assert abs(main.baseline_priority_score(requirement) - expected) < 1e-9\n\nplan = main.build_release_plan('BASELINE')\nassert [row['id'] for row in plan['selected']] == ['REQ-205', 'REQ-203']\nassert plan['budget_used'] == 8",
+    "weight": 10
+  },
+  {
+    "id": "test-policy-design",
+    "name": "Release Policy Is Deliberately Designed",
+    "description": "Checks that the student selected a valid hybrid weighting rather than leaving the policy undefined.",
+    "testCode": "import main\n\nweights = [main.AI_WEIGHT, main.BUSINESS_WEIGHT, main.STRATEGIC_WEIGHT, main.VOTE_WEIGHT]\nassert all(isinstance(value, (int, float)) for value in weights), 'Choose all four core policy weights.'\nassert 0.30 <= main.AI_WEIGHT <= 0.60\nassert 0.10 <= main.BUSINESS_WEIGHT <= 0.30\nassert 0.10 <= main.STRATEGIC_WEIGHT <= 0.30\nassert 0.05 <= main.VOTE_WEIGHT <= 0.25\nassert abs(sum(weights) - 1.0) < 1e-9, 'Core policy weights must sum to 1.0.'\nassert isinstance(main.ACCESSIBILITY_BONUS, (int, float)) and 0.00 <= main.ACCESSIBILITY_BONUS <= 0.10\nassert isinstance(main.EFFORT_PENALTY, (int, float)) and 0.02 <= main.EFFORT_PENALTY <= 0.08\nmain.validate_policy()",
+    "weight": 20
   },
   {
     "id": "test-ai-score",
-    "name": "AI-Assisted Scoring Equation Is Correct",
-    "description": "Checks the implemented hybrid score against the stated engineering design.",
-    "testCode": "import main\nfrom priority_model import predict_priority\n\nrequirement = next(r for r in main.CANDIDATE_REQUIREMENTS if r['id'] == 'REQ-204')\nprediction = predict_priority(requirement)\nexpected = (\n    main.AI_WEIGHT * prediction['p_high']\n    + main.BUSINESS_WEIGHT * (requirement['business_value'] / 10.0)\n    + main.STRATEGIC_WEIGHT * (requirement['strategic_fit'] / 10.0)\n    + main.VOTE_WEIGHT * min(requirement['user_votes'] / 100.0, 1.0)\n    + (main.ACCESSIBILITY_BONUS if requirement['accessibility_impact'] else 0.0)\n    - main.EFFORT_PENALTY * (requirement['effort'] - 1)\n)\nexpected = main.clamp(expected)\nactual = main.ai_assisted_priority_score(requirement, prediction)\nassert abs(actual - expected) < 1e-9, f'Expected {expected:.6f}, got {actual:.6f}'",
+    "name": "Hybrid Priority Function Implements the Chosen Policy",
+    "description": "Recomputes the score using the student's own valid policy and checks the implementation.",
+    "testCode": "import main\nfrom priority_model import predict_priority\n\nrequirement = next(r for r in main.CANDIDATE_REQUIREMENTS if r['id'] == 'REQ-204')\nprediction = predict_priority(requirement)\nexpected = (\n    main.AI_WEIGHT * prediction['p_high']\n    + main.BUSINESS_WEIGHT * (requirement['business_value'] / 10.0)\n    + main.STRATEGIC_WEIGHT * (requirement['strategic_fit'] / 10.0)\n    + main.VOTE_WEIGHT * min(requirement['user_votes'] / 100.0, 1.0)\n    + (main.ACCESSIBILITY_BONUS if requirement['accessibility_impact'] else 0.0)\n    - main.EFFORT_PENALTY * (requirement['effort'] - 1)\n)\nexpected = main.clamp(expected)\nactual = main.ai_assisted_priority_score(requirement, prediction)\nassert abs(actual - expected) < 1e-9",
     "weight": 20
   },
   {
-    "id": "test-budget-and-order",
-    "name": "AI Release Plan Respects Ranking and Budget",
-    "description": "The release planner must stay within the implementation budget and retain descending score order.",
-    "testCode": "import main\n\nplan = main.build_release_plan('AI_ASSISTED')\nassert plan['budget_used'] <= main.RELEASE_BUDGET\nscores = [row['score'] for row in plan['ranking']]\nassert scores == sorted(scores, reverse=True), 'Ranking is not in descending score order'\nselected_effort = sum(row['effort'] for row in plan['selected'])\nassert selected_effort == plan['budget_used']",
+    "id": "test-ai-sensitivity",
+    "name": "The AI Signal Actually Influences the Decision",
+    "description": "Checks that raising the learned HIGH-priority probability increases the score for an otherwise identical requirement.",
+    "testCode": "import main\n\nrequirement = next(r for r in main.CANDIDATE_REQUIREMENTS if r['id'] == 'REQ-201')\nlow = {'p_high': 0.10}\nhigh = {'p_high': 0.90}\nlow_score = main.ai_assisted_priority_score(requirement, low)\nhigh_score = main.ai_assisted_priority_score(requirement, high)\nassert high_score > low_score, 'Your score does not respond to the NLP model output.'",
     "weight": 15
   },
   {
-    "id": "test-release-change",
-    "name": "AI-Assisted Prioritization Changes the Product Release",
-    "description": "Verifies that the learned text evidence changes the selected requirements rather than reproducing the vote-only baseline.",
-    "testCode": "import main\n\nbaseline = [row['id'] for row in main.build_release_plan('BASELINE')['selected']]\nai_plan = main.build_release_plan('AI_ASSISTED')\nai_selected = [row['id'] for row in ai_plan['selected']]\nassert ai_selected != baseline, 'AI-assisted release should differ from the vote-only baseline'\nassert 'REQ-202' in ai_selected, 'Live Lyrics Translation should enter the AI-assisted release'\nassert 'REQ-204' in ai_selected, 'Low Data Mode should enter the AI-assisted release'\nassert ai_plan['budget_used'] <= main.RELEASE_BUDGET",
-    "weight": 20
+    "id": "test-budget-and-order",
+    "name": "AI-Assisted Release Respects Ranking and Budget",
+    "description": "Checks that the chosen policy can be deployed safely under the release budget.",
+    "testCode": "import main\n\nplan = main.build_release_plan('AI_ASSISTED')\nassert plan['budget_used'] <= main.RELEASE_BUDGET\nscores = [row['score'] for row in plan['ranking']]\nassert scores == sorted(scores, reverse=True)\nassert sum(row['effort'] for row in plan['selected']) == plan['budget_used']\nassert len(plan['selected']) >= 2",
+    "weight": 15
   }
 ]
