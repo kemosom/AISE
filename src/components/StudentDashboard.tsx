@@ -54,6 +54,8 @@ const STAFF_PROFILE_URL =
   'https://sunwayuniversity.edu.my/school-of-engineering/staff-profiles/dr-abdikarim-mohamed-ibrahim';
 const PERSONAL_WEBSITE_URL = 'https://dr-abdikarim.com/';
 const SUNWAY_URL = 'https://sunwayuniversity.edu.my/';
+const SUNWAY_LOGO = 'data:image/webp;base64,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';
+const FCRI_LOGO = 'data:image/webp;base64,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';
 
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   labs,
@@ -62,96 +64,103 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   error,
   isLoading,
 }) => {
-  const heroRef = useRef<HTMLElement | null>(null);
+  const pageRef = useRef<HTMLDivElement | null>(null);
   const cursorGlowRef = useRef<HTMLDivElement | null>(null);
   const orbARef = useRef<HTMLDivElement | null>(null);
   const orbBRef = useRef<HTMLDivElement | null>(null);
+  const orbCRef = useRef<HTMLDivElement | null>(null);
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
-    const hero = heroRef.current;
-    if (!hero) return;
-
-    const rect = hero.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const width = window.innerWidth || 1;
+    const height = window.innerHeight || 1;
+    const x = event.clientX / width - 0.5;
+    const y = event.clientY / height - 0.5;
 
     if (cursorGlowRef.current) {
-      cursorGlowRef.current.style.left = `${event.clientX - rect.left}px`;
-      cursorGlowRef.current.style.top = `${event.clientY - rect.top}px`;
+      cursorGlowRef.current.style.left = `${event.clientX}px`;
+      cursorGlowRef.current.style.top = `${event.clientY}px`;
     }
 
     if (orbARef.current) {
       orbARef.current.style.transform =
-        `translate3d(${x * 34}px, ${y * 24}px, 0)`;
+        `translate3d(${x * 70}px, ${y * 52}px, 0)`;
     }
 
     if (orbBRef.current) {
       orbBRef.current.style.transform =
-        `translate3d(${x * -22}px, ${y * -18}px, 0)`;
+        `translate3d(${x * -52}px, ${y * -38}px, 0)`;
+    }
+
+    if (orbCRef.current) {
+      orbCRef.current.style.transform =
+        `translate3d(${x * 36}px, ${y * -30}px, 0)`;
     }
   };
 
   const resetParallax = () => {
     if (cursorGlowRef.current) {
-      cursorGlowRef.current.style.left = '72%';
-      cursorGlowRef.current.style.top = '34%';
+      cursorGlowRef.current.style.left = '68%';
+      cursorGlowRef.current.style.top = '32%';
     }
-    if (orbARef.current) {
-      orbARef.current.style.transform = 'translate3d(0, 0, 0)';
-    }
-    if (orbBRef.current) {
-      orbBRef.current.style.transform = 'translate3d(0, 0, 0)';
-    }
+
+    [orbARef, orbBRef, orbCRef].forEach((ref) => {
+      if (ref.current) {
+        ref.current.style.transform = 'translate3d(0, 0, 0)';
+      }
+    });
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-5 sm:px-8 py-10">
-      <section
-        ref={heroRef}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={resetParallax}
-        className="relative mb-10 overflow-hidden rounded-2xl border border-slate-200 bg-white px-6 py-8 sm:px-8 sm:py-10 shadow-sm"
-      >
+    <div
+      ref={pageRef}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetParallax}
+      className="relative isolate min-h-[calc(100vh-4rem)] w-full overflow-hidden bg-slate-50"
+    >
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         <div
           ref={cursorGlowRef}
-          className="pointer-events-none absolute z-0 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-300/20 blur-3xl transition-[left,top] duration-150 ease-out"
-          style={{ left: '72%', top: '34%' }}
+          className="absolute h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-300/18 blur-3xl transition-[left,top] duration-100 ease-out"
+          style={{ left: '68%', top: '32%' }}
         />
         <div
           ref={orbARef}
-          className="pointer-events-none absolute -right-16 -top-20 z-0 h-56 w-56 rounded-full border border-blue-200/70 bg-blue-100/50 blur-[1px] transition-transform duration-300 ease-out"
+          className="absolute -right-28 top-12 h-80 w-80 rounded-full border border-blue-200/70 bg-blue-100/45 transition-transform duration-300 ease-out"
         />
         <div
           ref={orbBRef}
-          className="pointer-events-none absolute -bottom-24 right-28 z-0 h-48 w-48 rounded-full border border-cyan-100 bg-cyan-50/70 transition-transform duration-300 ease-out"
+          className="absolute -left-24 top-[42%] h-72 w-72 rounded-full border border-cyan-100 bg-cyan-50/75 transition-transform duration-300 ease-out"
         />
-        <div className="pointer-events-none absolute right-14 top-9 z-0 h-24 w-24 rounded-full border border-slate-200/80" />
-        <div className="pointer-events-none absolute right-20 top-15 z-0 h-12 w-12 rounded-full border border-blue-200/80" />
+        <div
+          ref={orbCRef}
+          className="absolute bottom-[-7rem] right-[16%] h-80 w-80 rounded-full border border-indigo-100 bg-indigo-50/65 transition-transform duration-300 ease-out"
+        />
+        <div className="absolute left-[12%] top-[18%] h-20 w-20 rounded-full border border-blue-200/70" />
+        <div className="absolute right-[21%] top-[58%] h-28 w-28 rounded-full border border-slate-200/80" />
+        <div
+          className="absolute inset-0 opacity-[0.26]"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle at 1px 1px, rgba(59,130,246,0.16) 1px, transparent 0)',
+            backgroundSize: '28px 28px',
+          }}
+        />
+      </div>
 
-        <div className="relative z-10">
+      <div className="relative z-10 mx-auto w-full max-w-5xl px-5 py-10 sm:px-8">
+        <section className="mb-10 rounded-2xl border border-slate-200/90 bg-white/82 px-6 py-8 shadow-sm backdrop-blur-md sm:px-8 sm:py-10">
           <a
             href={SUNWAY_URL}
             target="_blank"
             rel="noreferrer"
-            className="mb-6 inline-flex items-center gap-3 rounded-lg border border-slate-200 bg-white/85 px-3 py-2 shadow-sm backdrop-blur"
+            className="mb-7 inline-flex"
             title="Sunway University"
           >
             <img
-              src="https://sunwayuniversity.edu.my/favicon.ico"
-              alt="Sunway University logo"
-              className="h-9 w-9 object-contain"
-              onError={(event) => {
-                event.currentTarget.style.display = 'none';
-              }}
+              src={SUNWAY_LOGO}
+              alt="Sunway University"
+              className="h-auto w-52 object-contain sm:w-56"
             />
-            <div className="leading-tight">
-              <div className="text-[11px] font-bold tracking-[0.16em] text-slate-950">
-                SUNWAY UNIVERSITY
-              </div>
-              <div className="mt-0.5 text-[9px] uppercase tracking-[0.14em] text-slate-400">
-                Faculty of Engineering and Technology
-              </div>
-            </div>
           </a>
 
           <p className="text-xs font-semibold tracking-[0.16em] uppercase text-blue-900 mb-1">
@@ -161,11 +170,11 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             Sunway University · Faculty of Engineering and Technology
           </p>
 
-          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-950">
+          <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
             Interactive Laboratory Modules
           </h1>
 
-          <p className="mt-3 max-w-2xl text-sm sm:text-base leading-7 text-slate-600">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
             Start with the theory and laboratory sheet, follow the guided steps,
             work directly in the Python workspace, verify the requirements, and
             complete the integrated technical report.
@@ -185,161 +194,171 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               Requirement verification & report
             </span>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {error && (
-        <div className="mb-6 border border-red-200 bg-red-50 rounded-md px-4 py-3 flex items-start justify-between gap-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-red-600 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm font-medium text-red-900">
-                Unable to load laboratory modules.
-              </p>
-              <p className="text-xs text-red-700 mt-1">{error}</p>
+        {error && (
+          <div className="mb-6 flex items-start justify-between gap-4 rounded-md border border-red-200 bg-red-50/95 px-4 py-3 backdrop-blur">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+              <div>
+                <p className="text-sm font-medium text-red-900">
+                  Unable to load laboratory modules.
+                </p>
+                <p className="mt-1 text-xs text-red-700">{error}</p>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={onRefresh}
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-800 hover:text-red-950"
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Retry
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={onRefresh}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-red-800 hover:text-red-950"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Retry
-          </button>
-        </div>
-      )}
+        )}
 
-      {isLoading && (
-        <div className="py-12 text-sm text-slate-500">
-          Loading laboratory modules…
-        </div>
-      )}
+        {isLoading && (
+          <div className="py-12 text-sm text-slate-500">
+            Loading laboratory modules…
+          </div>
+        )}
 
-      {!isLoading && !error && labs.length === 0 && (
-        <div className="border border-slate-200 rounded-md p-6 text-sm text-slate-600">
-          No laboratory modules are available yet.
-        </div>
-      )}
+        {!isLoading && !error && labs.length === 0 && (
+          <div className="rounded-md border border-slate-200 bg-white/80 p-6 text-sm text-slate-600 backdrop-blur">
+            No laboratory modules are available yet.
+          </div>
+        )}
 
-      {!isLoading && labs.length > 0 && (
-        <div className="border-t border-slate-200">
-          {labs.map((lab) => {
-            const unlocked = lab.isUnlocked;
-            const submitted =
-              lab.status === 'Submitted' ||
-              lab.status === 'Completed' ||
-              lab.isSubmitted;
-            const isExam = lab.examMode || lab.labNumber === 12;
+        {!isLoading && labs.length > 0 && (
+          <div className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white/72 shadow-sm backdrop-blur-md">
+            {labs.map((lab, index) => {
+              const unlocked = lab.isUnlocked;
+              const submitted =
+                lab.status === 'Submitted' ||
+                lab.status === 'Completed' ||
+                lab.isSubmitted;
+              const isExam = lab.examMode || lab.labNumber === 12;
 
-            return (
-              <article
-                key={lab.id}
-                className="border-b border-slate-200 py-6 grid grid-cols-1 sm:grid-cols-[92px_1fr_auto] gap-3 sm:gap-6 items-start"
-              >
-                <div>
-                  <span className="font-mono text-xs text-slate-500">
-                    {isExam
-                      ? 'EXAM'
-                      : `LAB ${String(lab.labNumber).padStart(2, '0')}`}
-                  </span>
-                  {lab.estimatedDuration && (
-                    <div className="mt-2 inline-flex items-center gap-1 text-[11px] text-slate-400">
-                      <Clock3 className="w-3 h-3" />
-                      {lab.estimatedDuration}
-                    </div>
-                  )}
-                </div>
-
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2
-                      className={`text-base font-semibold ${
-                        unlocked ? 'text-slate-950' : 'text-slate-500'
-                      }`}
-                    >
-                      {lab.title}
-                    </h2>
-                    {submitted && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
-                        Completed
-                      </span>
+              return (
+                <article
+                  key={lab.id}
+                  className={`grid grid-cols-1 items-start gap-3 px-5 py-6 transition-colors hover:bg-white/70 sm:grid-cols-[92px_1fr_auto] sm:gap-6 sm:px-6 ${
+                    index < labs.length - 1 ? 'border-b border-slate-200/90' : ''
+                  }`}
+                >
+                  <div>
+                    <span className="font-mono text-xs text-slate-500">
+                      {isExam
+                        ? 'EXAM'
+                        : `LAB ${String(lab.labNumber).padStart(2, '0')}`}
+                    </span>
+                    {lab.estimatedDuration && (
+                      <div className="mt-2 inline-flex items-center gap-1 text-[11px] text-slate-400">
+                        <Clock3 className="h-3 w-3" />
+                        {lab.estimatedDuration}
+                      </div>
                     )}
                   </div>
-                  <p
-                    className={`mt-1 text-sm leading-6 max-w-2xl ${
-                      unlocked ? 'text-slate-600' : 'text-slate-400'
-                    }`}
-                  >
-                    {lab.shortDescription}
-                  </p>
-                </div>
 
-                <div className="sm:pt-1">
-                  {unlocked ? (
-                    <button
-                      type="button"
-                      onClick={() => onSelectLab(lab.id)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-slate-950 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
-                    >
-                      {submitted ? 'Review Lab' : 'Open Lab'}
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  ) : (
-                    <div className="inline-flex items-center gap-1.5 px-3 py-2 text-xs text-slate-400">
-                      <Lock className="w-3.5 h-3.5" />
-                      Coming later
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2
+                        className={`text-base font-semibold ${
+                          unlocked ? 'text-slate-950' : 'text-slate-500'
+                        }`}
+                      >
+                        {lab.title}
+                      </h2>
+                      {submitted && (
+                        <span className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">
+                          Completed
+                        </span>
+                      )}
                     </div>
-                  )}
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                    <p
+                      className={`mt-1 max-w-2xl text-sm leading-6 ${
+                        unlocked ? 'text-slate-600' : 'text-slate-400'
+                      }`}
+                    >
+                      {lab.shortDescription}
+                    </p>
+                  </div>
 
-      <footer className="mt-12 border-t border-slate-200 pt-6 pb-2">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs text-slate-500">
-              © 2026{' '}
+                  <div className="sm:pt-1">
+                    {unlocked ? (
+                      <button
+                        type="button"
+                        onClick={() => onSelectLab(lab.id)}
+                        className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
+                      >
+                        {submitted ? 'Review Lab' : 'Open Lab'}
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </button>
+                    ) : (
+                      <div className="inline-flex items-center gap-1.5 px-3 py-2 text-xs text-slate-400">
+                        <Lock className="h-3.5 w-3.5" />
+                        Coming later
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+
+        <footer className="mt-12 rounded-2xl border border-slate-200/90 bg-white/72 px-5 py-5 shadow-sm backdrop-blur-md sm:px-6">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <img
+                src={FCRI_LOGO}
+                alt="Future Cities Research Institute"
+                className="h-auto w-40 shrink-0 object-contain sm:w-44"
+              />
+
+              <div>
+                <p className="text-xs text-slate-500">
+                  © 2026{' '}
+                  <a
+                    href={STAFF_PROFILE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-semibold text-slate-800 hover:text-blue-900 hover:underline"
+                  >
+                    Dr Abdikarim Mohamed Ibrahim
+                  </a>
+                </p>
+                <p className="mt-1 max-w-xl text-[11px] leading-5 text-slate-400">
+                  Post-Doctoral Research Fellow · Faculty of Engineering and Technology,
+                  School of Engineering · Sunway University
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 text-[11px]">
+              <a
+                href={PERSONAL_WEBSITE_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-slate-500 hover:text-blue-900"
+              >
+                dr-abdikarim.com
+                <ExternalLink className="h-3 w-3" />
+              </a>
               <a
                 href={STAFF_PROFILE_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="font-semibold text-slate-800 hover:text-blue-900 hover:underline"
+                className="inline-flex items-center gap-1 text-slate-500 hover:text-blue-900"
               >
-                Dr Abdikarim Mohamed Ibrahim
+                Sunway staff profile
+                <ExternalLink className="h-3 w-3" />
               </a>
-            </p>
-            <p className="mt-1 max-w-2xl text-[11px] leading-5 text-slate-400">
-              Post-Doctoral Research Fellow · Faculty of Engineering and Technology,
-              School of Engineering · Sunway University
-            </p>
+            </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 text-[11px]">
-            <a
-              href={PERSONAL_WEBSITE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-slate-500 hover:text-blue-900"
-            >
-              dr-abdikarim.com
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <a
-              href={STAFF_PROFILE_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1 text-slate-500 hover:text-blue-900"
-            >
-              Sunway staff profile
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 };
