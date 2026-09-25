@@ -25,9 +25,13 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
   const [activeTab, setActiveTab] = useState<AdminTab>('guide');
   const [copied, setCopied] = useState(false);
 
+  const labLabel = data.labNumber
+    ? `Lab ${String(data.labNumber).padStart(2, '0')}`
+    : 'Laboratory';
+
   const copySolution = async () => {
     await navigator.clipboard.writeText(
-      `${data.solution.code}\n\n${data.solution.setting}`
+      [data.solution?.code, data.solution?.setting].filter(Boolean).join('\n\n')
     );
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1500);
@@ -41,6 +45,12 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
     { id: 'report', label: 'Sample Report', icon: <Clipboard className="w-4 h-4" /> },
     { id: 'masters', label: "Master's Level", icon: <GraduationCap className="w-4 h-4" /> },
   ];
+
+  const strategyLabels = data.engineeringDecision?.strategyLabels || {
+    strategyA: 'A: Direct AI',
+    strategyB: 'B: Policy in model',
+    strategyC: 'C: Separated',
+  };
 
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-slate-100">
@@ -57,7 +67,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
             </button>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
               <ShieldCheck className="w-4 h-4" />
-              Instructor only
+              Instructor only · {labLabel}
             </div>
             <h1 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-950">
               {data.title}
@@ -88,7 +98,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
 
         {activeTab === 'guide' && (
           <div className="space-y-4">
-            {data.teachingSteps.map((item: any) => (
+            {(data.teachingSteps || []).map((item: any) => (
               <section key={item.step} className="bg-white border border-slate-200 rounded-lg p-5">
                 <div className="flex items-start gap-4">
                   <div className="w-8 h-8 shrink-0 rounded-full bg-slate-950 text-white flex items-center justify-center text-xs font-bold">
@@ -111,9 +121,9 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
           <div className="space-y-5">
             <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
               <div className="px-5 py-4 border-b border-slate-200">
-                <h2 className="text-sm font-semibold text-slate-950">Lab 01 CLO/PLO contribution</h2>
+                <h2 className="text-sm font-semibold text-slate-950">{labLabel} CLO/PLO contribution</h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Use this to explain the academic purpose of the lab and avoid over-claiming alignment.
+                  Instructor-facing alignment and the evidence students should produce.
                 </p>
               </div>
               <div className="divide-y divide-slate-100">
@@ -135,7 +145,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                         Evidence expected from students
                       </div>
                       <ul className="mt-2 space-y-1.5 text-xs leading-5 text-slate-600">
-                        {item.studentEvidence.map((evidence: string) => (
+                        {(item.studentEvidence || []).map((evidence: string) => (
                           <li key={evidence} className="flex gap-2">
                             <span className="text-blue-700">•</span>
                             <span>{evidence}</span>
@@ -154,7 +164,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                   {data.engineeringDecision.title}
                 </h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Recommended answer: {data.engineeringDecision.recommendedStrategy}
+                  Recommended reference approach: {data.engineeringDecision.recommendedStrategy}
                 </p>
               </div>
               <div className="overflow-x-auto">
@@ -162,14 +172,14 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                   <thead className="bg-slate-50 text-slate-600">
                     <tr>
                       <th className="text-left px-4 py-3">Criterion</th>
-                      <th className="text-left px-4 py-3">A: Direct AI</th>
-                      <th className="text-left px-4 py-3">B: Policy in model</th>
-                      <th className="text-left px-4 py-3">C: Separated</th>
+                      <th className="text-left px-4 py-3">{strategyLabels.strategyA}</th>
+                      <th className="text-left px-4 py-3">{strategyLabels.strategyB}</th>
+                      <th className="text-left px-4 py-3">{strategyLabels.strategyC}</th>
                       <th className="text-left px-4 py-3">Instructor rationale</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {data.engineeringDecision.comparison.map((row: any) => (
+                    {(data.engineeringDecision.comparison || []).map((row: any) => (
                       <tr key={row.criterion} className="align-top">
                         <td className="px-4 py-3 font-semibold text-slate-900">{row.criterion}</td>
                         <td className="px-4 py-3 text-slate-600">{row.strategyA}</td>
@@ -185,7 +195,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
 
             <section className="bg-white border border-slate-200 rounded-lg p-5">
               <h2 className="text-sm font-semibold text-slate-950">Model answer</h2>
-              <p className="mt-3 text-sm leading-7 text-slate-700">
+              <p className="mt-3 text-sm leading-7 text-slate-700 whitespace-pre-line">
                 {data.engineeringDecision.sampleAnswer}
               </p>
 
@@ -193,7 +203,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                 Marking indicators
               </h3>
               <ul className="mt-2 space-y-2 text-sm leading-6 text-slate-600">
-                {data.engineeringDecision.markingIndicators.map((item: string) => (
+                {(data.engineeringDecision.markingIndicators || []).map((item: string) => (
                   <li key={item} className="flex gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1 shrink-0" />
                     <span>{item}</span>
@@ -206,7 +216,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
               <section className="bg-amber-50 border border-amber-200 rounded-lg p-5">
                 <h2 className="text-sm font-semibold text-amber-950">{data.courseWideRule.title}</h2>
                 <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
-                  {data.courseWideRule.points.map((item: string) => (
+                  {(data.courseWideRule.points || []).map((item: string) => (
                     <li key={item} className="flex gap-2">
                       <span>•</span>
                       <span>{item}</span>
@@ -218,7 +228,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
           </div>
         )}
 
-        {activeTab === 'solution' && (
+        {activeTab === 'solution' && data.solution && (
           <div className="space-y-5">
             <section className="bg-white border border-slate-200 rounded-lg p-5">
               <div className="flex items-center justify-between gap-3">
@@ -239,15 +249,17 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                 <code>{data.solution.code}</code>
               </pre>
 
-              <div className="mt-4 rounded-md bg-slate-100 px-3 py-2 font-mono text-xs text-slate-800">
-                {data.solution.setting}
-              </div>
+              {data.solution.setting && (
+                <div className="mt-4 rounded-md bg-slate-100 px-3 py-2 font-mono text-xs text-slate-800">
+                  {data.solution.setting}
+                </div>
+              )}
             </section>
 
             <section className="bg-white border border-slate-200 rounded-lg p-5">
-              <h2 className="text-sm font-semibold text-slate-950">Why this answer is correct</h2>
+              <h2 className="text-sm font-semibold text-slate-950">Why this is a defensible reference answer</h2>
               <div className="mt-3 space-y-2">
-                {data.solution.explanation.map((line: string, index: number) => (
+                {(data.solution.explanation || []).map((line: string, index: number) => (
                   <div key={index} className="flex gap-2 text-sm leading-6 text-slate-600">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-1 shrink-0" />
                     <span>{line}</span>
@@ -259,7 +271,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
             <section className="bg-white border border-slate-200 rounded-lg p-5">
               <h2 className="text-sm font-semibold text-slate-950">Common mistakes</h2>
               <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
-                {data.commonMistakes.map((item: string, index: number) => (
+                {(data.commonMistakes || []).map((item: string, index: number) => (
                   <li key={index} className="flex gap-2">
                     <span className="text-red-500">•</span>
                     <span>{item}</span>
@@ -272,45 +284,87 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
 
         {activeTab === 'results' && (
           <div className="space-y-5">
-            <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-200">
-                <h2 className="text-sm font-semibold text-slate-950">Expected pull-request decisions</h2>
-                <p className="mt-1 text-xs text-slate-500">
-                  Use these values to verify demonstrations and student interpretations.
-                </p>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead className="bg-slate-50 text-slate-600">
-                    <tr>
-                      <th className="text-left px-4 py-3">Case</th>
-                      <th className="text-left px-4 py-3">AI</th>
-                      <th className="text-left px-4 py-3">Confidence</th>
-                      <th className="text-left px-4 py-3">Evidence</th>
-                      <th className="text-left px-4 py-3">AI-only</th>
-                      <th className="text-left px-4 py-3">Guarded</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {data.expectedCases.map((row: any) => (
-                      <tr key={row.id} className="align-top">
-                        <td className="px-4 py-3 font-mono font-semibold">{row.id}</td>
-                        <td className="px-4 py-3">{row.aiLabel} ({row.aiRiskProbability.toFixed(3)})</td>
-                        <td className="px-4 py-3">{row.aiConfidence.toFixed(3)}</td>
-                        <td className="px-4 py-3 max-w-xs">{row.engineeringEvidence}</td>
-                        <td className="px-4 py-3 font-mono">{row.aiOnlyDecision}</td>
-                        <td className="px-4 py-3 font-mono font-semibold">{row.guardedDecision}</td>
+            {data.expectedResults ? (
+              <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200">
+                  <h2 className="text-sm font-semibold text-slate-950">
+                    {data.expectedResults.title || 'Expected results'}
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {data.expectedResults.description}
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        {(data.expectedResults.columns || []).map((column: any) => (
+                          <th key={column.key} className="text-left px-4 py-3">
+                            {column.label}
+                          </th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {(data.expectedResults.rows || []).map((row: any, index: number) => (
+                        <tr key={row.id || index} className="align-top">
+                          {(data.expectedResults.columns || []).map((column: any) => (
+                            <td
+                              key={column.key}
+                              className={`px-4 py-3 ${
+                                column.emphasis ? 'font-semibold text-slate-950' : 'text-slate-600'
+                              }`}
+                            >
+                              {String(row[column.key] ?? '')}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            ) : data.expectedCases ? (
+              <section className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+                <div className="px-5 py-4 border-b border-slate-200">
+                  <h2 className="text-sm font-semibold text-slate-950">Expected pull-request decisions</h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Use these values to verify demonstrations and student interpretations.
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-slate-50 text-slate-600">
+                      <tr>
+                        <th className="text-left px-4 py-3">Case</th>
+                        <th className="text-left px-4 py-3">AI</th>
+                        <th className="text-left px-4 py-3">Confidence</th>
+                        <th className="text-left px-4 py-3">Evidence</th>
+                        <th className="text-left px-4 py-3">AI-only</th>
+                        <th className="text-left px-4 py-3">Guarded</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {data.expectedCases.map((row: any) => (
+                        <tr key={row.id} className="align-top">
+                          <td className="px-4 py-3 font-mono font-semibold">{row.id}</td>
+                          <td className="px-4 py-3">{row.aiLabel} ({row.aiRiskProbability.toFixed(3)})</td>
+                          <td className="px-4 py-3">{row.aiConfidence.toFixed(3)}</td>
+                          <td className="px-4 py-3 max-w-xs">{row.engineeringEvidence}</td>
+                          <td className="px-4 py-3 font-mono">{row.aiOnlyDecision}</td>
+                          <td className="px-4 py-3 font-mono font-semibold">{row.guardedDecision}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            ) : null}
 
             <section className="bg-white border border-slate-200 rounded-lg p-5">
               <h2 className="text-sm font-semibold text-slate-950">Verification guide</h2>
               <div className="mt-3 divide-y divide-slate-100">
-                {data.verificationGuide.map((item: any) => (
+                {(data.verificationGuide || []).map((item: any) => (
                   <div key={item.name} className="py-3">
                     <div className="text-xs font-semibold text-slate-900">{item.name}</div>
                     <p className="mt-1 text-xs leading-5 text-slate-600">{item.meaning}</p>
@@ -333,7 +387,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
                 </p>
               </section>
             )}
-            {data.sampleReport.map((section: any) => (
+            {(data.sampleReport || []).map((section: any) => (
               <section key={section.title} className="bg-white border border-slate-200 rounded-lg p-5">
                 <h2 className="text-sm font-semibold text-slate-950">{section.title}</h2>
                 <p className="mt-3 text-sm leading-7 text-slate-700 whitespace-pre-line">
@@ -348,7 +402,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
           <section className="bg-white border border-slate-200 rounded-lg p-5">
             <h2 className="text-sm font-semibold text-slate-950">Why the lab is Master's level</h2>
             <div className="mt-4 space-y-3">
-              {data.mastersLevelRationale.map((item: string, index: number) => (
+              {(data.mastersLevelRationale || []).map((item: string, index: number) => (
                 <div key={index} className="flex gap-3 text-sm leading-6 text-slate-700">
                   <GraduationCap className="w-4 h-4 mt-1 shrink-0 text-blue-900" />
                   <span>{item}</span>

@@ -55,38 +55,40 @@ The purpose is not to treat the predicted class as the final decision. The model
 
 ## 4. Hybrid AI-assisted prioritization
 
-A release decision needs more than text classification. Your AI-assisted score combines:
+A release decision needs more than text classification.
+
+In this lab, **you design the policy** that determines how much influence each signal should have:
 
 ```text
-55%  learned HIGH-priority probability
-20%  business value
-15%  strategic fit
-10%  user demand
-+5%  accessibility bonus when applicable
--4%  penalty for each effort point above 1
-```
-
-This creates a hybrid decision:
-
-```text
-historical requirement patterns
+learned HIGH-priority probability
             +
-current product evidence
+business value
             +
-implementation cost
+strategic fit
+            +
+user demand
+            +
+accessibility consideration
+            -
+implementation effort
             ↓
 AI-assisted release priority
 ```
 
-You will implement this integration in one function. The model itself is already supplied.
+The lab gives you valid ranges for the weights, but it does **not** prescribe one final weighting. Your job is to decide how much authority the historical NLP model should have relative to present-day software-engineering evidence, justify that choice, and implement it.
+
+The model itself is supplied. The decision policy is yours.
 
 ## 5. What you should learn from the comparison
 
-A Master's-level result is not simply that one ranking is "better." Your analysis should explain:
+A Master's-level result is not simply that one ranking is "better" or that AI should automatically win. Your analysis should explain:
 
 - why the baseline and AI-assisted rankings differ,
+- why you selected your particular policy weights,
 - which signals caused the change,
 - whether the learned model is sufficiently reliable to influence release planning,
+- how sensitive predictions are to requirement wording,
+- how sensitive the release is to your policy assumptions,
 - which requirements become visible in the product when the ranking changes,
 - what risks arise if historical product decisions contain bias,
 - why implementation effort and accessibility impact should not disappear inside a black-box model.
