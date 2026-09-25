@@ -361,7 +361,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   // Evidence Insertion Handlers
   const handleAddCodeSnapshotToReport = (snapshot: { title: string; code: string }) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'guardrail') || reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'guardrail') ||
+      reportState.sections.find((s) => s.id === 'implementation') ||
+      reportState.sections.find((s) => s.id === 'ai-method') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const curSnaps = targetSection.codeSnapshots || [];
@@ -375,7 +379,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddOutputToReport = (output: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections.find((s) => s.id === 'baseline') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
