@@ -43,7 +43,7 @@ Click **Run Python**.
 
 The baseline uses user votes as the priority score.
 
-On the right, open **Product Preview** and inspect the release that the vote-only method produces.
+On the right, open **Live Product** and inspect the release that the vote-only method produces. Use the interface: play a generated demo track, search the library, change tracks, adjust volume, and inspect which release features are available.
 
 Record:
 
@@ -59,15 +59,21 @@ The model is already implemented. It learns from historical requirement statemen
 
 You are **not** required to rewrite the classifier.
 
-In `main.py`, inspect the prediction returned for each candidate requirement.
+Open the **NLP Model** tab.
 
-Pay attention to:
+Click several candidate requirements and inspect:
 
 ```text
-p_high
+P(HIGH)
+P(MEDIUM)
+P(LOW)
 confidence
 evidence_tokens
+validation accuracy
+macro-F1
 ```
+
+Then use the **Live NLP Playground** to type one new requirement of your own. This playground executes the same Python Naive Bayes model from `priority_model.py`; it is not a separate JavaScript approximation.
 
 ## Task 4: Implement the AI-assisted score
 
@@ -120,7 +126,18 @@ The release planner will:
 
 Compare the new interface with the baseline.
 
-You should be able to **see** the effect of the prioritization decision, not only read a list of IDs.
+Interact with the release-specific features. Depending on the selected requirements, you may see:
+
+- AI DJ context mix,
+- live lyrics translation,
+- accessible enlarged lyrics,
+- collaborative queue voting,
+- data-saver mode,
+- lossless playback indicator,
+- concert discovery,
+- podcast AI summaries.
+
+You should be able to **see and use** the effect of the prioritization decision, not only read a list of IDs.
 
 ## Task 6: Perform one sensitivity experiment
 

@@ -17,7 +17,10 @@ import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
-import { Lab02ProductPreviewPanel } from './Lab02ProductPreviewPanel';
+import {
+  Lab02ProductPreviewPanel,
+  type NlpPlaygroundPrediction,
+} from './Lab02ProductPreviewPanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -288,6 +291,45 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     }
   };
 
+
+  const handleAnalyzeLab02Requirement = async (
+    text: string
+  ): Promise<NlpPlaygroundPrediction> => {
+    if (isRunningCode) {
+      throw new Error('Wait for the current Python execution to finish.');
+    }
+
+    const pythonText = JSON.stringify(text);
+    const snippet = [
+      'import json',
+      'from priority_model import MODEL',
+      `text = ${pythonText}`,
+      'prediction = MODEL.predict(text)',
+      'print("__AISE_NLP__ " + json.dumps(prediction, separators=(",", ":")))',
+    ].join('\n');
+
+    const analysisResult = await defaultCodeRunner.run(snippet, files);
+
+    if (analysisResult.exitCode !== 0 || analysisResult.error) {
+      throw new Error(
+        analysisResult.error ||
+          analysisResult.stderr ||
+          'The NLP model could not analyse this requirement.'
+      );
+    }
+
+    const marker = '__AISE_NLP__ ';
+    const line = analysisResult.stdout
+      .split('\n')
+      .find((item) => item.startsWith(marker));
+
+    if (!line) {
+      throw new Error('The NLP model did not return a prediction payload.');
+    }
+
+    return JSON.parse(line.slice(marker.length)) as NlpPlaygroundPrediction;
+  };
+
   // Debounced Save Report
   const handleUpdateReportState = (newReport: ReportState) => {
     setReportState(newReport);
@@ -319,7 +361,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   // Evidence Insertion Handlers
   const handleAddCodeSnapshotToReport = (snapshot: { title: string; code: string }) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'guardrail') || reportState.sections.find((s) => s.id === 'implementation') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'guardrail') ||
+      reportState.sections.find((s) => s.id === 'implementation') ||
+      reportState.sections.find((s) => s.id === 'ai-method') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const curSnaps = targetSection.codeSnapshots || [];
@@ -333,7 +379,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddOutputToReport = (output: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections.find((s) => s.id === 'baseline') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
@@ -347,7 +397,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddPlotToReport = (plotBase64: string, caption?: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const curImages = targetSection.images || [];
@@ -361,7 +414,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddTestResultsToReport = (testSummary: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
@@ -572,7 +628,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               />
             </div>
             {labId === 'lab02-requirement-prioritization' ? (
-              <div className="w-[46%] min-w-[440px] max-w-[720px] shrink-0 h-full border-l border-slate-800">
+              <div className="w-[52%] min-w-[520px] max-w-[920px] shrink-0 h-full border-l border-slate-800">
                 <Lab02ProductPreviewPanel
                   result={execResult}
                   isRunning={isRunningCode}
@@ -580,6 +636,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                   onRestartRuntime={() => defaultCodeRunner.reset()}
                   onAddOutputToReport={handleAddOutputToReport}
                   onAddPlotToReport={handleAddPlotToReport}
+                  onAnalyzeRequirement={handleAnalyzeLab02Requirement}
                 />
               </div>
             ) : (

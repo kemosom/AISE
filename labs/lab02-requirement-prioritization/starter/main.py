@@ -139,12 +139,22 @@ def build_release_plan(mode=None):
 
 def preview_payload(plan):
     """
-    Keep the browser-preview payload intentionally small and JSON-safe.
+    Send both release-plan evidence and NLP-model evidence to the browser.
+    This lets the student inspect the AI model directly instead of treating
+    the model as a hidden implementation detail.
     """
+    metrics = evaluate_model()
+
     return {
         "mode": plan["mode"],
         "budget": plan["budget"],
         "budget_used": plan["budget_used"],
+        "model": {
+            "name": "Multinomial Naive Bayes",
+            "accuracy": round(metrics["accuracy"], 4),
+            "macro_f1": round(metrics["macro_f1"], 4),
+            "classes": ["HIGH", "MEDIUM", "LOW"],
+        },
         "selected": [
             {
                 "id": row["id"],
@@ -160,12 +170,20 @@ def preview_payload(plan):
             {
                 "id": row["id"],
                 "title": row["title"],
+                "description": row["description"],
                 "score": round(row["score"], 4),
                 "predicted_priority": row["prediction"]["label"],
                 "p_high": round(row["prediction"]["p_high"], 4),
+                "p_medium": round(row["prediction"]["p_medium"], 4),
+                "p_low": round(row["prediction"]["p_low"], 4),
                 "confidence": round(row["prediction"]["confidence"], 4),
                 "evidence_tokens": row["prediction"]["evidence_tokens"],
                 "effort": row["effort"],
+                "user_votes": row["user_votes"],
+                "business_value": row["business_value"],
+                "strategic_fit": row["strategic_fit"],
+                "accessibility_impact": row["accessibility_impact"],
+                "visual_feature": row["visual_feature"],
             }
             for row in plan["ranking"]
         ],
