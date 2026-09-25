@@ -56,7 +56,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 text-left">
           <button
             type="button"
@@ -72,7 +72,10 @@ export const Header: React.FC<HeaderProps> = ({
             className="leading-tight text-left"
           >
             <div className="text-sm font-semibold text-slate-950">AISE Lab Studio</div>
-            <div className="text-[10px] text-slate-400">MAI5124 · AI in Software Engineering</div>
+            <div className="text-[10px] text-slate-500">MAI5124 · AI in Software Engineering</div>
+            <div className="text-[9px] text-slate-400">
+              Sunway University · Faculty of Engineering and Technology
+            </div>
           </button>
         </div>
 
