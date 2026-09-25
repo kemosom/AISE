@@ -3,7 +3,6 @@ import {
   Accessibility,
   Activity,
   AudioLines,
-  BarChart3,
   BrainCircuit,
   ChevronRight,
   Heart,
