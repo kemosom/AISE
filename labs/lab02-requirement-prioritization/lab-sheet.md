@@ -3,17 +3,29 @@
 **Module:** MAI5124 AI in Software Engineering  
 **Lab:** 02  
 **Duration:** 2 hours  
-**Topic:** AI Techniques for Software Requirements Prioritization
+**Topic:** Data-Driven AI for Software Requirements Prioritization
 
-## Your role
+## Scenario
 
 You are the release engineer for a fictional Spotify-style music-streaming product.
 
-The next release has a strict budget of **9 effort points**. Eight candidate requirements are competing for that budget.
+The next release has a maximum capacity of:
 
-You are not being asked to reproduce one lecturer-selected ranking. You must investigate the evidence, design a defensible policy, implement it, stress-test it, and decide what you would actually ship.
+```text
+75 engineer-days
+```
 
-## Challenge 1: Diagnose the baseline before using AI
+You have 12 candidate requirements and three evidence sources:
+
+```text
+candidate_backlog.csv       current telemetry + engineering estimates
+customer_feedback.csv       958 unstructured feedback records
+historical_releases.csv     360 previous release decisions
+```
+
+These are synthetic teaching datasets. They are not Spotify internal data.
+
+## Challenge 1: Run the non-ML baseline
 
 Open `main.py`.
 
@@ -23,113 +35,143 @@ Leave:
 MODE = "BASELINE"
 ```
 
-Click **Run Python**, then use the **Live Product** on the right.
+Run Python.
 
-Do not just read the ranking. Interact with the release.
+The baseline ranks release value from **support-ticket pressure only**, then applies the same engineering budget and dependency rules.
 
-Your first job is to answer:
+Use the **Live Product**.
 
-1. Which requirements were selected?
-2. Which visible product capabilities became available?
-3. Which requirement did the vote-only method exclude that you think deserves reconsideration?
-4. Why is "most votes" an incomplete software-engineering rule?
+Record:
 
-Write your hypothesis in Report Section 1 **before** designing the AI policy.
+1. what was selected,
+2. how many engineer-days were used,
+3. which visible or infrastructure capabilities entered the release,
+4. one important source of evidence that the baseline ignores.
 
-## Challenge 2: Interrogate the NLP model
+Do this before using the ML pipeline.
 
-Open the **NLP Model** tab.
+## Challenge 2: Inspect the datasets
 
-Select at least three backlog requirements with different predicted classes.
+Open the three CSV files in the code workspace.
 
-For each one, inspect:
+For the current backlog, distinguish between:
 
-```text
-P(HIGH)
-P(MEDIUM)
-P(LOW)
-confidence
-evidence_tokens
+- observed product telemetry,
+- support evidence,
+- engineering estimates,
+- dependency status.
+
+For customer feedback, inspect:
+
+- text,
+- severity,
+- source channel,
+- region,
+- subscription plan,
+- the analyst-audited label available only for a subset.
+
+For historical releases, inspect:
+
+- the same evidence schema used for past decisions,
+- the target label: `SHIPPED_NEXT`, `DEFERRED`, or `REJECTED`.
+
+Your model will learn historical release behaviour. That is useful, but it can also reproduce historical bias.
+
+## Challenge 3: Tune the NLP matcher
+
+Change:
+
+```python
+MODE = "ANALYZE"
 ```
 
-Now use the **Live NLP Playground**.
+Run Python.
 
-Create two semantically similar requirements using different wording. Example:
+Open **Data & NLP**.
 
-```text
-Improve playback reliability on unstable mobile networks.
-Keep music playing when commuters temporarily lose mobile connectivity.
-```
-
-Run both through the model.
-
-Think about:
-
-- Did the probabilities change?
-- Which words appear to influence the model?
-- Should two requirements with similar intent receive materially different release priority because they were phrased differently?
-
-Capture one interesting or surprising observation for your report.
-
-## Challenge 3: Design your own release policy
-
-In `main.py`, the policy values are deliberately left as `None`.
-
-Choose your own values subject to these engineering constraints:
+You will see a threshold sweep for:
 
 ```text
-0.30 <= AI_WEIGHT <= 0.60
-0.10 <= BUSINESS_WEIGHT <= 0.30
-0.10 <= STRATEGIC_WEIGHT <= 0.30
-0.05 <= VOTE_WEIGHT <= 0.25
-
-AI_WEIGHT + BUSINESS_WEIGHT + STRATEGIC_WEIGHT + VOTE_WEIGHT = 1.0
-
-0.00 <= ACCESSIBILITY_BONUS <= 0.10
-0.02 <= EFFORT_PENALTY <= 0.08
+TF-IDF (unigrams + bigrams)
+        +
+cosine similarity
 ```
 
-There is **no single required weighting**.
+For each threshold, compare:
 
-Before coding the score, decide:
+- audited matching accuracy,
+- feedback coverage,
+- number of assigned comments.
 
-- How much authority should historical NLP evidence have?
-- How much should current strategic and business value matter?
-- Should accessibility receive an explicit bonus?
-- How strongly should expensive features be penalized?
+Choose a threshold and set:
 
-Record your rationale in Report Section 3.
+```python
+NLP_SIMILARITY_THRESHOLD = ...
+```
 
-## Challenge 4: Implement the hybrid score
+Do not choose a number because it "looks normal". Defend it from the audited results.
+
+Then use the **Live feedback matcher** and type at least two new customer comments. Inspect the top requirement matches and cosine similarities.
+
+## Challenge 4: Compare the supervised models
+
+Still in `ANALYZE` mode, open **ML Model**.
+
+Compare:
+
+```text
+LOGISTIC_REGRESSION
+RANDOM_FOREST
+```
+
+using:
+
+- 5-fold macro-F1,
+- cross-validated accuracy,
+- interpretability.
+
+Select one:
+
+```python
+MODEL_KIND = "..."
+```
+
+A slightly higher score is not the only possible argument. You may prefer a simpler model if performance is comparable, but you must justify the choice.
+
+## Challenge 5: Implement the feature-engineering join
 
 Complete:
 
 ```python
-ai_assisted_priority_score(requirement, prediction)
+build_current_feature_rows(candidates, feedback_evidence)
 ```
 
-Your function must use:
+Your current requirements must use the **same feature schema** as historical release decisions.
 
-- `prediction["p_high"]`
-- normalized business value
-- normalized strategic fit
-- normalized user demand
-- your accessibility bonus
-- your implementation-effort penalty
-
-Normalize:
+Two values come from the NLP pipeline:
 
 ```text
-business value = business_value / 10
-strategic fit  = strategic_fit / 10
-user demand    = min(user_votes / 100, 1)
+feedback_mentions_90d
+mean_feedback_severity
 ```
 
-Clamp the final score to `0.0 ... 1.0`.
+The remaining fields come from `candidate_backlog.csv`:
 
-The implementation should express **your policy**, not a copied lecturer formula.
+```text
+affected_mau
+support_tickets_90d
+engineering_days
+dependency_count
+premium_share
+churn_risk_share
+accessibility_or_compliance
+incident_linked_count
+prerequisite_ready
+```
 
-## Challenge 5: Ship the AI-assisted release
+Do not invent `business_value`, `strategic_fit`, or any other arbitrary score.
+
+## Challenge 6: Generate the AI-assisted release
 
 Change:
 
@@ -137,107 +179,136 @@ Change:
 MODE = "AI_ASSISTED"
 ```
 
-Run Python again.
+Run Python.
 
 Now inspect both:
 
-- **NLP Model** for the ranking and evidence;
-- **Live Product** for what the release actually does.
+### Data & NLP
 
-Use the product. Depending on your selected requirements, you may be able to:
+For several requirements, inspect the customer comments that were actually matched to them.
 
-- launch AI DJ,
-- translate lyrics,
-- enlarge accessible lyrics,
-- vote in a collaborative queue,
-- use Data Saver,
-- see Lossless status,
-- discover concerts,
-- inspect AI podcast summaries.
+Check:
 
-Compare this release with the baseline.
+- number of matched comments,
+- mean severity,
+- similarity values,
+- support-ticket count,
+- affected monthly users.
 
-A different ranking is not automatically better. You must decide whether the change is justified.
+### ML Model
 
-## Challenge 6: Stress-test your decision
+Inspect:
 
-Perform **both** experiments.
+- selected model,
+- 5-fold macro-F1,
+- feature importance,
+- `P(SHIPPED_NEXT)`,
+- engineering days,
+- final selected release.
 
-### Experiment A: wording sensitivity
+### Live Product
 
-In the Live NLP Playground, rewrite one requirement without changing its intent.
+Use the resulting application.
 
-Record the before/after probabilities.
+The release can visibly enable or remove capabilities such as:
 
-Explain whether the difference is acceptable and what it implies for using NLP in requirements engineering.
+- Data Saver,
+- Offline Recovery,
+- Live Lyrics Translation,
+- Accessible Lyrics,
+- AI DJ,
+- Queue Voting,
+- Family Controls,
+- Lossless / audio-pipeline capabilities,
+- Concert Discovery,
+- Podcast Summaries.
 
-### Experiment B: policy sensitivity
+The live product is the release consequence of the evidence pipeline.
 
-Change your policy while keeping it valid.
+## Challenge 7: Perform one counterfactual and one ablation
 
-For example:
+### A. Counterfactual
 
-- reduce AI_WEIGHT and redistribute the weight to business or strategic fit;
-- increase EFFORT_PENALTY;
-- remove the ACCESSIBILITY_BONUS;
-- increase the accessibility bonus while reducing another signal.
+Use:
 
-Run the release again.
+```python
+COUNTERFACTUAL_OVERRIDES = {
+    "REQ-304": {"engineering_days": 25}
+}
+```
 
-Record:
+or design another realistic what-if assumption.
 
-- which ranking positions changed,
-- whether the selected release changed,
-- which product features appeared or disappeared,
-- what this tells you about the stability of the decision.
+Re-run the model and release plan.
 
-Restore the policy you ultimately defend before verification.
+Ask:
 
-## Challenge 7: Verify engineering requirements
+- Did the rank change?
+- Did the release subset change?
+- Was the change caused by the prediction or by the budget/dependency constraint?
+
+### B. Feature ablation
+
+Remove one feature from:
+
+```python
+MODEL_FEATURES
+```
+
+Examples:
+
+```text
+feedback_mentions_90d
+churn_risk_share
+accessibility_or_compliance
+engineering_days
+```
+
+Re-run.
+
+Record the new cross-validated performance and release outcome.
+
+Restore your final defended configuration before verification.
+
+## Challenge 8: Verify and defend
 
 Click **Verify Requirements**.
 
-The tests check whether:
+The tests check:
 
-- NLP probabilities are valid,
-- the supplied model has acceptable validation performance,
-- the baseline is reproducible,
-- your policy satisfies the stated constraints,
-- your function correctly implements **your own** policy,
-- changing NLP probability actually changes the score,
-- ranking and budget rules remain valid.
+- dataset scale,
+- audited NLP matching quality,
+- feature-schema correctness,
+- cross-validated model performance,
+- valid release probabilities,
+- budget and dependency constraints,
+- absence of arbitrary business-value shortcut fields.
 
-The tests intentionally do **not** require one lecturer-selected set of weights.
+In your conclusion answer:
 
-## Challenge 8: Defend the release
+> What would you ship, and what additional evidence would you request before committing engineering resources?
 
-In the report, make an explicit recommendation:
+Your answer should distinguish:
 
-> Would you ship the baseline release or your AI-assisted release?
-
-Support the decision using:
-
-- model probabilities and confidence,
-- your weighting rationale,
-- budget usage,
-- visible product impact,
-- wording-sensitivity evidence,
-- policy-sensitivity evidence,
-- limitations and possible historical-data bias.
-
-A strong answer can defend either release if the reasoning is technically sound.
+```text
+AI evidence
+from
+engineering decision
+```
 
 ## Completion checklist
 
-- [ ] Baseline executed and used
-- [ ] Baseline weakness identified
-- [ ] Three backlog requirements inspected in the NLP model
-- [ ] Two alternative wordings tested
-- [ ] Release policy designed and justified
-- [ ] Hybrid score implemented
-- [ ] AI-assisted release executed and used
-- [ ] Wording-sensitivity experiment completed
-- [ ] Policy-sensitivity experiment completed
-- [ ] Engineering requirements verified
-- [ ] Final release recommendation defended
+- [ ] Baseline release executed and inspected
+- [ ] All three datasets inspected
+- [ ] NLP threshold chosen from audited evidence
+- [ ] Two live feedback-matching experiments completed
+- [ ] Logistic Regression and Random Forest compared
+- [ ] Model selected and justified
+- [ ] Current feature table implemented
+- [ ] AI-assisted release generated
+- [ ] Feature importance and P(SHIPPED_NEXT) interpreted
+- [ ] Counterfactual experiment completed
+- [ ] Feature-ablation experiment completed
+- [ ] Verification passed
+- [ ] Release recommendation defended
 - [ ] Report submitted
