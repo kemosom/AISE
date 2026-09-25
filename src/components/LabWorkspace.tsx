@@ -20,7 +20,7 @@ import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
 import {
   Lab02ProductPreviewPanel,
-  type NlpPlaygroundPrediction,
+  type FeedbackMatchPrediction,
 } from './Lab02ProductPreviewPanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
@@ -326,7 +326,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   const handleAnalyzeLab02Requirement = async (
     text: string
-  ): Promise<NlpPlaygroundPrediction> => {
+  ): Promise<FeedbackMatchPrediction> => {
     if (isRunningCode) {
       throw new Error('Wait for the current Python execution to finish.');
     }
@@ -334,10 +334,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     const pythonText = JSON.stringify(text);
     const snippet = [
       'import json',
-      'from priority_model import MODEL',
+      'import main',
       `text = ${pythonText}`,
-      'prediction = MODEL.predict(text)',
-      'print("__AISE_NLP__ " + json.dumps(prediction, separators=(",", ":")))',
+      'matches = main.MATCHER.match_single(text)',
+      'print("__AISE_NLP__ " + json.dumps(matches, separators=(",", ":")))',
     ].join('\n');
 
     const analysisResult = await defaultCodeRunner.run(snippet, files);
@@ -346,7 +346,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       throw new Error(
         analysisResult.error ||
           analysisResult.stderr ||
-          'The NLP model could not analyse this requirement.'
+          'The TF-IDF matcher could not analyse this feedback.'
       );
     }
 
@@ -356,10 +356,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       .find((item) => item.startsWith(marker));
 
     if (!line) {
-      throw new Error('The NLP model did not return a prediction payload.');
+      throw new Error('The NLP pipeline did not return a matching payload.');
     }
 
-    return JSON.parse(line.slice(marker.length)) as NlpPlaygroundPrediction;
+    return {
+      matches: JSON.parse(line.slice(marker.length)),
+    } as FeedbackMatchPrediction;
   };
 
   // Debounced Save Report

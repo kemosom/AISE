@@ -1,51 +1,51 @@
 [
   {
-    "id": "test-model-validity",
-    "name": "NLP Model Produces Valid Priority Probabilities",
-    "description": "Checks that the supplied classifier returns a valid probability distribution for every candidate requirement.",
-    "testCode": "from priority_model import predict_priority\nfrom requirements_data import CANDIDATE_REQUIREMENTS\n\nfor requirement in CANDIDATE_REQUIREMENTS:\n    prediction = predict_priority(requirement)\n    assert prediction['label'] in ('HIGH', 'MEDIUM', 'LOW')\n    total = prediction['p_high'] + prediction['p_medium'] + prediction['p_low']\n    assert abs(total - 1.0) < 1e-9\n    assert 0.0 <= prediction['confidence'] <= 1.0",
+    "id": "test-dataset-scale",
+    "name": "Realistic Dataset Scale",
+    "description": "Checks that the lab is working from a substantial feedback corpus and historical release dataset rather than a handful of hard-coded examples.",
+    "testCode": "import main\nassert len(main.FEEDBACK) >= 900, f'Expected >=900 feedback rows, got {len(main.FEEDBACK)}'\nassert len(main.HISTORICAL) >= 300, f'Expected >=300 historical release rows, got {len(main.HISTORICAL)}'\nassert len(main.CANDIDATES) == 12",
     "weight": 10
   },
   {
-    "id": "test-model-validation",
-    "name": "Historical Validation Performance Is Interpretable",
-    "description": "Checks that the supplied teaching model achieves acceptable validation accuracy and macro-F1 before it is used in release planning.",
-    "testCode": "from priority_model import evaluate_model\n\nmetrics = evaluate_model()\nassert metrics['accuracy'] >= 0.80\nassert metrics['macro_f1'] >= 0.80",
-    "weight": 10
-  },
-  {
-    "id": "test-baseline-behaviour",
-    "name": "Vote-Only Baseline Is Reproducible",
-    "description": "Confirms the transparent baseline and its budgeted release plan.",
-    "testCode": "import main\n\nfor requirement in main.CANDIDATE_REQUIREMENTS:\n    expected = min(requirement['user_votes'] / 100.0, 1.0)\n    assert abs(main.baseline_priority_score(requirement) - expected) < 1e-9\n\nplan = main.build_release_plan('BASELINE')\nassert [row['id'] for row in plan['selected']] == ['REQ-205', 'REQ-203']\nassert plan['budget_used'] == 8",
-    "weight": 10
-  },
-  {
-    "id": "test-policy-design",
-    "name": "Release Policy Is Deliberately Designed",
-    "description": "Checks that the student selected a valid hybrid weighting rather than leaving the policy undefined.",
-    "testCode": "import main\n\nweights = [main.AI_WEIGHT, main.BUSINESS_WEIGHT, main.STRATEGIC_WEIGHT, main.VOTE_WEIGHT]\nassert all(isinstance(value, (int, float)) for value in weights), 'Choose all four core policy weights.'\nassert 0.30 <= main.AI_WEIGHT <= 0.60\nassert 0.10 <= main.BUSINESS_WEIGHT <= 0.30\nassert 0.10 <= main.STRATEGIC_WEIGHT <= 0.30\nassert 0.05 <= main.VOTE_WEIGHT <= 0.25\nassert abs(sum(weights) - 1.0) < 1e-9, 'Core policy weights must sum to 1.0.'\nassert isinstance(main.ACCESSIBILITY_BONUS, (int, float)) and 0.00 <= main.ACCESSIBILITY_BONUS <= 0.10\nassert isinstance(main.EFFORT_PENALTY, (int, float)) and 0.02 <= main.EFFORT_PENALTY <= 0.08\nmain.validate_policy()",
-    "weight": 20
-  },
-  {
-    "id": "test-ai-score",
-    "name": "Hybrid Priority Function Implements the Chosen Policy",
-    "description": "Recomputes the score using the student's own valid policy and checks the implementation.",
-    "testCode": "import main\nfrom priority_model import predict_priority\n\nrequirement = next(r for r in main.CANDIDATE_REQUIREMENTS if r['id'] == 'REQ-204')\nprediction = predict_priority(requirement)\nexpected = (\n    main.AI_WEIGHT * prediction['p_high']\n    + main.BUSINESS_WEIGHT * (requirement['business_value'] / 10.0)\n    + main.STRATEGIC_WEIGHT * (requirement['strategic_fit'] / 10.0)\n    + main.VOTE_WEIGHT * min(requirement['user_votes'] / 100.0, 1.0)\n    + (main.ACCESSIBILITY_BONUS if requirement['accessibility_impact'] else 0.0)\n    - main.EFFORT_PENALTY * (requirement['effort'] - 1)\n)\nexpected = main.clamp(expected)\nactual = main.ai_assisted_priority_score(requirement, prediction)\nassert abs(actual - expected) < 1e-9",
-    "weight": 20
-  },
-  {
-    "id": "test-ai-sensitivity",
-    "name": "The AI Signal Actually Influences the Decision",
-    "description": "Checks that raising the learned HIGH-priority probability increases the score for an otherwise identical requirement.",
-    "testCode": "import main\n\nrequirement = next(r for r in main.CANDIDATE_REQUIREMENTS if r['id'] == 'REQ-201')\nlow = {'p_high': 0.10}\nhigh = {'p_high': 0.90}\nlow_score = main.ai_assisted_priority_score(requirement, low)\nhigh_score = main.ai_assisted_priority_score(requirement, high)\nassert high_score > low_score, 'Your score does not respond to the NLP model output.'",
+    "id": "test-nlp-threshold",
+    "name": "TF-IDF Matching Is Empirically Defensible",
+    "description": "Evaluates the student's chosen similarity threshold against the analyst-audited subset of customer feedback.",
+    "testCode": "import main\nfrom data_pipeline import evaluate_audited_matches\nmain.validate_student_choices()\nmatches = main.MATCHER.match_all(main.NLP_SIMILARITY_THRESHOLD)\nmetrics = evaluate_audited_matches(matches)\nassert metrics['audited_count'] >= 200\nassert metrics['accuracy'] >= 0.70, f\"Audited NLP accuracy is only {metrics['accuracy']:.3f}; inspect the threshold sweep.\"",
     "weight": 15
   },
   {
-    "id": "test-budget-and-order",
-    "name": "AI-Assisted Release Respects Ranking and Budget",
-    "description": "Checks that the chosen policy can be deployed safely under the release budget.",
-    "testCode": "import main\n\nplan = main.build_release_plan('AI_ASSISTED')\nassert plan['budget_used'] <= main.RELEASE_BUDGET\nscores = [row['score'] for row in plan['ranking']]\nassert scores == sorted(scores, reverse=True)\nassert sum(row['effort'] for row in plan['selected']) == plan['budget_used']\nassert len(plan['selected']) >= 2",
+    "id": "test-feature-table",
+    "name": "Current Requirements Use the Historical Feature Schema",
+    "description": "Checks that NLP-derived evidence is joined with product telemetry and engineering estimates without invented business-value scores.",
+    "testCode": "import main\nfrom data_pipeline import aggregate_feedback\nfrom priority_model import DEFAULT_FEATURES\nmain.validate_student_choices()\nmatches = main.MATCHER.match_all(main.NLP_SIMILARITY_THRESHOLD)\nevidence = aggregate_feedback(matches, main.CANDIDATES)\nrows = main.build_current_feature_rows(main.CANDIDATES, evidence)\nassert len(rows) == len(main.CANDIDATES)\nby_id = {row['id']: row for row in rows}\nfor requirement in main.CANDIDATES:\n    row = by_id[requirement['id']]\n    for feature in DEFAULT_FEATURES:\n        assert feature in row, f\"Missing feature {feature} for {requirement['id']}\"\n    assert row['feedback_mentions_90d'] == evidence[requirement['id']]['feedback_mentions_90d']\n    assert abs(row['mean_feedback_severity'] - evidence[requirement['id']]['mean_feedback_severity']) < 1e-9\n    assert row['affected_mau'] == requirement['affected_mau']\n    assert row['engineering_days'] == requirement['engineering_days']",
+    "weight": 20
+  },
+  {
+    "id": "test-model-selection",
+    "name": "Chosen Model Has Reproducible Cross-Validated Performance",
+    "description": "Checks the selected scikit-learn model using 5-fold macro-F1 on historical release decisions.",
+    "testCode": "import main\nfrom priority_model import benchmark_models\nmain.validate_student_choices()\nresults = benchmark_models(main.HISTORICAL, main.MODEL_FEATURES)\nscore = results[main.MODEL_KIND]['macro_f1_mean']\nassert score >= 0.50, f\"Selected model macro-F1 is only {score:.3f}\"",
     "weight": 15
+  },
+  {
+    "id": "test-probabilities",
+    "name": "Model Produces Valid Release Probabilities",
+    "description": "Trains the selected model and verifies that every current requirement receives a valid P(SHIPPED_NEXT).",
+    "testCode": "import main\nfrom data_pipeline import aggregate_feedback\nfrom priority_model import train_model, shipped_probability\nmain.validate_student_choices()\nmatches = main.MATCHER.match_all(main.NLP_SIMILARITY_THRESHOLD)\nevidence = aggregate_feedback(matches, main.CANDIDATES)\nrows = main.build_current_feature_rows(main.CANDIDATES, evidence)\nmodel = train_model(main.HISTORICAL, main.MODEL_FEATURES, main.MODEL_KIND)\nprobabilities = shipped_probability(model, rows, main.MODEL_FEATURES)\nassert len(probabilities) == len(rows)\nassert all(0.0 <= float(p) <= 1.0 for p in probabilities)\nassert max(probabilities) - min(probabilities) > 0.05, 'Model is not meaningfully differentiating the backlog.'",
+    "weight": 15
+  },
+  {
+    "id": "test-release-constraints",
+    "name": "Release Optimizer Respects Budget and Dependencies",
+    "description": "Checks the deployed AI release against the engineer-day budget and unmet prerequisite rules.",
+    "testCode": "import main\nfrom data_pipeline import aggregate_feedback\nfrom priority_model import train_model, shipped_probability\nmain.validate_student_choices()\nmatches = main.MATCHER.match_all(main.NLP_SIMILARITY_THRESHOLD)\nevidence = aggregate_feedback(matches, main.CANDIDATES)\nrows = main.build_current_feature_rows(main.CANDIDATES, evidence)\nmodel = train_model(main.HISTORICAL, main.MODEL_FEATURES, main.MODEL_KIND)\nprobs = shipped_probability(model, rows, main.MODEL_FEATURES)\nvalues = {row['id']: float(p) for row, p in zip(rows, probs)}\nplan = main.optimize_release(rows, values)\nassert plan['days_used'] <= main.MAX_RELEASE_DAYS\nselected_ids = {row['id'] for row in plan['selected']}\nfor row in plan['selected']:\n    prereq = row.get('prerequisite', '')\n    ready = int(row.get('prerequisite_ready', 0))\n    assert (not prereq and ready == 1) or ready == 1 or prereq in selected_ids, f\"Unmet prerequisite for {row['id']}\"",
+    "weight": 15
+  },
+  {
+    "id": "test-no-subjective-score-fields",
+    "name": "No Invented Business-Value Shortcut",
+    "description": "Ensures the deployed feature table does not reintroduce arbitrary business_value or strategic_fit numbers.",
+    "testCode": "import main\nfrom data_pipeline import aggregate_feedback\nmain.validate_student_choices()\nmatches = main.MATCHER.match_all(main.NLP_SIMILARITY_THRESHOLD)\nevidence = aggregate_feedback(matches, main.CANDIDATES)\nrows = main.build_current_feature_rows(main.CANDIDATES, evidence)\nfor row in rows:\n    assert 'business_value' not in row\n    assert 'strategic_fit' not in row",
+    "weight": 10
   }
 ]

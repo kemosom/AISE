@@ -1,106 +1,123 @@
 # Lab 02: AI Techniques for Software Requirements Prioritization
 
-## 1. The engineering problem
+## The problem
 
-A software team rarely has enough time to implement every requested feature. Requirements arrive from users, product managers, accessibility teams, operations, security teams, and business stakeholders. They are usually written in natural language and often conflict in value, cost, urgency, and strategic importance.
+A real product team does not receive neat values such as `business_value = 9`.
 
-In this lab, you work with a **fictional Spotify-style music-streaming backlog**. The product context is intentionally familiar, but the backlog and historical decisions are teaching data and are **not Spotify internal data**.
+It receives evidence from different systems:
 
-Your release team has a fixed implementation budget of **9 effort points**. The question is not simply:
+- customer feedback and support conversations,
+- product telemetry,
+- support-ticket volume,
+- engineering estimates,
+- dependency information,
+- accessibility or compliance obligations,
+- incident history,
+- historical release decisions.
 
-> Which feature has the most votes?
+Most customer feedback is unstructured text. Historical prioritization decisions are also imperfect because they reflect previous organisational choices.
 
-The stronger question is:
+This lab treats AI as **decision support**, not as an automatic product manager.
 
-> How should an AI model contribute to prioritization when product value, strategic fit, implementation effort, accessibility impact, and stakeholder demand must all be considered?
+## Data used in this laboratory
 
-## 2. Baseline: prioritization by user votes
+The Spotify-style scenario is fictional. The datasets are **synthetic but structurally realistic** and contain no Spotify internal data.
 
-The starter program first ranks requirements only by the number of user votes.
+You will work with:
 
-This is useful as a baseline because it is simple and transparent. It is also limited. A vote-only ranking can over-prioritize expensive or highly visible features while under-prioritizing requirements that are strategically important, accessibility-related, or strongly associated with historically high-priority work.
+- **958 customer-feedback records**
+- **360 historical release decisions**
+- **12 current candidate requirements**
 
-You will run this baseline first and observe the resulting release directly in the product preview.
+The data are deliberately large enough that manual inspection alone is not practical.
 
-## 3. AI technique: supervised NLP classification
+## AI technique 1: NLP evidence extraction
 
-The supplied model is a lightweight **Multinomial Naive Bayes text classifier** trained on historical requirement statements labelled:
+The first problem is to connect free-text customer feedback to candidate requirements.
 
-- HIGH
-- MEDIUM
-- LOW
-
-The model learns how words occur across the three historical priority classes.
-
-Conceptually:
-
-```text
-priority evidence
-    = prior class probability
-    + evidence contributed by the words in the requirement
-```
-
-For a new requirement, the model returns:
-
-- predicted priority class,
-- probability of HIGH priority,
-- probability of MEDIUM priority,
-- probability of LOW priority,
-- prediction confidence,
-- influential text tokens.
-
-In the coding workspace, the **NLP Model** tab exposes these values visually. You can click any backlog requirement to inspect its probability distribution and evidence tokens. A **Live NLP Playground** also lets you type a completely new requirement and run it through the same Python model.
-
-The purpose is not to treat the predicted class as the final decision. The model supplies **learned evidence** to the release-planning process.
-
-## 4. Hybrid AI-assisted prioritization
-
-A release decision needs more than text classification.
-
-In this lab, **you design the policy** that determines how much influence each signal should have:
+The lab uses a real scikit-learn pipeline:
 
 ```text
-learned HIGH-priority probability
-            +
-business value
-            +
-strategic fit
-            +
-user demand
-            +
-accessibility consideration
-            -
-implementation effort
-            ↓
-AI-assisted release priority
+customer feedback
+      ↓
+TF-IDF vectorization
+(unigrams + bigrams)
+      ↓
+cosine similarity
+      ↓
+candidate requirement
 ```
 
-The lab gives you valid ranges for the weights, but it does **not** prescribe one final weighting. Your job is to decide how much authority the historical NLP model should have relative to present-day software-engineering evidence, justify that choice, and implement it.
+A subset of the feedback has an analyst-audited requirement label. You use those audited records to choose a similarity threshold.
 
-The model itself is supplied. The decision policy is yours.
+The threshold creates a real precision/coverage trade-off:
 
-## 5. What you should learn from the comparison
+- threshold too low: unrelated feedback is incorrectly assigned;
+- threshold too high: relevant feedback is discarded as OTHER.
 
-A Master's-level result is not simply that one ranking is "better" or that AI should automatically win. Your analysis should explain:
+## AI technique 2: supervised release prioritization
 
-- why the baseline and AI-assisted rankings differ,
-- why you selected your particular policy weights,
-- which signals caused the change,
-- whether the learned model is sufficiently reliable to influence release planning,
-- how sensitive predictions are to requirement wording,
-- how sensitive the release is to your policy assumptions,
-- which requirements become visible in the product when the ranking changes,
-- what risks arise if historical product decisions contain bias,
-- why implementation effort and accessibility impact should not disappear inside a black-box model.
+The second problem is to learn from historical release decisions.
 
-The right-side workspace is part of the evidence. It has three views:
+Historical rows contain measurable evidence such as:
 
-1. **Live Product**: an interactive Spotify-style application where prioritized requirements visibly enable features.
-2. **NLP Model**: the actual classifier output, probabilities, confidence, evidence tokens, validation metrics, and a live text playground.
-3. **Console**: the raw Python execution trace.
+```text
+feedback mentions
+affected monthly users
+support tickets
+feedback severity
+engineering days
+dependency count
+premium-user share
+churn-risk share
+accessibility/compliance
+incident-linked count
+prerequisite readiness
+```
 
-The product mockup is interactive: play/pause, track selection, search, queue voting, lyrics controls, volume, progress, and other functions respond to the release plan. Its audio is generated locally by the browser for teaching and does not stream Spotify catalogue music.
+You compare two real scikit-learn models:
 
-## Continue to the laboratory
+- Logistic Regression
+- Random Forest
 
-Open **Steps** and complete the tasks in order.
+using **5-fold cross-validation** and **macro-F1**.
+
+The selected model outputs:
+
+```text
+P(SHIPPED_NEXT)
+```
+
+for each current requirement.
+
+There is no manually weighted `business_value` or `strategic_fit` score.
+
+## Release planning is still software engineering
+
+A high model probability does not automatically mean a feature can ship.
+
+The final plan must satisfy:
+
+- a **75 engineer-day budget**,
+- explicit requirement dependencies,
+- prerequisite readiness.
+
+The lab searches feasible release combinations and selects the subset with the strongest model-supported release value.
+
+The result is then applied to the interactive Spotify-style product so you can see what the release would actually expose to users.
+
+## What you are expected to question
+
+You should not finish the lab by saying "Random Forest ranked this first."
+
+You should ask:
+
+- Was the NLP matching threshold defensible?
+- Did the model generalise across folds?
+- Which historical features drive the prediction?
+- Are those historical patterns desirable or potentially biased?
+- Does changing one engineering estimate change the release?
+- Does removing one feature materially alter the ranking?
+- Would you commit engineering resources based on this evidence?
+
+Open **Steps** and perform the investigation.

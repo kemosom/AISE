@@ -1,20 +1,24 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accessibility,
-  Activity,
   AudioLines,
+  BarChart3,
   BrainCircuit,
+  CheckCircle2,
   ChevronRight,
+  Database,
   Heart,
   Home,
   Languages,
   Library,
   ListMusic,
   Music2,
+  Network,
   Pause,
   Play,
   Podcast,
   Search,
+  ShieldCheck,
   SkipBack,
   SkipForward,
   Sparkles,
@@ -28,55 +32,100 @@ import {
 import type { ExecutionResult } from '../../lib/runners/types';
 import { OutputConsolePanel } from './OutputConsolePanel';
 
-interface PreviewRequirement {
+interface MatchRow {
   id: string;
   title: string;
-  score: number;
-  moscow: string;
-  effort: number;
+  similarity: number;
+}
+
+export interface FeedbackMatchPrediction {
+  matches: MatchRow[];
+}
+
+interface SelectedRequirement {
+  id: string;
+  title: string;
   visual_feature: string;
+  engineering_days: number;
+  score: number;
 }
 
 interface RankingRow {
   id: string;
   title: string;
   description: string;
-  score: number;
-  predicted_priority: string;
-  p_high: number;
-  p_medium: number;
-  p_low: number;
-  confidence: number;
-  evidence_tokens: string[];
-  effort: number;
-  user_votes: number;
-  business_value: number;
-  strategic_fit: number;
-  accessibility_impact: boolean;
   visual_feature: string;
+  engineering_days: number;
+  affected_mau?: number;
+  support_tickets_90d?: number;
+  feedback_mentions_90d?: number;
+  mean_feedback_severity?: number;
+  ship_probability?: number;
+  prerequisite?: string;
+  feedback_examples?: Array<{
+    feedback_id: string;
+    text: string;
+    severity: number;
+    similarity: number;
+    channel: string;
+    region: string;
+  }>;
+  baseline_value?: number;
+}
+
+interface ModelBenchmark {
+  macro_f1_mean: number;
+  macro_f1_std: number;
+  accuracy_mean: number;
+}
+
+interface AnalysisPayload {
+  mode: 'ANALYZE';
+  data: {
+    feedback_rows: number;
+    historical_rows: number;
+    candidate_rows: number;
+  };
+  threshold_sweep: Array<{
+    threshold: number;
+    accuracy: number;
+    audited_count: number;
+    assigned_count: number;
+    coverage: number;
+  }>;
+  benchmarks: Record<string, ModelBenchmark>;
 }
 
 interface PreviewPayload {
-  mode: 'BASELINE' | 'AI_ASSISTED' | string;
+  mode: 'BASELINE' | 'AI_ASSISTED';
   budget: number;
   budget_used: number;
-  model?: {
-    name: string;
-    accuracy: number;
-    macro_f1: number;
-    classes: string[];
+  data: {
+    feedback_rows: number;
+    historical_rows: number;
+    candidate_rows: number;
+    audited_feedback_rows?: number;
   };
-  selected: PreviewRequirement[];
+  nlp?: {
+    method: string;
+    threshold: number;
+    audited_accuracy: number;
+  };
+  model?: {
+    kind: string;
+    features: string[];
+    benchmarks: Record<string, ModelBenchmark>;
+    training_fit: {
+      accuracy: number;
+      macro_f1: number;
+    };
+    feature_importance: Array<{
+      feature: string;
+      importance: number;
+    }>;
+  };
+  selected: SelectedRequirement[];
   ranking: RankingRow[];
-}
-
-export interface NlpPlaygroundPrediction {
-  label: string;
-  p_high: number;
-  p_medium: number;
-  p_low: number;
-  confidence: number;
-  evidence_tokens: string[];
 }
 
 interface Lab02ProductPreviewPanelProps {
@@ -86,20 +135,20 @@ interface Lab02ProductPreviewPanelProps {
   onRestartRuntime: () => void;
   onAddOutputToReport: (output: string) => void;
   onAddPlotToReport: (plotBase64: string, caption?: string) => void;
-  onAnalyzeRequirement?: (text: string) => Promise<NlpPlaygroundPrediction>;
+  onAnalyzeRequirement?: (text: string) => Promise<FeedbackMatchPrediction>;
 }
 
-const parsePreview = (stdout?: string): PreviewPayload | null => {
+const parseMarker = <T,>(stdout: string | undefined, marker: string): T | null => {
   if (!stdout) return null;
-
-  const marker = '__AISE_PREVIEW__ ';
-  const lines = stdout.split('\n').reverse();
-  const line = lines.find((item) => item.startsWith(marker));
+  const line = stdout
+    .split('\n')
+    .reverse()
+    .find((item) => item.startsWith(marker));
 
   if (!line) return null;
 
   try {
-    return JSON.parse(line.slice(marker.length)) as PreviewPayload;
+    return JSON.parse(line.slice(marker.length)) as T;
   } catch {
     return null;
   }
@@ -136,29 +185,36 @@ const TRACKS = [
   },
 ];
 
+const prettyFeature = (value: string) =>
+  value
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const formatCompact = (value?: number) => {
+  if (value === undefined) return '—';
+  return new Intl.NumberFormat('en', {
+    notation: 'compact',
+    maximumFractionDigits: 1,
+  }).format(value);
+};
+
 const formatTime = (seconds: number) => {
   const safe = Math.max(0, Math.floor(seconds));
   const minutes = Math.floor(safe / 60);
-  const remainder = safe % 60;
-  return `${minutes}:${String(remainder).padStart(2, '0')}`;
+  return `${minutes}:${String(safe % 60).padStart(2, '0')}`;
 };
 
-const ProbabilityBar: React.FC<{
+const MetricCard: React.FC<{
   label: string;
-  value: number;
-  tone: string;
-}> = ({ label, value, tone }) => (
-  <div>
-    <div className="mb-1 flex items-center justify-between text-[10px]">
-      <span className="font-semibold text-slate-300">{label}</span>
-      <span className="font-mono text-slate-400">{(value * 100).toFixed(1)}%</span>
+  value: string;
+  note?: string;
+}> = ({ label, value, note }) => (
+  <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+    <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+      {label}
     </div>
-    <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-      <div
-        className={`h-full rounded-full ${tone} transition-all duration-500`}
-        style={{ width: `${Math.max(2, value * 100)}%` }}
-      />
-    </div>
+    <div className="mt-1 text-xl font-black text-white">{value}</div>
+    {note && <div className="mt-1 text-[9px] leading-4 text-slate-500">{note}</div>}
   </div>
 );
 
@@ -171,14 +227,22 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
   onAddPlotToReport,
   onAnalyzeRequirement,
 }) => {
-  const [tab, setTab] = useState<'preview' | 'model' | 'console'>('preview');
-  const payload = useMemo(() => parsePreview(result?.stdout), [result?.stdout]);
-  const selectedFeatures = useMemo(
-    () => new Set(payload?.selected.map((item) => item.visual_feature) || []),
-    [payload]
+  const [tab, setTab] = useState<'product' | 'evidence' | 'model' | 'console'>('product');
+  const preview = useMemo(
+    () => parseMarker<PreviewPayload>(result?.stdout, '__AISE_PREVIEW__ '),
+    [result?.stdout]
+  );
+  const analysis = useMemo(
+    () => parseMarker<AnalysisPayload>(result?.stdout, '__AISE_ANALYSIS__ '),
+    [result?.stdout]
   );
 
-  const [activeRequirementId, setActiveRequirementId] = useState<string>('');
+  const selectedFeatures = useMemo(
+    () => new Set(preview?.selected.map((item) => item.visual_feature) || []),
+    [preview]
+  );
+
+  const [activeRequirementId, setActiveRequirementId] = useState('');
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -187,16 +251,18 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
   const [activeNav, setActiveNav] = useState<'home' | 'search' | 'library'>('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [showTranslatedLyrics, setShowTranslatedLyrics] = useState(true);
+  const [explicitBlocked, setExplicitBlocked] = useState(true);
   const [queueVotes, setQueueVotes] = useState<Record<string, number>>({
     'Neon Skyline': 18,
     'Night Drive': 12,
     'Sunset Loop': 9,
   });
-  const [playgroundText, setPlaygroundText] = useState(
-    'Add a low-data playback mode for commuters on unstable mobile networks'
+
+  const [feedbackText, setFeedbackText] = useState(
+    'Music keeps stopping when I lose mobile signal on the train.'
   );
-  const [playgroundPrediction, setPlaygroundPrediction] =
-    useState<NlpPlaygroundPrediction | null>(null);
+  const [feedbackPrediction, setFeedbackPrediction] =
+    useState<FeedbackMatchPrediction | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
 
@@ -207,27 +273,20 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
   const currentTrack = TRACKS[currentTrackIndex];
 
   const activeRequirement = useMemo(() => {
-    if (!payload?.ranking.length) return null;
+    if (!preview?.ranking.length) return null;
     return (
-      payload.ranking.find((row) => row.id === activeRequirementId) ||
-      payload.ranking[0]
+      preview.ranking.find((row) => row.id === activeRequirementId) ||
+      preview.ranking[0]
     );
-  }, [payload, activeRequirementId]);
+  }, [preview, activeRequirementId]);
 
   useEffect(() => {
-    if (payload?.ranking.length && !activeRequirementId) {
-      setActiveRequirementId(payload.ranking[0].id);
+    if (preview?.ranking.length && !activeRequirementId) {
+      setActiveRequirementId(preview.ranking[0].id);
     }
-  }, [payload, activeRequirementId]);
+  }, [preview, activeRequirementId]);
 
-  const hasAiDj = selectedFeatures.has('ai_dj');
-  const hasLyricsTranslation = selectedFeatures.has('lyrics_translation');
-  const hasQueueVoting = selectedFeatures.has('queue_voting');
-  const hasDataSaver = selectedFeatures.has('data_saver');
-  const hasLossless = selectedFeatures.has('lossless');
-  const hasAccessibleLyrics = selectedFeatures.has('accessible_lyrics');
-  const hasConcerts = selectedFeatures.has('concerts');
-  const hasPodcastSummary = selectedFeatures.has('podcast_summary');
+  const has = (feature: string) => selectedFeatures.has(feature);
 
   const stopSynth = () => {
     if (synthIntervalRef.current !== null) {
@@ -251,7 +310,6 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
 
     oscillator.type = currentTrackIndex === 3 ? 'triangle' : 'sine';
     oscillator.frequency.value = frequency;
-
     bass.type = 'sine';
     bass.frequency.value = frequency / 2;
 
@@ -269,7 +327,6 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
 
     oscillator.connect(gain).connect(context.destination);
     bass.connect(bassGain).connect(context.destination);
-
     oscillator.start(now);
     oscillator.stop(now + 0.26);
     bass.start(now);
@@ -280,7 +337,6 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext();
     }
-
     await audioContextRef.current.resume();
     stopSynth();
     noteIndexRef.current = 0;
@@ -294,21 +350,18 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
     } else {
       stopSynth();
     }
-
     return () => stopSynth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying, currentTrackIndex, volume]);
 
   useEffect(() => {
     if (!isPlaying) return;
-
     const timer = window.setInterval(() => {
       setProgress((value) => {
         const next = value + 1;
         return next >= currentTrack.duration ? 0 : next;
       });
     }, 1000);
-
     return () => window.clearInterval(timer);
   }, [isPlaying, currentTrack.duration]);
 
@@ -324,14 +377,6 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
     setProgress(0);
   };
 
-  const nextTrack = () => {
-    chooseTrack((currentTrackIndex + 1) % TRACKS.length);
-  };
-
-  const previousTrack = () => {
-    chooseTrack((currentTrackIndex - 1 + TRACKS.length) % TRACKS.length);
-  };
-
   const filteredTracks = TRACKS.filter((track) => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return true;
@@ -341,67 +386,56 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
     );
   });
 
-  const handleAnalyze = async () => {
-    if (!onAnalyzeRequirement || !playgroundText.trim()) return;
+  const handleFeedbackMatch = async () => {
+    if (!onAnalyzeRequirement || !feedbackText.trim()) return;
 
     setIsAnalyzing(true);
     setAnalysisError(null);
-
     try {
-      const prediction = await onAnalyzeRequirement(playgroundText.trim());
-      setPlaygroundPrediction(prediction);
+      const prediction = await onAnalyzeRequirement(feedbackText.trim());
+      setFeedbackPrediction(prediction);
     } catch (error: any) {
-      setAnalysisError(error?.message || 'Unable to run the NLP model.');
+      setAnalysisError(error?.message || 'Unable to run TF-IDF matching.');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
+  const dataset = preview?.data || analysis?.data;
+  const benchmarks = preview?.model?.benchmarks || analysis?.benchmarks;
+
   return (
     <div className="h-full flex flex-col bg-slate-950">
       <div className="h-10 shrink-0 border-b border-slate-800 bg-slate-900 px-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => setTab('preview')}
-            className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              tab === 'preview'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Music2 className="w-3.5 h-3.5 text-[#1ed760]" />
-            Live Product
-          </button>
-          <button
-            onClick={() => setTab('model')}
-            className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              tab === 'model'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <BrainCircuit className="w-3.5 h-3.5 text-violet-400" />
-            NLP Model
-          </button>
-          <button
-            onClick={() => setTab('console')}
-            className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              tab === 'console'
-                ? 'bg-slate-800 text-white'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            Console
-          </button>
+          {([
+            { id: 'product' as const, label: 'Live Product', Icon: Music2 },
+            { id: 'evidence' as const, label: 'Data & NLP', Icon: Database },
+            { id: 'model' as const, label: 'ML Model', Icon: BrainCircuit },
+            { id: 'console' as const, label: 'Console', Icon: Terminal },
+          ]).map(({ id, label, Icon }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              className={`px-2 py-1.5 rounded text-[11px] font-semibold flex items-center gap-1.5 transition-colors ${
+                tab === id
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Icon className={`w-3.5 h-3.5 ${id === 'product' ? 'text-[#1ed760]' : id === 'evidence' ? 'text-cyan-400' : id === 'model' ? 'text-violet-400' : ''}`} />
+              {label}
+            </button>
+          ))}
         </div>
-
-        <div className="text-[10px] text-slate-400 font-mono">
+        <div className="text-[9px] text-slate-500 font-mono">
           {isRunning
-            ? 'Updating model + product…'
-            : payload
-              ? `${payload.mode.replace('_', ' ')} · ${payload.budget_used}/${payload.budget} pts`
-              : 'Run Python first'}
+            ? 'Running Python + scikit-learn…'
+            : preview
+              ? `${preview.mode.replace('_', ' ')} · ${preview.budget_used}/${preview.budget} days`
+              : analysis
+                ? 'ANALYZE mode'
+                : 'Run Python first'}
         </div>
       </div>
 
@@ -418,213 +452,342 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
         </div>
       )}
 
-      {tab === 'model' && (
-        <div className="flex-1 min-h-0 overflow-auto bg-[#090b10] p-4 text-white">
-          <div className="mx-auto max-w-4xl space-y-4">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-400">
-                    Model Inspector
-                  </div>
-                  <h3 className="mt-1 text-lg font-bold">
-                    {payload?.model?.name || 'Multinomial Naive Bayes'}
-                  </h3>
-                  <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-400">
-                    The model reads each requirement as text and estimates the probability
-                    that historical product decisions would label it HIGH, MEDIUM, or LOW.
-                    The release planner then combines that learned signal with current
-                    engineering evidence.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2">
-                    <div className="text-[9px] uppercase text-slate-500">Validation accuracy</div>
-                    <div className="mt-1 text-lg font-bold text-emerald-400">
-                      {payload?.model ? `${(payload.model.accuracy * 100).toFixed(0)}%` : '—'}
-                    </div>
-                  </div>
-                  <div className="rounded-lg border border-slate-800 bg-slate-950 px-3 py-2">
-                    <div className="text-[9px] uppercase text-slate-500">Macro F1</div>
-                    <div className="mt-1 text-lg font-bold text-cyan-400">
-                      {payload?.model ? payload.model.macro_f1.toFixed(2) : '—'}
-                    </div>
-                  </div>
-                </div>
+      {tab === 'evidence' && (
+        <div className="flex-1 min-h-0 overflow-auto bg-[#080b10] p-4 text-white">
+          <div className="mx-auto max-w-5xl space-y-4">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-400">
+                Raw Evidence → NLP Evidence
               </div>
+              <h3 className="mt-1 text-lg font-black">Customer-feedback pipeline</h3>
+              <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-400">
+                The lab does not invent business-value scores. It starts from customer feedback,
+                product telemetry, support pressure, engineering estimates, dependencies and
+                historical release decisions.
+              </p>
             </div>
 
-            {!payload ? (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/40 p-8 text-center">
-                <BrainCircuit className="mx-auto h-8 w-8 text-slate-600" />
-                <div className="mt-3 text-sm font-semibold">Run Python to inspect the model</div>
-                <div className="mt-1 text-xs text-slate-500">
-                  The ranking, class probabilities, confidence, and evidence tokens
-                  will appear here.
-                </div>
-              </div>
-            ) : (
-              <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)]">
-                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-2">
-                  <div className="px-2 py-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-                    Candidate requirements
-                  </div>
-                  <div className="space-y-1">
-                    {payload.ranking.map((row, index) => (
-                      <button
-                        key={row.id}
-                        onClick={() => setActiveRequirementId(row.id)}
-                        className={`w-full rounded-lg border px-2.5 py-2 text-left transition ${
-                          activeRequirement?.id === row.id
-                            ? 'border-violet-500/60 bg-violet-500/10'
-                            : 'border-transparent bg-slate-950/50 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[9px] font-mono text-slate-500">#{index + 1} · {row.id}</span>
-                          <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${
-                            row.predicted_priority === 'HIGH'
-                              ? 'bg-emerald-500/15 text-emerald-400'
-                              : row.predicted_priority === 'MEDIUM'
-                                ? 'bg-amber-500/15 text-amber-300'
-                                : 'bg-slate-700 text-slate-300'
-                          }`}>
-                            {row.predicted_priority}
-                          </span>
-                        </div>
-                        <div className="mt-1 text-[11px] font-semibold text-white">
-                          {row.title}
-                        </div>
-                        <div className="mt-1 text-[9px] text-slate-500">
-                          priority score {row.score.toFixed(3)}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            <div className="grid grid-cols-3 gap-3">
+              <MetricCard
+                label="Customer feedback"
+                value={dataset ? String(dataset.feedback_rows) : '—'}
+                note="unstructured records"
+              />
+              <MetricCard
+                label="Historical releases"
+                value={dataset ? String(dataset.historical_rows) : '—'}
+                note="supervised training rows"
+              />
+              <MetricCard
+                label="Current backlog"
+                value={dataset ? String(dataset.candidate_rows) : '—'}
+                note="candidate requirements"
+              />
+            </div>
 
-                {activeRequirement && (
-                  <div className="space-y-4">
-                    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="max-w-xl">
-                          <div className="text-[9px] font-mono text-slate-500">{activeRequirement.id}</div>
-                          <h4 className="mt-1 text-base font-bold">{activeRequirement.title}</h4>
-                          <p className="mt-1 text-xs leading-5 text-slate-400">
-                            {activeRequirement.description}
-                          </p>
-                        </div>
-                        <div className="rounded-lg border border-violet-500/30 bg-violet-500/10 px-3 py-2 text-right">
-                          <div className="text-[9px] uppercase text-violet-300">Confidence</div>
-                          <div className="text-xl font-black text-violet-300">
-                            {(activeRequirement.confidence * 100).toFixed(1)}%
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 space-y-3">
-                        <ProbabilityBar label="HIGH" value={activeRequirement.p_high} tone="bg-emerald-500" />
-                        <ProbabilityBar label="MEDIUM" value={activeRequirement.p_medium} tone="bg-amber-400" />
-                        <ProbabilityBar label="LOW" value={activeRequirement.p_low} tone="bg-rose-500" />
-                      </div>
-
-                      <div className="mt-4">
-                        <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                          Text evidence pushing toward HIGH
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                          {activeRequirement.evidence_tokens.length > 0 ? (
-                            activeRequirement.evidence_tokens.map((token) => (
-                              <span
-                                key={token}
-                                className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-mono text-emerald-300"
-                              >
-                                {token}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-[10px] text-slate-500">
-                              No strongly positive HIGH-priority tokens for this requirement.
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        {[
-                          ['Votes', String(activeRequirement.user_votes)],
-                          ['Business', `${activeRequirement.business_value}/10`],
-                          ['Strategic', `${activeRequirement.strategic_fit}/10`],
-                          ['Effort', `${activeRequirement.effort} pts`],
-                        ].map(([label, value]) => (
-                          <div key={label} className="rounded-lg bg-slate-950 px-3 py-2">
-                            <div className="text-[8px] uppercase text-slate-600">{label}</div>
-                            <div className="mt-0.5 text-sm font-bold text-slate-200">{value}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <section className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
               <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-cyan-400" />
+                <Network className="h-4 w-4 text-cyan-400" />
                 <div>
-                  <div className="text-sm font-bold">Live NLP Playground</div>
+                  <div className="text-sm font-bold">Live feedback matcher</div>
                   <div className="text-[10px] text-slate-400">
-                    Type a new software requirement. This calls the same Python model used by the lab.
+                    This runs the same scikit-learn TF-IDF vectorizer and cosine-similarity
+                    matcher used on the full customer-feedback corpus.
                   </div>
                 </div>
               </div>
 
               <textarea
-                value={playgroundText}
-                onChange={(event) => setPlaygroundText(event.target.value)}
+                value={feedbackText}
+                onChange={(event) => setFeedbackText(event.target.value)}
                 rows={3}
                 className="mt-3 w-full resize-none rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs leading-5 text-white outline-none focus:border-cyan-500"
               />
 
-              <div className="mt-2 flex items-center justify-between gap-3">
+              <div className="mt-2 flex items-center gap-3">
                 <button
-                  onClick={handleAnalyze}
+                  onClick={handleFeedbackMatch}
                   disabled={!onAnalyzeRequirement || isAnalyzing || isRunning}
-                  className="rounded-md bg-cyan-500 px-3 py-2 text-xs font-bold text-slate-950 hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-md bg-cyan-400 px-3 py-2 text-xs font-black text-slate-950 hover:bg-cyan-300 disabled:opacity-50"
                 >
-                  {isAnalyzing ? 'Running model…' : 'Analyse Requirement'}
+                  {isAnalyzing ? 'Vectorizing…' : 'Match Feedback'}
                 </button>
                 {analysisError && (
                   <span className="text-[10px] text-rose-400">{analysisError}</span>
                 )}
               </div>
 
-              {playgroundPrediction && (
-                <div className="mt-3 grid gap-3 rounded-lg border border-slate-800 bg-slate-950/80 p-3 sm:grid-cols-[140px_minmax(0,1fr)]">
-                  <div>
-                    <div className="text-[8px] uppercase text-slate-500">Prediction</div>
-                    <div className="mt-1 text-xl font-black text-cyan-300">
-                      {playgroundPrediction.label}
+              {feedbackPrediction && (
+                <div className="mt-3 space-y-2">
+                  {feedbackPrediction.matches.map((match, index) => (
+                    <div
+                      key={match.id}
+                      className="rounded-lg border border-slate-800 bg-slate-950/80 px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <span className="mr-2 text-[9px] font-mono text-slate-600">#{index + 1}</span>
+                          <span className="text-xs font-semibold">{match.title}</span>
+                        </div>
+                        <span className="font-mono text-[10px] text-cyan-300">
+                          cosine {match.similarity.toFixed(3)}
+                        </span>
+                      </div>
+                      <div className="mt-1.5 h-1.5 rounded-full bg-slate-800">
+                        <div
+                          className="h-full rounded-full bg-cyan-400"
+                          style={{ width: `${Math.min(100, match.similarity * 100)}%` }}
+                        />
+                      </div>
                     </div>
-                    <div className="mt-1 text-[10px] text-slate-500">
-                      confidence {(playgroundPrediction.confidence * 100).toFixed(1)}%
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <ProbabilityBar label="HIGH" value={playgroundPrediction.p_high} tone="bg-emerald-500" />
-                    <ProbabilityBar label="MEDIUM" value={playgroundPrediction.p_medium} tone="bg-amber-400" />
-                    <ProbabilityBar label="LOW" value={playgroundPrediction.p_low} tone="bg-rose-500" />
-                  </div>
+                  ))}
                 </div>
               )}
-            </div>
+            </section>
+
+            {analysis?.threshold_sweep && (
+              <section className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-800">
+                  <div className="text-sm font-bold">Audited threshold sweep</div>
+                  <div className="text-[10px] text-slate-400">
+                    Use the analyst-labelled subset to choose a defensible similarity threshold.
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[10px]">
+                    <thead className="bg-slate-950 text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Threshold</th>
+                        <th className="px-3 py-2 text-left">Audited accuracy</th>
+                        <th className="px-3 py-2 text-left">Coverage</th>
+                        <th className="px-3 py-2 text-left">Assigned</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800">
+                      {analysis.threshold_sweep.map((row) => (
+                        <tr key={row.threshold}>
+                          <td className="px-3 py-2 font-mono">{row.threshold.toFixed(2)}</td>
+                          <td className="px-3 py-2">{(row.accuracy * 100).toFixed(1)}%</td>
+                          <td className="px-3 py-2">{(row.coverage * 100).toFixed(1)}%</td>
+                          <td className="px-3 py-2">{row.assigned_count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {preview?.nlp && (
+              <section className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <MetricCard label="NLP method" value="TF-IDF" note="1–2 grams + cosine similarity" />
+                  <MetricCard label="Chosen threshold" value={preview.nlp.threshold.toFixed(2)} />
+                  <MetricCard
+                    label="Audited accuracy"
+                    value={`${(preview.nlp.audited_accuracy * 100).toFixed(1)}%`}
+                    note={`${preview.data.audited_feedback_rows || 0} audited records`}
+                  />
+                </div>
+              </section>
+            )}
+
+            {preview?.mode === 'AI_ASSISTED' && activeRequirement && (
+              <section className="grid gap-4 xl:grid-cols-[230px_minmax(0,1fr)]">
+                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-2">
+                  <div className="px-2 py-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                    Requirement evidence
+                  </div>
+                  {preview.ranking.map((row) => (
+                    <button
+                      key={row.id}
+                      onClick={() => setActiveRequirementId(row.id)}
+                      className={`mb-1 w-full rounded-lg border px-2.5 py-2 text-left ${
+                        activeRequirement.id === row.id
+                          ? 'border-cyan-500/50 bg-cyan-500/10'
+                          : 'border-transparent bg-slate-950/50 hover:border-slate-700'
+                      }`}
+                    >
+                      <div className="text-[9px] font-mono text-slate-500">{row.id}</div>
+                      <div className="mt-0.5 text-[11px] font-semibold">{row.title}</div>
+                      <div className="mt-1 text-[9px] text-slate-500">
+                        {row.feedback_mentions_90d ?? 0} matched feedback
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                  <h4 className="text-base font-black">{activeRequirement.title}</h4>
+                  <p className="mt-1 text-xs leading-5 text-slate-400">{activeRequirement.description}</p>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    <MetricCard label="Matched feedback" value={String(activeRequirement.feedback_mentions_90d ?? 0)} />
+                    <MetricCard label="Mean severity" value={(activeRequirement.mean_feedback_severity ?? 0).toFixed(2)} />
+                    <MetricCard label="Support tickets" value={String(activeRequirement.support_tickets_90d ?? 0)} />
+                    <MetricCard label="Affected MAU" value={formatCompact(activeRequirement.affected_mau)} />
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                      Highest-similarity customer evidence
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      {(activeRequirement.feedback_examples || []).map((item) => (
+                        <div key={item.feedback_id} className="rounded-lg bg-slate-950 p-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="font-mono text-[8px] text-slate-600">{item.feedback_id}</span>
+                            <span className="text-[8px] text-cyan-400">
+                              similarity {item.similarity.toFixed(3)} · severity {item.severity}/5
+                            </span>
+                          </div>
+                          <div className="mt-1 text-[10px] leading-4 text-slate-300">{item.text}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
           </div>
         </div>
       )}
 
-      {tab === 'preview' && (
+      {tab === 'model' && (
+        <div className="flex-1 min-h-0 overflow-auto bg-[#090b10] p-4 text-white">
+          <div className="mx-auto max-w-5xl space-y-4">
+            <div>
+              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-violet-400">
+                Historical Release Model
+              </div>
+              <h3 className="mt-1 text-lg font-black">Supervised prioritization</h3>
+              <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-400">
+                Logistic Regression and Random Forest learn from historical release decisions.
+                The output is P(SHIPPED_NEXT), not a manually weighted business score.
+              </p>
+            </div>
+
+            {benchmarks ? (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {Object.entries(benchmarks).map(([kind, metric]) => (
+                  <section
+                    key={kind}
+                    className={`rounded-xl border p-4 ${
+                      preview?.model?.kind === kind
+                        ? 'border-violet-500/50 bg-violet-500/10'
+                        : 'border-slate-800 bg-slate-900/70'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-xs font-black">{prettyFeature(kind)}</div>
+                      {preview?.model?.kind === kind && (
+                        <span className="rounded-full bg-violet-400 px-2 py-0.5 text-[8px] font-black text-slate-950">
+                          DEPLOYED
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <MetricCard
+                        label="5-fold macro-F1"
+                        value={metric.macro_f1_mean.toFixed(3)}
+                        note={`± ${metric.macro_f1_std.toFixed(3)}`}
+                      />
+                      <MetricCard
+                        label="CV accuracy"
+                        value={metric.accuracy_mean.toFixed(3)}
+                      />
+                    </div>
+                  </section>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-dashed border-slate-700 p-8 text-center text-xs text-slate-500">
+                Set <span className="font-mono text-slate-300">MODE = "ANALYZE"</span> and run Python to compare models.
+              </div>
+            )}
+
+            {preview?.model && (
+              <>
+                <section className="rounded-xl border border-slate-800 bg-slate-900/70 p-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="h-4 w-4 text-violet-400" />
+                    <div className="text-sm font-black">Feature importance</div>
+                  </div>
+                  <div className="mt-3 space-y-2">
+                    {preview.model.feature_importance.map((row) => (
+                      <div key={row.feature} className="grid grid-cols-[180px_minmax(0,1fr)_46px] items-center gap-2">
+                        <div className="truncate text-[10px] text-slate-300">{prettyFeature(row.feature)}</div>
+                        <div className="h-2 rounded-full bg-slate-800">
+                          <div
+                            className="h-full rounded-full bg-violet-400"
+                            style={{ width: `${Math.max(2, row.importance * 100)}%` }}
+                          />
+                        </div>
+                        <div className="text-right font-mono text-[9px] text-slate-500">
+                          {(row.importance * 100).toFixed(1)}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section className="rounded-xl border border-slate-800 bg-slate-900/70 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-black">Current backlog ranking</div>
+                      <div className="text-[10px] text-slate-500">Predicted probability of SHIPPED_NEXT</div>
+                    </div>
+                    <div className="text-[9px] font-mono text-slate-500">
+                      {preview.budget_used}/{preview.budget} engineer-days selected
+                    </div>
+                  </div>
+                  <div className="divide-y divide-slate-800">
+                    {preview.ranking.map((row, index) => {
+                      const selected = preview.selected.some((item) => item.id === row.id);
+                      return (
+                        <button
+                          key={row.id}
+                          onClick={() => {
+                            setActiveRequirementId(row.id);
+                            setTab('evidence');
+                          }}
+                          className="grid w-full grid-cols-[32px_minmax(0,1fr)_90px_64px] items-center gap-3 px-4 py-3 text-left hover:bg-white/5"
+                        >
+                          <div className="text-[10px] font-mono text-slate-600">#{index + 1}</div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="truncate text-[11px] font-bold">{row.title}</span>
+                              {selected && (
+                                <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[7px] font-black text-emerald-300">
+                                  RELEASE
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-0.5 text-[8px] text-slate-500">
+                              {row.feedback_mentions_90d} feedback · {formatCompact(row.affected_mau)} affected MAU
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-[8px] text-slate-600">P(ship)</div>
+                            <div className="font-mono text-[11px] font-bold text-violet-300">
+                              {((row.ship_probability || 0) * 100).toFixed(1)}%
+                            </div>
+                          </div>
+                          <div className="text-right text-[9px] text-slate-500">
+                            {row.engineering_days} d
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {tab === 'product' && (
         <div className="flex-1 min-h-0 overflow-auto bg-[#030303] p-3">
           <div className="mx-auto min-h-full max-w-5xl overflow-hidden rounded-xl border border-zinc-800 bg-[#121212] text-white shadow-2xl">
             <div className="flex h-9 items-center justify-between border-b border-white/5 bg-[#090909] px-3">
@@ -634,19 +797,25 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                 <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/90" />
               </div>
               <div className="flex items-center gap-2">
-                {payload && (
-                  <span className={`rounded-full px-2 py-0.5 text-[8px] font-bold ${
-                    payload.mode === 'AI_ASSISTED'
+                {preview && (
+                  <span className={`rounded-full px-2 py-0.5 text-[8px] font-black ${
+                    preview.mode === 'AI_ASSISTED'
                       ? 'bg-violet-500/15 text-violet-300'
                       : 'bg-zinc-800 text-zinc-300'
                   }`}>
-                    {payload.mode.replace('_', ' ')}
+                    {preview.mode.replace('_', ' ')}
                   </span>
                 )}
-                {hasDataSaver && (
+                {has('data_saver') && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-sky-400/10 px-2 py-0.5 text-[8px] font-semibold text-sky-300">
                     <WifiOff className="h-2.5 w-2.5" />
                     Data Saver
+                  </span>
+                )}
+                {has('offline_recovery') && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/10 px-2 py-0.5 text-[8px] font-semibold text-emerald-300">
+                    <CheckCircle2 className="h-2.5 w-2.5" />
+                    Recovery Ready
                   </span>
                 )}
                 <span className="text-[8px] text-zinc-600">Interactive teaching mockup</span>
@@ -681,6 +850,12 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
               </aside>
 
               <main className="min-w-0 bg-gradient-to-b from-[#233229] via-[#181818] to-[#121212] p-4">
+                {!preview && (
+                  <div className="rounded-lg border border-amber-400/20 bg-amber-400/10 p-3 text-[10px] text-amber-200">
+                    Run <span className="font-mono">BASELINE</span> or <span className="font-mono">AI_ASSISTED</span> to load a release into the product.
+                  </div>
+                )}
+
                 {activeNav === 'search' ? (
                   <div>
                     <div className="flex items-center gap-2 rounded-full bg-white px-3 py-2 text-black">
@@ -692,7 +867,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                         className="w-full bg-transparent text-xs outline-none"
                       />
                     </div>
-                    <h3 className="mt-5 text-lg font-bold">Search results</h3>
+                    <h3 className="mt-5 text-lg font-black">Search results</h3>
                     <div className="mt-3 space-y-2">
                       {filteredTracks.map((track) => {
                         const index = TRACKS.indexOf(track);
@@ -715,7 +890,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                   </div>
                 ) : activeNav === 'library' ? (
                   <div>
-                    <h3 className="text-lg font-bold">Your Library</h3>
+                    <h3 className="text-lg font-black">Your Library</h3>
                     <div className="mt-4 grid grid-cols-2 gap-3">
                       {TRACKS.map((track, index) => (
                         <button
@@ -739,16 +914,17 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                         </div>
                         <h3 className="mt-1 text-xl font-black tracking-tight">Good afternoon</h3>
                       </div>
-                      <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-800 text-[9px] font-bold">
-                        K
+                      <div className="flex items-center gap-1.5">
+                        {has('context_service') && (
+                          <span className="rounded-full bg-violet-400/10 px-2 py-1 text-[7px] font-bold text-violet-300">
+                            Context Engine
+                          </span>
+                        )}
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-800 text-[9px] font-bold">
+                          K
+                        </div>
                       </div>
                     </div>
-
-                    {!payload && (
-                      <div className="mb-4 rounded-lg border border-amber-400/20 bg-amber-400/10 p-3 text-[10px] text-amber-200">
-                        Run Python first. The selected software requirements will change this product.
-                      </div>
-                    )}
 
                     <div className="grid grid-cols-2 gap-2">
                       {[
@@ -768,7 +944,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                       ))}
                     </div>
 
-                    {hasAiDj && (
+                    {has('ai_dj') && (
                       <button
                         onClick={() => {
                           chooseTrack(3);
@@ -781,19 +957,19 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-[#1ed760]">
-                            Prioritized feature
+                            Released capability
                           </div>
                           <div className="truncate text-sm font-black">AI DJ · Focus Flow</div>
-                          <div className="text-[9px] text-zinc-300">Click to start a generated context mix</div>
+                          <div className="text-[9px] text-zinc-300">Context-aware generated listening session</div>
                         </div>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1ed760] text-black">
-                          <Play className="h-4 w-4 fill-current" />
-                        </div>
+                        <Play className="h-5 w-5 text-[#1ed760]" />
                       </button>
                     )}
 
                     <div className="mt-5 flex items-center justify-between">
-                      <h4 className="text-sm font-black">{hasConcerts ? 'Made for you + Live near you' : 'Made for you'}</h4>
+                      <h4 className="text-sm font-black">
+                        {has('concerts') ? 'Made for you + Live near you' : 'Made for you'}
+                      </h4>
                       <span className="text-[9px] font-bold text-zinc-400">Show all</span>
                     </div>
 
@@ -805,33 +981,63 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                           className="group min-w-0 rounded-lg bg-white/5 p-2 text-left transition hover:bg-white/10"
                         >
                           <div className={`relative aspect-square overflow-hidden rounded-md bg-gradient-to-br ${track.gradient}`}>
-                            <div className="absolute inset-0 bg-black/10" />
-                            <div className="absolute bottom-2 left-2 text-[8px] font-black tracking-tight text-white">
+                            <div className="absolute bottom-2 left-2 text-[8px] font-black">
                               {track.title.toUpperCase()}
                             </div>
-                            <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#1ed760] text-black opacity-0 shadow-lg transition group-hover:opacity-100">
+                            <div className="absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-full bg-[#1ed760] text-black opacity-0 transition group-hover:opacity-100">
                               <Play className="h-3.5 w-3.5 fill-current" />
                             </div>
                           </div>
                           <div className="mt-2 truncate text-[9px] font-bold">{track.title}</div>
-                          <div className="truncate text-[8px] text-zinc-500">
-                            {index === 2 && hasConcerts ? 'Live event recommendations enabled' : track.artist}
-                          </div>
+                          <div className="truncate text-[8px] text-zinc-500">{track.artist}</div>
                         </button>
                       ))}
                     </div>
 
-                    {hasPodcastSummary && (
-                      <button className="mt-4 flex w-full items-center gap-3 rounded-lg bg-white/5 p-3 text-left hover:bg-white/10">
+                    {has('concerts') && (
+                      <button className="mt-4 flex w-full items-center gap-3 rounded-lg border border-rose-500/20 bg-rose-500/10 p-3 text-left">
+                        <Ticket className="h-5 w-5 text-rose-300" />
+                        <div className="flex-1">
+                          <div className="text-[10px] font-bold text-rose-200">3 concerts near you</div>
+                          <div className="text-[9px] text-rose-300/70">Matched from artists in your recent listening</div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-rose-300" />
+                      </button>
+                    )}
+
+                    {has('podcast_summary') && (
+                      <button className="mt-3 flex w-full items-center gap-3 rounded-lg bg-white/5 p-3 text-left hover:bg-white/10">
                         <Podcast className="h-5 w-5 text-[#1ed760]" />
-                        <div className="min-w-0 flex-1">
+                        <div className="flex-1">
                           <div className="text-[10px] font-bold">AI podcast summary</div>
-                          <div className="truncate text-[9px] text-zinc-400">
-                            60-second summary and key moments available before playback
-                          </div>
+                          <div className="text-[9px] text-zinc-400">60-second summary and key moments available</div>
                         </div>
                         <ChevronRight className="h-4 w-4 text-zinc-500" />
                       </button>
+                    )}
+
+                    {has('family_controls') && (
+                      <div className="mt-3 rounded-lg border border-blue-500/20 bg-blue-500/10 p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-blue-300" />
+                            <div>
+                              <div className="text-[10px] font-bold">Family content controls</div>
+                              <div className="text-[8px] text-blue-200/70">Explicit content policy</div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setExplicitBlocked((value) => !value)}
+                            className={`rounded-full px-2 py-1 text-[8px] font-bold ${
+                              explicitBlocked
+                                ? 'bg-blue-300 text-slate-950'
+                                : 'bg-white/10 text-white'
+                            }`}
+                          >
+                            {explicitBlocked ? 'Blocked' : 'Allowed'}
+                          </button>
+                        </div>
+                      </div>
                     )}
                   </>
                 )}
@@ -847,14 +1053,9 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                   onClick={() => setIsPlaying((value) => !value)}
                   className={`relative mt-3 aspect-square w-full overflow-hidden rounded-lg bg-gradient-to-br ${currentTrack.gradient}`}
                 >
-                  <div className="absolute inset-0 bg-black/10" />
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 transition hover:opacity-100">
                     <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/70">
-                      {isPlaying ? (
-                        <Pause className="h-5 w-5 fill-current" />
-                      ) : (
-                        <Play className="h-5 w-5 fill-current" />
-                      )}
+                      {isPlaying ? <Pause className="h-5 w-5 fill-current" /> : <Play className="h-5 w-5 fill-current" />}
                     </div>
                   </div>
                   <div className="absolute bottom-2 left-2 text-[11px] font-black">
@@ -875,16 +1076,16 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                   </button>
                 </div>
 
-                {(hasLyricsTranslation || hasAccessibleLyrics) && (
+                {(has('lyrics_translation') || has('accessible_lyrics')) && (
                   <div className={`mt-4 rounded-lg border p-3 ${
-                    hasAccessibleLyrics
+                    has('accessible_lyrics')
                       ? 'border-white/25 bg-black text-white'
                       : 'border-zinc-800 bg-zinc-900'
                   }`}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[9px] font-black">Lyrics</span>
                       <div className="flex items-center gap-1">
-                        {hasLyricsTranslation && (
+                        {has('lyrics_translation') && (
                           <button
                             onClick={() => setShowTranslatedLyrics((value) => !value)}
                             className="inline-flex items-center gap-1 rounded-full bg-[#1ed760]/15 px-2 py-1 text-[7px] font-bold text-[#1ed760]"
@@ -893,7 +1094,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                             {showTranslatedLyrics ? 'BM' : 'EN'}
                           </button>
                         )}
-                        {hasAccessibleLyrics && (
+                        {has('accessible_lyrics') && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-[7px] font-bold text-white">
                             <Accessibility className="h-2.5 w-2.5" />
                             A+
@@ -902,26 +1103,18 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                       </div>
                     </div>
                     <div className={`mt-2 leading-relaxed ${
-                      hasAccessibleLyrics ? 'text-[12px] font-semibold' : 'text-[9px] text-zinc-300'
+                      has('accessible_lyrics') ? 'text-[12px] font-semibold' : 'text-[9px] text-zinc-300'
                     }`}>
-                      {showTranslatedLyrics && hasLyricsTranslation ? (
-                        <>
-                          Lampu kota bergerak perlahan<br />
-                          malam menjadi irama<br />
-                          kita terus melangkah…
-                        </>
+                      {showTranslatedLyrics && has('lyrics_translation') ? (
+                        <>Lampu kota bergerak perlahan<br />malam menjadi irama<br />kita terus melangkah…</>
                       ) : (
-                        <>
-                          City lights are moving slowly<br />
-                          the night becomes a rhythm<br />
-                          we keep moving on…
-                        </>
+                        <>City lights are moving slowly<br />the night becomes a rhythm<br />we keep moving on…</>
                       )}
                     </div>
                   </div>
                 )}
 
-                {hasQueueVoting && (
+                {has('queue_voting') && (
                   <div className="mt-4">
                     <div className="flex items-center gap-1 text-[9px] font-black">
                       <Users className="h-3.5 w-3.5 text-[#1ed760]" />
@@ -929,10 +1122,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                     </div>
                     <div className="mt-2 space-y-1.5">
                       {TRACKS.slice(0, 3).map((track, index) => (
-                        <div
-                          key={track.title}
-                          className="flex items-center gap-2 rounded-md bg-white/5 px-2 py-1.5"
-                        >
+                        <div key={track.title} className="flex items-center gap-2 rounded-md bg-white/5 px-2 py-1.5">
                           <button
                             onClick={() => chooseTrack(index)}
                             className="min-w-0 flex-1 truncate text-left text-[8px] text-zinc-300 hover:text-white"
@@ -946,7 +1136,7 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                                 [track.title]: (votes[track.title] || 0) + 1,
                               }))
                             }
-                            className="inline-flex items-center gap-1 rounded bg-[#1ed760]/10 px-1.5 py-1 text-[7px] font-bold text-[#1ed760] hover:bg-[#1ed760]/20"
+                            className="inline-flex items-center gap-1 rounded bg-[#1ed760]/10 px-1.5 py-1 text-[7px] font-bold text-[#1ed760]"
                           >
                             <ThumbsUp className="h-2.5 w-2.5" />
                             {queueVotes[track.title] || 0}
@@ -955,16 +1145,6 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                       ))}
                     </div>
                   </div>
-                )}
-
-                {hasConcerts && (
-                  <button className="mt-4 flex w-full items-center gap-2 rounded-lg border border-rose-500/20 bg-rose-500/10 p-2 text-left">
-                    <Ticket className="h-4 w-4 text-rose-300" />
-                    <div>
-                      <div className="text-[8px] font-bold text-rose-200">Live near you</div>
-                      <div className="text-[7px] text-rose-300/70">3 events matched to your artists</div>
-                    </div>
-                  </button>
                 )}
               </aside>
             </div>
@@ -976,34 +1156,36 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
                   <div className="truncate text-[10px] font-bold">{currentTrack.title}</div>
                   <div className="truncate text-[8px] text-zinc-500">{currentTrack.artist}</div>
                 </div>
-                <button
-                  onClick={() => setLiked((value) => !value)}
-                  className={liked ? 'text-[#1ed760]' : 'text-zinc-500'}
-                >
+                <button onClick={() => setLiked((value) => !value)} className={liked ? 'text-[#1ed760]' : 'text-zinc-500'}>
                   <Heart className={`h-3.5 w-3.5 ${liked ? 'fill-current' : ''}`} />
                 </button>
               </div>
 
               <div>
                 <div className="flex items-center justify-center gap-4">
-                  <button onClick={previousTrack} className="text-zinc-400 hover:text-white">
+                  <button
+                    onClick={() => {
+                      chooseTrack((currentTrackIndex - 1 + TRACKS.length) % TRACKS.length);
+                    }}
+                    className="text-zinc-400 hover:text-white"
+                  >
                     <SkipBack className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setIsPlaying((value) => !value)}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-white text-black transition hover:scale-105"
                   >
-                    {isPlaying ? (
-                      <Pause className="h-4 w-4 fill-current" />
-                    ) : (
-                      <Play className="h-4 w-4 fill-current" />
-                    )}
+                    {isPlaying ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
                   </button>
-                  <button onClick={nextTrack} className="text-zinc-400 hover:text-white">
+                  <button
+                    onClick={() => {
+                      chooseTrack((currentTrackIndex + 1) % TRACKS.length);
+                    }}
+                    className="text-zinc-400 hover:text-white"
+                  >
                     <SkipForward className="h-4 w-4" />
                   </button>
                 </div>
-
                 <div className="mt-2 flex items-center gap-2 text-[7px] text-zinc-500">
                   <span>{formatTime(progress)}</span>
                   <input
@@ -1019,14 +1201,14 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
               </div>
 
               <div className="flex items-center justify-end gap-2 text-zinc-400">
-                {hasLossless && (
+                {has('lossless') && (
                   <span className="rounded border border-[#1ed760]/40 px-2 py-1 text-[7px] font-black text-[#1ed760]">
                     LOSSLESS
                   </span>
                 )}
-                {hasDataSaver && (
-                  <span className="rounded border border-sky-400/30 px-2 py-1 text-[7px] font-black text-sky-300">
-                    DATA SAVER
+                {has('audio_pipeline') && (
+                  <span className="rounded border border-violet-400/30 px-2 py-1 text-[7px] font-black text-violet-300">
+                    ADAPTIVE CODEC
                   </span>
                 )}
                 <Volume2 className="h-3.5 w-3.5" />
@@ -1043,28 +1225,27 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
             </div>
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-[9px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
-              Release features
-            </span>
-            {payload?.selected.map((item) => (
-              <span
-                key={item.id}
-                className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-1 text-[9px] text-zinc-300"
-              >
-                {item.title}
-              </span>
-            ))}
-            {!payload && (
-              <span className="text-[10px] text-zinc-500">
-                No release plan loaded yet.
-              </span>
-            )}
-          </div>
+          {preview && (
+            <div className="mt-2 rounded-xl border border-zinc-900 bg-zinc-950 p-3">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-[8px] font-semibold uppercase tracking-[0.14em] text-zinc-600">
+                  Release selected by optimizer
+                </span>
+                {preview.selected.map((item) => (
+                  <span
+                    key={item.id}
+                    className="rounded-full border border-zinc-800 bg-zinc-900 px-2 py-1 text-[8px] text-zinc-300"
+                  >
+                    {item.title} · {item.engineering_days}d
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="mt-2 rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 text-[9px] leading-4 text-zinc-500">
-            Audio in this teaching mockup is generated locally with the browser Web Audio API.
-            It does not stream or reproduce Spotify catalogue music.
+          <div className="mt-2 rounded-lg border border-zinc-900 bg-zinc-950 px-3 py-2 text-[8px] leading-4 text-zinc-600">
+            Audio is generated locally with the browser Web Audio API. The product
+            interface is a teaching mockup and does not use Spotify catalogue music or internal Spotify data.
           </div>
         </div>
       )}

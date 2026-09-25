@@ -1,0 +1,959 @@
+feedback_id,submitted_at,channel,region,plan,severity,text,audited_requirement_id
+FB-0001,2026-08-16,community,MY,individual,2,Music keeps buffering on 4G where I live; a data saver would help. This would make the app much more useful.,
+FB-0002,2026-01-24,support_chat,DE,individual,5,Streaming should automatically use less data when signal quality drops. Please prioritize this.,
+FB-0003,2026-08-03,community,GB,family,4,I need an option that reduces bitrate when the network is weak. This would make the app much more useful.,
+FB-0004,2026-07-20,support_chat,TH,individual,3,Please add a low data setting because my connection is slow on the train. This is important enough to keep me subscribed.,
+FB-0005,2026-07-16,in_app,PH,duo,1,Please add a low data setting because my connection is slow on the train. I keep running into this problem.,
+FB-0006,2026-06-24,app_store,ID,student,2,Please add a low data setting because my connection is slow on the train. Please prioritize this.,
+FB-0007,2026-07-07,app_store,JP,duo,3,I need an option that reduces bitrate when the network is weak.,
+FB-0008,2026-03-03,app_store,IN,family,1,Streaming should automatically use less data when signal quality drops. This is important enough to keep me subscribed.,REQ-301
+FB-0009,2026-02-02,community,TH,free,4,I need an option that reduces bitrate when the network is weak.,
+FB-0010,2026-08-01,email,IN,individual,3,Streaming should automatically use less data when signal quality drops. I would use this immediately.,REQ-301
+FB-0011,2026-02-22,in_app,BR,student,3,I need an option that reduces bitrate when the network is weak. Please prioritize this.,
+FB-0012,2026-08-12,support_chat,TH,individual,3,I commute on mobile data and streaming uses too much of my monthly allowance. I would use this immediately.,
+FB-0013,2026-04-26,support_chat,GB,family,2,Music keeps buffering on 4G where I live; a data saver would help. I would use this immediately.,REQ-301
+FB-0014,2026-07-27,community,ID,family,3,Please add a low data setting because my connection is slow on the train. Please prioritize this.,
+FB-0015,2026-06-15,support_chat,US,student,4,Streaming should automatically use less data when signal quality drops.,
+FB-0016,2026-01-08,email,SG,student,4,I need an option that reduces bitrate when the network is weak. This is important enough to keep me subscribed.,
+FB-0017,2026-06-10,in_app,BR,student,3,I need an option that reduces bitrate when the network is weak.,
+FB-0018,2026-05-14,support_chat,PH,family,4,I commute on mobile data and streaming uses too much of my monthly allowance. This is important enough to keep me subscribed.,
+FB-0019,2026-02-20,community,GB,individual,4,I need an option that reduces bitrate when the network is weak. This is important enough to keep me subscribed.,REQ-301
+FB-0020,2026-07-28,community,ID,duo,3,Music keeps buffering on 4G where I live; a data saver would help.,REQ-301
+FB-0021,2026-06-19,app_store,US,student,2,I need an option that reduces bitrate when the network is weak.,REQ-301
+FB-0022,2026-05-17,in_app,PH,free,3,Streaming should automatically use less data when signal quality drops.,REQ-301
+FB-0023,2026-07-08,in_app,ID,individual,4,I need an option that reduces bitrate when the network is weak.,REQ-301
+FB-0024,2026-07-02,in_app,SG,individual,2,I commute on mobile data and streaming uses too much of my monthly allowance.,
+FB-0025,2026-05-11,app_store,IN,free,3,I need an option that reduces bitrate when the network is weak.,
+FB-0026,2026-07-17,in_app,SG,family,3,I need an option that reduces bitrate when the network is weak. Please prioritize this.,REQ-301
+FB-0027,2026-02-06,email,BR,student,3,Streaming should automatically use less data when signal quality drops. Please prioritize this.,REQ-301
+FB-0028,2026-08-10,community,GB,free,3,I need an option that reduces bitrate when the network is weak.,REQ-301
+FB-0029,2026-07-08,app_store,JP,student,3,I need an option that reduces bitrate when the network is weak. I would use this immediately.,
+FB-0030,2026-08-23,support_chat,MX,individual,2,Music keeps buffering on 4G where I live; a data saver would help. I would use this immediately.,
+FB-0031,2026-04-16,support_chat,MY,student,3,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,
+FB-0032,2026-08-03,app_store,DE,duo,4,Please add a low data setting because my connection is slow on the train. Please prioritize this.,
+FB-0033,2026-06-07,community,TH,student,2,I commute on mobile data and streaming uses too much of my monthly allowance.,
+FB-0034,2026-08-18,support_chat,DE,individual,4,Please add a low data setting because my connection is slow on the train.,
+FB-0035,2026-06-20,email,IN,duo,3,I commute on mobile data and streaming uses too much of my monthly allowance. I keep running into this problem.,
+FB-0036,2026-03-11,app_store,MX,student,3,I commute on mobile data and streaming uses too much of my monthly allowance. I would use this immediately.,REQ-301
+FB-0037,2026-04-28,email,JP,free,4,Please add a low data setting because my connection is slow on the train.,
+FB-0038,2026-07-06,community,MX,individual,3,Streaming should automatically use less data when signal quality drops.,REQ-301
+FB-0039,2026-02-07,email,US,family,3,I need an option that reduces bitrate when the network is weak.,
+FB-0040,2026-06-06,app_store,DE,family,4,Music keeps buffering on 4G where I live; a data saver would help. Please prioritize this.,
+FB-0041,2026-07-05,support_chat,ID,individual,3,I need an option that reduces bitrate when the network is weak. I keep running into this problem.,
+FB-0042,2026-01-25,community,PH,student,2,I commute on mobile data and streaming uses too much of my monthly allowance. This has been missing for a long time.,
+FB-0043,2026-05-02,app_store,JP,individual,3,Music keeps buffering on 4G where I live; a data saver would help. I keep running into this problem.,
+FB-0044,2026-06-20,email,GB,family,1,Streaming should automatically use less data when signal quality drops. This has been missing for a long time.,
+FB-0045,2026-07-17,in_app,GB,family,5,I commute on mobile data and streaming uses too much of my monthly allowance.,REQ-301
+FB-0046,2026-03-04,app_store,IN,individual,4,Please add a low data setting because my connection is slow on the train. This has been missing for a long time.,
+FB-0047,2026-04-24,community,MX,free,3,I commute on mobile data and streaming uses too much of my monthly allowance. I would use this immediately.,
+FB-0048,2026-02-17,email,MX,family,4,I commute on mobile data and streaming uses too much of my monthly allowance.,
+FB-0049,2026-05-08,community,GB,student,3,Music keeps buffering on 4G where I live; a data saver would help. Please prioritize this.,
+FB-0050,2026-02-14,in_app,MY,family,1,Please add a low data setting because my connection is slow on the train.,
+FB-0051,2026-02-09,community,GB,duo,2,Please add a low data setting because my connection is slow on the train. I would use this immediately.,
+FB-0052,2026-07-27,email,DE,student,2,Streaming should automatically use less data when signal quality drops.,
+FB-0053,2026-04-27,support_chat,SG,family,2,Streaming should automatically use less data when signal quality drops. This is important enough to keep me subscribed.,
+FB-0054,2026-03-03,app_store,US,student,3,Please add a low data setting because my connection is slow on the train. I would use this immediately.,REQ-301
+FB-0055,2026-04-09,email,BR,free,4,I commute on mobile data and streaming uses too much of my monthly allowance. Please prioritize this.,REQ-301
+FB-0056,2026-05-07,email,DE,family,5,I need an option that reduces bitrate when the network is weak.,REQ-301
+FB-0057,2026-02-13,community,MY,free,5,Streaming should automatically use less data when signal quality drops. Please prioritize this.,
+FB-0058,2026-01-20,community,TH,individual,2,Streaming should automatically use less data when signal quality drops. This is important enough to keep me subscribed.,
+FB-0059,2026-03-25,app_store,TH,duo,2,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,
+FB-0060,2026-07-13,email,PH,duo,3,I need an option that reduces bitrate when the network is weak. This is important enough to keep me subscribed.,
+FB-0061,2026-03-16,app_store,JP,student,3,I commute on mobile data and streaming uses too much of my monthly allowance. Please prioritize this.,
+FB-0062,2026-01-26,support_chat,JP,family,2,Streaming should automatically use less data when signal quality drops. This would make the app much more useful.,
+FB-0063,2026-05-21,community,PH,duo,3,I commute on mobile data and streaming uses too much of my monthly allowance. This is important enough to keep me subscribed.,
+FB-0064,2026-07-19,community,DE,free,2,I need an option that reduces bitrate when the network is weak.,REQ-301
+FB-0065,2026-05-26,in_app,MY,free,4,I need an option that reduces bitrate when the network is weak. I keep running into this problem.,REQ-301
+FB-0066,2026-06-26,support_chat,DE,family,2,I commute on mobile data and streaming uses too much of my monthly allowance. I keep running into this problem.,
+FB-0067,2026-05-27,app_store,SG,individual,2,I need an option that reduces bitrate when the network is weak.,
+FB-0068,2026-08-06,community,SG,individual,2,Music keeps buffering on 4G where I live; a data saver would help.,
+FB-0069,2026-07-10,community,TH,duo,2,I commute on mobile data and streaming uses too much of my monthly allowance.,
+FB-0070,2026-07-20,in_app,SG,free,4,Music keeps buffering on 4G where I live; a data saver would help. Please prioritize this.,
+FB-0071,2026-06-04,email,TH,free,4,I need an option that reduces bitrate when the network is weak.,
+FB-0072,2026-08-18,in_app,GB,student,4,I commute on mobile data and streaming uses too much of my monthly allowance.,
+FB-0073,2026-05-05,app_store,MX,individual,4,Music keeps buffering on 4G where I live; a data saver would help.,
+FB-0074,2026-01-20,email,JP,free,3,I need an option that reduces bitrate when the network is weak. This is important enough to keep me subscribed.,
+FB-0075,2026-01-18,support_chat,DE,student,4,I need an option that reduces bitrate when the network is weak. This would make the app much more useful.,
+FB-0076,2026-03-26,support_chat,DE,individual,4,Streaming should automatically use less data when signal quality drops. This has been missing for a long time.,REQ-301
+FB-0077,2026-06-03,email,JP,family,3,Streaming should automatically use less data when signal quality drops. This would make the app much more useful.,
+FB-0078,2026-03-27,email,TH,duo,3,Streaming should automatically use less data when signal quality drops. This would make the app much more useful.,
+FB-0079,2026-03-13,app_store,GB,individual,3,Please add a low data setting because my connection is slow on the train. Please prioritize this.,
+FB-0080,2026-02-18,support_chat,TH,family,3,I need an option that reduces bitrate when the network is weak. This is important enough to keep me subscribed.,REQ-301
+FB-0081,2026-03-24,app_store,TH,free,3,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,
+FB-0082,2026-08-10,support_chat,IN,individual,2,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,REQ-301
+FB-0083,2026-07-26,app_store,PH,individual,5,I commute on mobile data and streaming uses too much of my monthly allowance. I keep running into this problem.,
+FB-0084,2026-04-10,in_app,TH,family,4,Streaming should automatically use less data when signal quality drops.,REQ-301
+FB-0085,2026-02-12,support_chat,PH,individual,4,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,
+FB-0086,2026-02-01,email,DE,family,1,Streaming should automatically use less data when signal quality drops.,
+FB-0087,2026-08-23,community,SG,student,4,Streaming should automatically use less data when signal quality drops. This would make the app much more useful.,
+FB-0088,2026-04-15,app_store,US,free,3,Streaming should automatically use less data when signal quality drops.,
+FB-0089,2026-02-19,support_chat,ID,duo,3,Music keeps buffering on 4G where I live; a data saver would help. This has been missing for a long time.,
+FB-0090,2026-02-03,community,PH,family,1,I need an option that reduces bitrate when the network is weak.,
+FB-0091,2026-02-06,community,SG,free,3,I commute on mobile data and streaming uses too much of my monthly allowance. I keep running into this problem.,
+FB-0092,2026-08-08,app_store,BR,free,4,Music keeps buffering on 4G where I live; a data saver would help.,
+FB-0093,2026-03-09,in_app,TH,individual,2,Please add a low data setting because my connection is slow on the train. I would use this immediately.,
+FB-0094,2026-06-25,support_chat,ID,free,2,I commute on mobile data and streaming uses too much of my monthly allowance.,REQ-301
+FB-0095,2026-05-17,in_app,PH,student,3,Music keeps buffering on 4G where I live; a data saver would help. Please prioritize this.,
+FB-0096,2026-06-11,community,ID,individual,2,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0097,2026-02-08,in_app,MX,free,2,I love reading lyrics but I want them translated into my language. This is important enough to keep me subscribed.,REQ-302
+FB-0098,2026-04-11,email,SG,duo,3,Can lyrics translate live while the song is playing? I keep running into this problem.,
+FB-0099,2026-06-08,app_store,SG,family,2,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0100,2026-07-06,email,US,duo,4,I love reading lyrics but I want them translated into my language. I keep running into this problem.,
+FB-0101,2026-01-02,support_chat,DE,free,2,Could synchronized lyrics have an instant translation option? I keep running into this problem.,
+FB-0102,2026-02-18,community,SG,individual,2,Please show translated lyrics without making me leave the player.,REQ-302
+FB-0103,2026-07-08,support_chat,DE,free,3,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0104,2026-02-25,app_store,JP,free,1,Could synchronized lyrics have an instant translation option? Please prioritize this.,
+FB-0105,2026-06-02,community,ID,individual,1,Could synchronized lyrics have an instant translation option? I would use this immediately.,
+FB-0106,2026-07-16,community,IN,student,3,Please show translated lyrics without making me leave the player.,REQ-302
+FB-0107,2026-02-28,community,ID,family,2,Could synchronized lyrics have an instant translation option? I keep running into this problem.,
+FB-0108,2026-08-02,in_app,BR,family,1,Could synchronized lyrics have an instant translation option? This has been missing for a long time.,REQ-302
+FB-0109,2026-08-27,app_store,PH,individual,3,Please show translated lyrics without making me leave the player.,REQ-302
+FB-0110,2026-02-27,app_store,MY,duo,1,I love reading lyrics but I want them translated into my language.,REQ-302
+FB-0111,2026-04-27,community,GB,family,2,Can lyrics translate live while the song is playing? I would use this immediately.,REQ-302
+FB-0112,2026-03-26,app_store,BR,individual,2,Please show translated lyrics without making me leave the player.,
+FB-0113,2026-05-25,app_store,TH,free,2,Please show translated lyrics without making me leave the player.,
+FB-0114,2026-06-08,in_app,ID,duo,2,Could synchronized lyrics have an instant translation option? I would use this immediately.,REQ-302
+FB-0115,2026-02-21,support_chat,DE,free,3,Could synchronized lyrics have an instant translation option? This has been missing for a long time.,
+FB-0116,2026-02-24,support_chat,IN,student,1,I love reading lyrics but I want them translated into my language. This is important enough to keep me subscribed.,
+FB-0117,2026-07-26,app_store,BR,student,1,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0118,2026-06-10,email,GB,duo,2,Can lyrics translate live while the song is playing? This would make the app much more useful.,
+FB-0119,2026-05-24,support_chat,BR,duo,3,I listen to songs in other languages and would use real-time lyric translation every day.,REQ-302
+FB-0120,2026-06-26,community,PH,free,2,Please show translated lyrics without making me leave the player. I keep running into this problem.,REQ-302
+FB-0121,2026-06-22,email,GB,student,2,Could synchronized lyrics have an instant translation option? I would use this immediately.,
+FB-0122,2026-04-13,email,IN,free,3,I listen to songs in other languages and would use real-time lyric translation every day. This is important enough to keep me subscribed.,
+FB-0123,2026-07-16,app_store,JP,duo,1,I listen to songs in other languages and would use real-time lyric translation every day. Please prioritize this.,REQ-302
+FB-0124,2026-02-25,email,ID,free,3,Could synchronized lyrics have an instant translation option?,REQ-302
+FB-0125,2026-03-23,app_store,US,free,2,I listen to songs in other languages and would use real-time lyric translation every day. This is important enough to keep me subscribed.,
+FB-0126,2026-01-05,support_chat,GB,individual,1,I love reading lyrics but I want them translated into my language.,REQ-302
+FB-0127,2026-08-26,support_chat,MY,free,2,Can lyrics translate live while the song is playing?,
+FB-0128,2026-03-19,app_store,TH,family,2,I listen to songs in other languages and would use real-time lyric translation every day. Please prioritize this.,REQ-302
+FB-0129,2026-01-23,support_chat,US,individual,2,Can lyrics translate live while the song is playing?,
+FB-0130,2026-03-27,in_app,TH,student,1,Could synchronized lyrics have an instant translation option?,
+FB-0131,2026-06-27,in_app,IN,free,1,Could synchronized lyrics have an instant translation option? This is important enough to keep me subscribed.,
+FB-0132,2026-06-04,email,IN,family,1,I love reading lyrics but I want them translated into my language. Please prioritize this.,
+FB-0133,2026-04-16,support_chat,GB,individual,2,I love reading lyrics but I want them translated into my language.,
+FB-0134,2026-01-26,in_app,SG,student,1,I love reading lyrics but I want them translated into my language. This would make the app much more useful.,
+FB-0135,2026-03-27,in_app,MX,family,1,Could synchronized lyrics have an instant translation option? This is important enough to keep me subscribed.,
+FB-0136,2026-02-12,app_store,JP,student,2,Please show translated lyrics without making me leave the player. This has been missing for a long time.,
+FB-0137,2026-04-09,email,JP,family,2,Can lyrics translate live while the song is playing?,REQ-302
+FB-0138,2026-05-19,in_app,IN,free,2,Please show translated lyrics without making me leave the player.,
+FB-0139,2026-02-17,app_store,JP,student,3,Please show translated lyrics without making me leave the player. This is important enough to keep me subscribed.,
+FB-0140,2026-08-02,app_store,MY,individual,3,Please show translated lyrics without making me leave the player. This is important enough to keep me subscribed.,
+FB-0141,2026-04-12,in_app,JP,family,2,I listen to songs in other languages and would use real-time lyric translation every day. Please prioritize this.,
+FB-0142,2026-01-06,email,MY,duo,1,I love reading lyrics but I want them translated into my language. Please prioritize this.,REQ-302
+FB-0143,2026-03-28,community,BR,student,3,Can lyrics translate live while the song is playing? I would use this immediately.,
+FB-0144,2026-02-16,support_chat,JP,student,1,Can lyrics translate live while the song is playing? This has been missing for a long time.,
+FB-0145,2026-06-18,support_chat,SG,student,3,Please show translated lyrics without making me leave the player.,
+FB-0146,2026-06-09,in_app,GB,student,2,Can lyrics translate live while the song is playing? This would make the app much more useful.,REQ-302
+FB-0147,2026-01-12,in_app,TH,family,1,I love reading lyrics but I want them translated into my language. I would use this immediately.,
+FB-0148,2026-08-05,support_chat,DE,family,2,Could synchronized lyrics have an instant translation option?,
+FB-0149,2026-02-19,app_store,IN,individual,2,Could synchronized lyrics have an instant translation option?,
+FB-0150,2026-02-09,email,TH,family,3,Please show translated lyrics without making me leave the player. I would use this immediately.,
+FB-0151,2026-05-18,app_store,DE,family,1,I love reading lyrics but I want them translated into my language. I would use this immediately.,
+FB-0152,2026-04-25,support_chat,MX,duo,2,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0153,2026-06-03,support_chat,MX,individual,2,Can lyrics translate live while the song is playing? This is important enough to keep me subscribed.,
+FB-0154,2026-01-02,email,IN,individual,1,Could synchronized lyrics have an instant translation option?,REQ-302
+FB-0155,2026-06-04,app_store,US,family,3,Could synchronized lyrics have an instant translation option? I would use this immediately.,
+FB-0156,2026-03-09,app_store,GB,student,3,I listen to songs in other languages and would use real-time lyric translation every day.,
+FB-0157,2026-05-15,community,IN,individual,2,Can lyrics translate live while the song is playing? This would make the app much more useful.,
+FB-0158,2026-03-02,in_app,MX,student,3,Please show translated lyrics without making me leave the player. Please prioritize this.,
+FB-0159,2026-01-05,community,IN,family,3,Could synchronized lyrics have an instant translation option? I would use this immediately.,
+FB-0160,2026-01-08,community,MX,individual,2,I listen to songs in other languages and would use real-time lyric translation every day. I keep running into this problem.,
+FB-0161,2026-01-19,support_chat,TH,duo,2,Can lyrics translate live while the song is playing? I would use this immediately.,
+FB-0162,2026-08-12,email,PH,duo,2,Please show translated lyrics without making me leave the player. This is important enough to keep me subscribed.,REQ-302
+FB-0163,2026-04-20,app_store,DE,student,2,Could synchronized lyrics have an instant translation option? This would make the app much more useful.,
+FB-0164,2026-07-20,in_app,BR,student,2,Can lyrics translate live while the song is playing? I keep running into this problem.,
+FB-0165,2026-02-04,community,GB,duo,2,Could synchronized lyrics have an instant translation option?,
+FB-0166,2026-05-07,app_store,SG,individual,2,I listen to songs in other languages and would use real-time lyric translation every day. I keep running into this problem.,
+FB-0167,2026-06-24,in_app,DE,student,1,I love reading lyrics but I want them translated into my language. This is important enough to keep me subscribed.,
+FB-0168,2026-04-15,support_chat,MY,free,1,I listen to songs in other languages and would use real-time lyric translation every day. This has been missing for a long time.,
+FB-0169,2026-08-21,app_store,TH,family,1,I love reading lyrics but I want them translated into my language.,REQ-302
+FB-0170,2026-06-23,support_chat,DE,free,4,I love reading lyrics but I want them translated into my language. Please prioritize this.,
+FB-0171,2026-08-08,support_chat,PH,family,1,Could synchronized lyrics have an instant translation option? This has been missing for a long time.,
+FB-0172,2026-06-09,community,MX,family,4,I listen to songs in other languages and would use real-time lyric translation every day. I would use this immediately.,
+FB-0173,2026-03-19,in_app,DE,free,2,Please show translated lyrics without making me leave the player. I keep running into this problem.,
+FB-0174,2026-06-13,in_app,US,student,2,Please add track votes to group sessions. I keep running into this problem.,
+FB-0175,2026-08-18,community,MY,duo,2,Please add track votes to group sessions.,
+FB-0176,2026-04-25,community,TH,student,3,Group sessions need voting because one person keeps controlling the queue. I would use this immediately.,REQ-303
+FB-0177,2026-06-10,support_chat,GB,family,1,Please add track votes to group sessions. I would use this immediately.,
+FB-0178,2026-07-01,email,IN,student,2,Please add track votes to group sessions. Please prioritize this.,
+FB-0179,2026-08-18,email,ID,free,1,Our friends want to reorder the queue by votes.,
+FB-0180,2026-06-14,email,SG,free,3,Our friends want to reorder the queue by votes. This is important enough to keep me subscribed.,
+FB-0181,2026-02-05,community,JP,student,3,A shared queue needs democratic voting when we use group mode.,
+FB-0182,2026-06-25,support_chat,JP,student,1,Let everyone in the listening party vote songs up or down. This has been missing for a long time.,
+FB-0183,2026-01-14,app_store,ID,individual,3,Group sessions need voting because one person keeps controlling the queue. I keep running into this problem.,REQ-303
+FB-0184,2026-01-11,in_app,ID,student,1,Our friends want to reorder the queue by votes. This would make the app much more useful.,
+FB-0185,2026-06-02,in_app,TH,individual,2,Our friends want to reorder the queue by votes. This is important enough to keep me subscribed.,
+FB-0186,2026-02-16,support_chat,MY,individual,1,Please add track votes to group sessions. This is important enough to keep me subscribed.,REQ-303
+FB-0187,2026-06-08,community,SG,individual,4,Let everyone in the listening party vote songs up or down.,
+FB-0188,2026-05-25,app_store,US,student,1,A shared queue needs democratic voting when we use group mode. This is important enough to keep me subscribed.,REQ-303
+FB-0189,2026-05-01,community,US,duo,1,Let everyone in the listening party vote songs up or down.,
+FB-0190,2026-03-15,email,US,family,1,Please add track votes to group sessions.,
+FB-0191,2026-08-21,community,ID,free,3,Group sessions need voting because one person keeps controlling the queue.,
+FB-0192,2026-01-24,app_store,IN,individual,3,Let everyone in the listening party vote songs up or down. I would use this immediately.,
+FB-0193,2026-07-27,in_app,US,free,1,Let everyone in the listening party vote songs up or down. This is important enough to keep me subscribed.,
+FB-0194,2026-05-15,app_store,TH,free,1,Group sessions need voting because one person keeps controlling the queue. This would make the app much more useful.,REQ-303
+FB-0195,2026-03-02,support_chat,BR,duo,3,A shared queue needs democratic voting when we use group mode.,
+FB-0196,2026-03-26,in_app,ID,free,2,A shared queue needs democratic voting when we use group mode. This is important enough to keep me subscribed.,
+FB-0197,2026-06-09,support_chat,DE,duo,2,Our friends want to reorder the queue by votes. This is important enough to keep me subscribed.,
+FB-0198,2026-08-20,in_app,TH,duo,4,Group sessions need voting because one person keeps controlling the queue. Please prioritize this.,REQ-303
+FB-0199,2026-02-07,support_chat,DE,duo,3,Group sessions need voting because one person keeps controlling the queue.,
+FB-0200,2026-06-27,support_chat,MY,family,2,Group sessions need voting because one person keeps controlling the queue.,
+FB-0201,2026-02-18,support_chat,DE,free,2,Let everyone in the listening party vote songs up or down. This is important enough to keep me subscribed.,
+FB-0202,2026-08-24,in_app,BR,duo,3,Please add track votes to group sessions. I keep running into this problem.,
+FB-0203,2026-02-14,in_app,SG,family,3,Let everyone in the listening party vote songs up or down.,
+FB-0204,2026-02-03,app_store,BR,free,3,Group sessions need voting because one person keeps controlling the queue.,
+FB-0205,2026-03-20,community,MY,student,4,Group sessions need voting because one person keeps controlling the queue. This would make the app much more useful.,
+FB-0206,2026-06-02,community,MY,free,2,Our friends want to reorder the queue by votes.,
+FB-0207,2026-08-09,email,US,free,2,Group sessions need voting because one person keeps controlling the queue. This is important enough to keep me subscribed.,
+FB-0208,2026-08-01,in_app,US,student,1,A shared queue needs democratic voting when we use group mode.,
+FB-0209,2026-06-23,community,JP,duo,3,A shared queue needs democratic voting when we use group mode. I keep running into this problem.,
+FB-0210,2026-08-02,support_chat,MY,duo,1,Please add track votes to group sessions. Please prioritize this.,REQ-303
+FB-0211,2026-08-09,community,JP,individual,4,Let everyone in the listening party vote songs up or down. This is important enough to keep me subscribed.,
+FB-0212,2026-05-01,in_app,BR,student,2,Please add track votes to group sessions. I keep running into this problem.,
+FB-0213,2026-06-19,email,DE,student,1,A shared queue needs democratic voting when we use group mode.,
+FB-0214,2026-05-13,in_app,US,duo,2,Please add track votes to group sessions.,
+FB-0215,2026-01-13,community,GB,free,2,A shared queue needs democratic voting when we use group mode. This would make the app much more useful.,REQ-303
+FB-0216,2026-03-15,in_app,MX,student,3,Our friends want to reorder the queue by votes.,
+FB-0217,2026-05-01,in_app,MY,family,2,Let everyone in the listening party vote songs up or down.,
+FB-0218,2026-01-17,app_store,BR,student,2,Please add track votes to group sessions. This would make the app much more useful.,
+FB-0219,2026-04-14,in_app,BR,duo,2,A shared queue needs democratic voting when we use group mode.,
+FB-0220,2026-07-21,app_store,MX,family,2,A shared queue needs democratic voting when we use group mode. I would use this immediately.,REQ-303
+FB-0221,2026-04-04,in_app,GB,family,1,A shared queue needs democratic voting when we use group mode. Please prioritize this.,REQ-303
+FB-0222,2026-02-25,support_chat,MY,family,2,Please add track votes to group sessions. This has been missing for a long time.,
+FB-0223,2026-06-17,community,MY,duo,3,Group sessions need voting because one person keeps controlling the queue. I would use this immediately.,
+FB-0224,2026-06-08,email,DE,duo,3,A shared queue needs democratic voting when we use group mode.,REQ-303
+FB-0225,2026-02-02,in_app,JP,student,3,A shared queue needs democratic voting when we use group mode. This has been missing for a long time.,
+FB-0226,2026-02-08,support_chat,TH,free,2,A shared queue needs democratic voting when we use group mode. This would make the app much more useful.,REQ-303
+FB-0227,2026-06-06,support_chat,BR,duo,1,Our friends want to reorder the queue by votes. This is important enough to keep me subscribed.,REQ-303
+FB-0228,2026-01-10,in_app,GB,student,1,Our friends want to reorder the queue by votes. This would make the app much more useful.,
+FB-0229,2026-08-28,in_app,JP,free,3,Please add track votes to group sessions.,
+FB-0230,2026-08-22,email,BR,family,2,Group sessions need voting because one person keeps controlling the queue.,
+FB-0231,2026-01-23,in_app,SG,student,2,Let everyone in the listening party vote songs up or down. Please prioritize this.,
+FB-0232,2026-03-26,community,SG,free,2,Group sessions need voting because one person keeps controlling the queue. This would make the app much more useful.,
+FB-0233,2026-04-21,support_chat,JP,family,2,Please add track votes to group sessions.,
+FB-0234,2026-04-01,email,US,family,2,Our friends want to reorder the queue by votes.,
+FB-0235,2026-01-21,in_app,DE,duo,3,A shared queue needs democratic voting when we use group mode. Please prioritize this.,
+FB-0236,2026-06-18,email,BR,individual,1,Premium should include lossless music.,REQ-304
+FB-0237,2026-08-06,community,US,individual,2,Please add true lossless audio for premium headphones.,
+FB-0238,2026-02-11,app_store,MY,free,3,Premium should include lossless music. Please prioritize this.,
+FB-0239,2026-03-08,in_app,BR,duo,1,I would pay for higher quality lossless audio.,REQ-304
+FB-0240,2026-08-11,community,PH,free,2,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0241,2026-04-15,in_app,MX,student,2,Can we get bit-perfect lossless playback? I would use this immediately.,
+FB-0242,2026-02-26,community,GB,family,2,I would pay for higher quality lossless audio.,REQ-304
+FB-0243,2026-04-11,email,SG,free,2,I want a high fidelity lossless quality option.,
+FB-0244,2026-03-15,in_app,ID,free,3,Premium should include lossless music. This has been missing for a long time.,
+FB-0245,2026-08-21,in_app,TH,free,3,I would pay for higher quality lossless audio. Please prioritize this.,
+FB-0246,2026-01-11,email,IN,free,5,Premium should include lossless music. I would use this immediately.,REQ-304
+FB-0247,2026-08-10,support_chat,MX,individual,3,Please add true lossless audio for premium headphones. Please prioritize this.,REQ-304
+FB-0248,2026-06-23,in_app,DE,free,1,I would pay for higher quality lossless audio. I would use this immediately.,
+FB-0249,2026-03-27,support_chat,BR,individual,2,I would pay for higher quality lossless audio. Please prioritize this.,
+FB-0250,2026-03-22,app_store,BR,family,2,Can we get bit-perfect lossless playback?,REQ-304
+FB-0251,2026-06-17,support_chat,GB,free,3,I would pay for higher quality lossless audio. This would make the app much more useful.,REQ-304
+FB-0252,2026-02-13,email,PH,individual,2,I would pay for higher quality lossless audio. This would make the app much more useful.,
+FB-0253,2026-02-05,email,IN,student,2,Premium should include lossless music. This has been missing for a long time.,
+FB-0254,2026-06-19,community,ID,duo,1,I would pay for higher quality lossless audio.,
+FB-0255,2026-04-02,support_chat,TH,individual,3,I would pay for higher quality lossless audio.,
+FB-0256,2026-04-22,app_store,GB,free,3,I want a high fidelity lossless quality option. This is important enough to keep me subscribed.,
+FB-0257,2026-05-19,app_store,TH,free,2,Can we get bit-perfect lossless playback?,
+FB-0258,2026-06-20,community,PH,student,3,Please add true lossless audio for premium headphones. I keep running into this problem.,
+FB-0259,2026-02-03,in_app,GB,student,1,I want a high fidelity lossless quality option. This would make the app much more useful.,REQ-304
+FB-0260,2026-08-08,community,TH,duo,3,I would pay for higher quality lossless audio.,
+FB-0261,2026-07-05,community,ID,duo,3,I want a high fidelity lossless quality option. This has been missing for a long time.,
+FB-0262,2026-02-27,app_store,IN,duo,1,I want a high fidelity lossless quality option. This would make the app much more useful.,
+FB-0263,2026-05-02,in_app,PH,family,3,Please add true lossless audio for premium headphones. Please prioritize this.,
+FB-0264,2026-08-14,in_app,TH,individual,3,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0265,2026-06-14,community,ID,student,3,I want a high fidelity lossless quality option. This is important enough to keep me subscribed.,
+FB-0266,2026-03-05,community,US,free,2,Can we get bit-perfect lossless playback? This is important enough to keep me subscribed.,
+FB-0267,2026-05-17,support_chat,PH,duo,1,I would pay for higher quality lossless audio. I keep running into this problem.,
+FB-0268,2026-04-16,app_store,JP,student,1,I want a high fidelity lossless quality option.,
+FB-0269,2026-04-13,support_chat,US,student,3,Can we get bit-perfect lossless playback?,
+FB-0270,2026-05-14,support_chat,JP,student,2,I would pay for higher quality lossless audio. This is important enough to keep me subscribed.,
+FB-0271,2026-02-07,app_store,BR,student,4,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0272,2026-08-26,app_store,IN,duo,1,Can we get bit-perfect lossless playback?,
+FB-0273,2026-02-24,in_app,TH,free,4,Please add true lossless audio for premium headphones. Please prioritize this.,
+FB-0274,2026-02-23,community,PH,student,3,Please add true lossless audio for premium headphones.,REQ-304
+FB-0275,2026-05-01,app_store,MX,family,3,I want a high fidelity lossless quality option. Please prioritize this.,
+FB-0276,2026-07-12,support_chat,MY,free,1,Can we get bit-perfect lossless playback?,
+FB-0277,2026-02-24,community,TH,student,1,I want a high fidelity lossless quality option.,REQ-304
+FB-0278,2026-07-02,email,MX,individual,3,Please add true lossless audio for premium headphones. This has been missing for a long time.,REQ-304
+FB-0279,2026-04-23,community,TH,free,1,Can we get bit-perfect lossless playback? This would make the app much more useful.,
+FB-0280,2026-01-05,support_chat,MY,duo,1,I want a high fidelity lossless quality option.,
+FB-0281,2026-05-04,support_chat,SG,duo,3,Can we get bit-perfect lossless playback? This has been missing for a long time.,
+FB-0282,2026-07-03,in_app,MX,family,2,Please add true lossless audio for premium headphones. Please prioritize this.,
+FB-0283,2026-08-24,community,GB,individual,2,Can we get bit-perfect lossless playback? Please prioritize this.,
+FB-0284,2026-01-17,app_store,DE,duo,2,I would pay for higher quality lossless audio. I keep running into this problem.,
+FB-0285,2026-02-22,support_chat,GB,student,3,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0286,2026-08-09,support_chat,TH,free,3,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0287,2026-01-04,support_chat,ID,duo,2,Please add true lossless audio for premium headphones.,
+FB-0288,2026-02-19,support_chat,DE,individual,3,Can we get bit-perfect lossless playback?,REQ-304
+FB-0289,2026-07-20,community,MX,student,1,Premium should include lossless music.,
+FB-0290,2026-06-28,app_store,TH,student,2,I would pay for higher quality lossless audio. Please prioritize this.,REQ-304
+FB-0291,2026-05-16,in_app,BR,student,1,Premium should include lossless music. Please prioritize this.,
+FB-0292,2026-01-01,support_chat,ID,free,2,I would pay for higher quality lossless audio.,
+FB-0293,2026-05-24,community,BR,family,3,I would pay for higher quality lossless audio. Please prioritize this.,REQ-304
+FB-0294,2026-07-13,support_chat,IN,family,2,Please add true lossless audio for premium headphones. This is important enough to keep me subscribed.,REQ-304
+FB-0295,2026-07-08,app_store,US,duo,2,I would pay for higher quality lossless audio.,
+FB-0296,2026-03-10,in_app,MY,duo,2,I want a high fidelity lossless quality option.,
+FB-0297,2026-04-18,app_store,TH,free,2,Premium should include lossless music. This is important enough to keep me subscribed.,REQ-304
+FB-0298,2026-07-09,in_app,GB,free,1,Can we get bit-perfect lossless playback? This has been missing for a long time.,
+FB-0299,2026-05-01,community,PH,family,3,Please add true lossless audio for premium headphones. This would make the app much more useful.,REQ-304
+FB-0300,2026-01-27,support_chat,SG,duo,2,Can we get bit-perfect lossless playback? I keep running into this problem.,
+FB-0301,2026-04-12,email,US,individual,1,Please add true lossless audio for premium headphones. I would use this immediately.,
+FB-0302,2026-06-07,community,PH,free,2,Premium should include lossless music. This would make the app much more useful.,
+FB-0303,2026-04-11,email,BR,family,1,I want a high fidelity lossless quality option. This would make the app much more useful.,REQ-304
+FB-0304,2026-04-28,community,PH,duo,2,I want a high fidelity lossless quality option. Please prioritize this.,
+FB-0305,2026-06-11,community,IN,duo,2,Can we get bit-perfect lossless playback?,REQ-304
+FB-0306,2026-06-11,in_app,GB,free,1,Please add true lossless audio for premium headphones. I would use this immediately.,REQ-304
+FB-0307,2026-07-21,app_store,TH,free,2,Please add true lossless audio for premium headphones. This is important enough to keep me subscribed.,
+FB-0308,2026-07-20,community,GB,student,3,I want a high fidelity lossless quality option. Please prioritize this.,
+FB-0309,2026-06-26,community,TH,family,1,I want a high fidelity lossless quality option. This would make the app much more useful.,
+FB-0310,2026-02-07,email,PH,duo,2,Please add true lossless audio for premium headphones.,
+FB-0311,2026-03-07,email,SG,individual,2,I would pay for higher quality lossless audio. I keep running into this problem.,REQ-304
+FB-0312,2026-01-23,community,MX,free,2,Premium should include lossless music. This has been missing for a long time.,
+FB-0313,2026-03-22,support_chat,SG,individual,2,I would pay for higher quality lossless audio. This has been missing for a long time.,REQ-304
+FB-0314,2026-03-26,community,BR,family,3,I want a high fidelity lossless quality option. This is important enough to keep me subscribed.,
+FB-0315,2026-06-03,support_chat,PH,family,3,Can we get bit-perfect lossless playback?,REQ-304
+FB-0316,2026-07-27,in_app,IN,family,2,Please add true lossless audio for premium headphones. I would use this immediately.,REQ-304
+FB-0317,2026-05-20,support_chat,JP,free,1,Premium should include lossless music. This has been missing for a long time.,
+FB-0318,2026-01-14,support_chat,SG,free,2,I would pay for higher quality lossless audio.,
+FB-0319,2026-01-04,app_store,BR,student,2,Please add true lossless audio for premium headphones. This would make the app much more useful.,
+FB-0320,2026-07-12,support_chat,ID,student,3,Please add true lossless audio for premium headphones. This is important enough to keep me subscribed.,
+FB-0321,2026-02-12,community,BR,family,3,Please make lyrics easier to read with high contrast and larger text. Please prioritize this.,
+FB-0322,2026-08-28,in_app,BR,free,3,My screen reader cannot identify the lyric controls properly. Please prioritize this.,
+FB-0323,2026-04-07,email,JP,duo,5,The lyric text is too small and my screen reader misses some controls.,REQ-305
+FB-0324,2026-05-09,app_store,JP,duo,2,My screen reader cannot identify the lyric controls properly. This has been missing for a long time.,
+FB-0325,2026-08-12,community,DE,family,2,Please make lyrics easier to read with high contrast and larger text.,
+FB-0326,2026-04-10,app_store,MX,duo,5,Please make lyrics easier to read with high contrast and larger text. This has been missing for a long time.,REQ-305
+FB-0327,2026-06-10,app_store,BR,duo,3,Please make lyrics easier to read with high contrast and larger text.,
+FB-0328,2026-02-28,community,DE,family,4,My screen reader cannot identify the lyric controls properly. I keep running into this problem.,
+FB-0329,2026-04-21,community,PH,family,4,Keyboard navigation in the lyric panel is difficult. Please prioritize this.,
+FB-0330,2026-04-15,support_chat,MY,family,4,Keyboard navigation in the lyric panel is difficult. This is important enough to keep me subscribed.,
+FB-0331,2026-04-22,app_store,ID,individual,4,My screen reader cannot identify the lyric controls properly. I keep running into this problem.,
+FB-0332,2026-07-27,email,MY,student,2,Please make lyrics easier to read with high contrast and larger text. I would use this immediately.,REQ-305
+FB-0333,2026-01-23,in_app,MX,individual,1,Accessible lyrics with larger text would make the app usable for me.,
+FB-0334,2026-08-21,support_chat,IN,family,4,Keyboard navigation in the lyric panel is difficult.,
+FB-0335,2026-01-02,app_store,US,duo,3,Accessible lyrics with larger text would make the app usable for me.,
+FB-0336,2026-02-01,support_chat,GB,family,1,The lyric text is too small and my screen reader misses some controls. I would use this immediately.,
+FB-0337,2026-05-01,email,TH,family,4,Please make lyrics easier to read with high contrast and larger text. This is important enough to keep me subscribed.,REQ-305
+FB-0338,2026-05-25,in_app,GB,student,4,Please make lyrics easier to read with high contrast and larger text. Please prioritize this.,
+FB-0339,2026-06-23,in_app,JP,free,3,My screen reader cannot identify the lyric controls properly. This would make the app much more useful.,
+FB-0340,2026-04-05,app_store,MX,family,5,The lyric text is too small and my screen reader misses some controls.,REQ-305
+FB-0341,2026-04-24,support_chat,TH,family,2,Keyboard navigation in the lyric panel is difficult. I keep running into this problem.,
+FB-0342,2026-08-18,support_chat,ID,individual,3,Accessible lyrics with larger text would make the app usable for me.,REQ-305
+FB-0343,2026-06-07,app_store,DE,duo,2,My screen reader cannot identify the lyric controls properly.,
+FB-0344,2026-06-28,email,GB,free,3,The lyric text is too small and my screen reader misses some controls. This is important enough to keep me subscribed.,REQ-305
+FB-0345,2026-03-08,email,US,family,4,The lyric text is too small and my screen reader misses some controls.,
+FB-0346,2026-02-04,community,ID,free,3,My screen reader cannot identify the lyric controls properly. I keep running into this problem.,
+FB-0347,2026-08-20,email,BR,student,4,My screen reader cannot identify the lyric controls properly.,
+FB-0348,2026-06-04,in_app,US,student,2,The lyric text is too small and my screen reader misses some controls.,
+FB-0349,2026-03-27,email,SG,student,3,Keyboard navigation in the lyric panel is difficult. This is important enough to keep me subscribed.,
+FB-0350,2026-01-02,email,US,family,4,Accessible lyrics with larger text would make the app usable for me.,
+FB-0351,2026-01-28,email,IN,family,4,Please make lyrics easier to read with high contrast and larger text. This would make the app much more useful.,REQ-305
+FB-0352,2026-01-18,in_app,SG,free,3,The lyric text is too small and my screen reader misses some controls. This would make the app much more useful.,
+FB-0353,2026-06-05,support_chat,MX,student,4,My screen reader cannot identify the lyric controls properly. Please prioritize this.,REQ-305
+FB-0354,2026-06-15,app_store,MX,individual,3,Please make lyrics easier to read with high contrast and larger text.,
+FB-0355,2026-03-23,email,US,duo,4,Keyboard navigation in the lyric panel is difficult. This is important enough to keep me subscribed.,
+FB-0356,2026-02-03,email,US,student,3,Accessible lyrics with larger text would make the app usable for me. This is important enough to keep me subscribed.,
+FB-0357,2026-02-22,community,IN,duo,3,Please make lyrics easier to read with high contrast and larger text.,
+FB-0358,2026-02-13,app_store,PH,individual,2,Keyboard navigation in the lyric panel is difficult.,
+FB-0359,2026-04-17,app_store,MX,duo,3,My screen reader cannot identify the lyric controls properly. This would make the app much more useful.,
+FB-0360,2026-05-02,app_store,SG,family,3,Please make lyrics easier to read with high contrast and larger text. I keep running into this problem.,
+FB-0361,2026-01-17,email,SG,free,2,Accessible lyrics with larger text would make the app usable for me.,
+FB-0362,2026-02-01,email,ID,student,4,My screen reader cannot identify the lyric controls properly. This is important enough to keep me subscribed.,REQ-305
+FB-0363,2026-01-26,support_chat,ID,duo,4,Accessible lyrics with larger text would make the app usable for me. I keep running into this problem.,
+FB-0364,2026-05-28,app_store,MY,student,3,My screen reader cannot identify the lyric controls properly. I keep running into this problem.,REQ-305
+FB-0365,2026-07-09,community,ID,duo,4,Please make lyrics easier to read with high contrast and larger text. I would use this immediately.,
+FB-0366,2026-08-02,app_store,MY,family,1,Keyboard navigation in the lyric panel is difficult. This would make the app much more useful.,
+FB-0367,2026-05-28,email,IN,family,5,The lyric text is too small and my screen reader misses some controls.,
+FB-0368,2026-04-05,app_store,SG,duo,3,The lyric text is too small and my screen reader misses some controls. Please prioritize this.,
+FB-0369,2026-02-17,support_chat,PH,student,3,My screen reader cannot identify the lyric controls properly. This would make the app much more useful.,
+FB-0370,2026-01-24,in_app,BR,free,2,My screen reader cannot identify the lyric controls properly. This would make the app much more useful.,
+FB-0371,2026-08-18,app_store,TH,individual,2,My screen reader cannot identify the lyric controls properly.,
+FB-0372,2026-02-05,support_chat,US,free,4,Keyboard navigation in the lyric panel is difficult. I keep running into this problem.,REQ-305
+FB-0373,2026-01-16,in_app,PH,student,3,I want the AI DJ to understand whether I am studying or working out. This would make the app much more useful.,
+FB-0374,2026-01-16,in_app,PH,duo,3,I want the AI DJ to understand whether I am studying or working out.,
+FB-0375,2026-03-16,email,JP,student,2,Could the DJ build a focus mix based on my current listening context? This has been missing for a long time.,
+FB-0376,2026-03-26,email,GB,duo,2,Could the DJ build a focus mix based on my current listening context? I keep running into this problem.,
+FB-0377,2026-07-01,in_app,BR,student,1,I want a smart DJ that changes the mix based on what I am doing. This has been missing for a long time.,
+FB-0378,2026-05-18,support_chat,DE,individual,1,Please make the DJ adapt to workout and focus sessions. Please prioritize this.,
+FB-0379,2026-04-03,in_app,DE,student,2,I want the AI DJ to understand whether I am studying or working out. I keep running into this problem.,
+FB-0380,2026-05-11,app_store,US,family,2,I want the AI DJ to understand whether I am studying or working out. I would use this immediately.,
+FB-0381,2026-03-04,email,MX,student,2,I want the AI DJ to understand whether I am studying or working out. I would use this immediately.,
+FB-0382,2026-03-23,in_app,SG,free,1,Please make the DJ adapt to workout and focus sessions.,
+FB-0383,2026-02-05,in_app,TH,individual,4,An AI DJ for commuting would be useful.,
+FB-0384,2026-01-27,email,US,duo,3,I want the AI DJ to understand whether I am studying or working out. This would make the app much more useful.,REQ-306
+FB-0385,2026-05-13,community,BR,free,2,Please make the DJ adapt to workout and focus sessions. This is important enough to keep me subscribed.,
+FB-0386,2026-05-11,app_store,IN,individual,2,I want the AI DJ to understand whether I am studying or working out.,
+FB-0387,2026-08-11,support_chat,JP,family,2,I want a smart DJ that changes the mix based on what I am doing. Please prioritize this.,
+FB-0388,2026-07-14,support_chat,MX,family,3,Please make the DJ adapt to workout and focus sessions. I would use this immediately.,REQ-306
+FB-0389,2026-02-19,email,BR,free,3,Could the DJ build a focus mix based on my current listening context? This has been missing for a long time.,
+FB-0390,2026-08-27,support_chat,BR,individual,2,I want the AI DJ to understand whether I am studying or working out. This is important enough to keep me subscribed.,REQ-306
+FB-0391,2026-04-28,support_chat,MX,student,2,I want the AI DJ to understand whether I am studying or working out. Please prioritize this.,
+FB-0392,2026-02-13,app_store,MX,individual,1,An AI DJ for commuting would be useful. I would use this immediately.,
+FB-0393,2026-06-26,app_store,MY,family,2,Please make the DJ adapt to workout and focus sessions. This has been missing for a long time.,
+FB-0394,2026-07-05,app_store,GB,student,2,Could the DJ build a focus mix based on my current listening context? I would use this immediately.,
+FB-0395,2026-05-12,email,MY,individual,2,An AI DJ for commuting would be useful. I keep running into this problem.,
+FB-0396,2026-08-08,in_app,MX,family,3,Could the DJ build a focus mix based on my current listening context? This would make the app much more useful.,
+FB-0397,2026-03-15,app_store,MX,individual,1,I want a smart DJ that changes the mix based on what I am doing. Please prioritize this.,REQ-306
+FB-0398,2026-05-12,email,JP,duo,2,Could the DJ build a focus mix based on my current listening context? This has been missing for a long time.,
+FB-0399,2026-07-27,community,SG,student,3,I want the AI DJ to understand whether I am studying or working out. Please prioritize this.,
+FB-0400,2026-07-19,app_store,SG,family,2,I want the AI DJ to understand whether I am studying or working out.,
+FB-0401,2026-03-06,support_chat,PH,duo,1,I want the AI DJ to understand whether I am studying or working out. This would make the app much more useful.,
+FB-0402,2026-07-14,app_store,JP,family,2,An AI DJ for commuting would be useful.,
+FB-0403,2026-07-05,app_store,BR,individual,2,I want the AI DJ to understand whether I am studying or working out. This is important enough to keep me subscribed.,
+FB-0404,2026-05-21,community,ID,individual,3,Please make the DJ adapt to workout and focus sessions. Please prioritize this.,
+FB-0405,2026-07-15,in_app,JP,duo,2,I want a smart DJ that changes the mix based on what I am doing.,
+FB-0406,2026-06-24,community,IN,student,2,I want a smart DJ that changes the mix based on what I am doing. I would use this immediately.,REQ-306
+FB-0407,2026-07-09,support_chat,ID,free,1,An AI DJ for commuting would be useful. I keep running into this problem.,REQ-306
+FB-0408,2026-03-10,support_chat,JP,family,2,An AI DJ for commuting would be useful. This would make the app much more useful.,
+FB-0409,2026-07-19,community,US,student,4,An AI DJ for commuting would be useful. This is important enough to keep me subscribed.,
+FB-0410,2026-07-06,app_store,MY,individual,2,I want a smart DJ that changes the mix based on what I am doing.,REQ-306
+FB-0411,2026-05-20,in_app,MY,free,1,I want a smart DJ that changes the mix based on what I am doing. This has been missing for a long time.,REQ-306
+FB-0412,2026-08-08,email,MY,family,2,Could the DJ build a focus mix based on my current listening context? I would use this immediately.,
+FB-0413,2026-06-15,in_app,US,family,3,Could the DJ build a focus mix based on my current listening context? This has been missing for a long time.,
+FB-0414,2026-02-18,app_store,PH,student,2,I want the AI DJ to understand whether I am studying or working out. I would use this immediately.,REQ-306
+FB-0415,2026-07-20,app_store,BR,student,2,I want the AI DJ to understand whether I am studying or working out. I keep running into this problem.,
+FB-0416,2026-02-05,email,JP,duo,1,I want the AI DJ to understand whether I am studying or working out. Please prioritize this.,REQ-306
+FB-0417,2026-02-22,app_store,BR,free,4,Could the DJ build a focus mix based on my current listening context? I keep running into this problem.,REQ-306
+FB-0418,2026-04-14,support_chat,US,free,1,An AI DJ for commuting would be useful.,
+FB-0419,2026-02-18,email,ID,duo,3,I want the AI DJ to understand whether I am studying or working out.,
+FB-0420,2026-06-16,support_chat,MY,student,1,Could the DJ build a focus mix based on my current listening context? This would make the app much more useful.,
+FB-0421,2026-06-07,support_chat,TH,duo,2,An AI DJ for commuting would be useful.,REQ-306
+FB-0422,2026-03-24,support_chat,MX,duo,2,Please make the DJ adapt to workout and focus sessions. This is important enough to keep me subscribed.,
+FB-0423,2026-02-17,email,GB,family,2,I want a smart DJ that changes the mix based on what I am doing. This would make the app much more useful.,
+FB-0424,2026-08-12,support_chat,IN,free,1,I want the AI DJ to understand whether I am studying or working out.,
+FB-0425,2026-05-26,community,TH,free,3,I want a smart DJ that changes the mix based on what I am doing. This is important enough to keep me subscribed.,
+FB-0426,2026-06-16,in_app,MY,free,2,I want a smart DJ that changes the mix based on what I am doing. This has been missing for a long time.,
+FB-0427,2026-04-04,support_chat,DE,individual,2,An AI DJ for commuting would be useful. I keep running into this problem.,
+FB-0428,2026-02-12,app_store,PH,free,1,I want a smart DJ that changes the mix based on what I am doing.,REQ-306
+FB-0429,2026-07-01,email,ID,duo,1,I want the AI DJ to understand whether I am studying or working out. This has been missing for a long time.,
+FB-0430,2026-05-16,community,US,free,2,I want the AI DJ to understand whether I am studying or working out. This would make the app much more useful.,REQ-306
+FB-0431,2026-04-25,community,ID,free,2,I want the AI DJ to understand whether I am studying or working out.,REQ-306
+FB-0432,2026-08-17,community,US,duo,2,Please make the DJ adapt to workout and focus sessions. I keep running into this problem.,
+FB-0433,2026-07-25,in_app,TH,student,2,I want a smart DJ that changes the mix based on what I am doing. This would make the app much more useful.,REQ-306
+FB-0434,2026-06-19,app_store,ID,duo,2,I want the AI DJ to understand whether I am studying or working out. This is important enough to keep me subscribed.,REQ-306
+FB-0435,2026-04-07,in_app,PH,family,2,Please make the DJ adapt to workout and focus sessions. I keep running into this problem.,
+FB-0436,2026-03-07,community,DE,individual,3,An AI DJ for commuting would be useful.,
+FB-0437,2026-04-14,community,MY,student,3,Please make the DJ adapt to workout and focus sessions.,
+FB-0438,2026-05-17,community,BR,family,3,Please make the DJ adapt to workout and focus sessions. This has been missing for a long time.,
+FB-0439,2026-06-19,community,MY,individual,2,I want the AI DJ to understand whether I am studying or working out.,REQ-306
+FB-0440,2026-08-06,email,GB,duo,2,I want the AI DJ to understand whether I am studying or working out. I would use this immediately.,
+FB-0441,2026-08-24,app_store,DE,individual,2,I want a smart DJ that changes the mix based on what I am doing.,
+FB-0442,2026-06-27,support_chat,BR,free,3,An AI DJ for commuting would be useful. I would use this immediately.,
+FB-0443,2026-05-14,support_chat,DE,family,1,Please surface nearby gigs based on what I listen to. I keep running into this problem.,
+FB-0444,2026-04-22,app_store,DE,duo,1,I want local concert recommendations in the app. This is important enough to keep me subscribed.,
+FB-0445,2026-07-18,community,MX,individual,2,Show live events for artists in my library.,
+FB-0446,2026-04-05,email,JP,student,1,Concert discovery would stop me missing shows. This has been missing for a long time.,
+FB-0447,2026-03-18,email,ID,duo,2,Show live events for artists in my library.,
+FB-0448,2026-02-27,support_chat,DE,family,3,Tell me when artists I follow are playing concerts near me.,REQ-307
+FB-0449,2026-01-06,email,IN,student,2,Tell me when artists I follow are playing concerts near me. This is important enough to keep me subscribed.,
+FB-0450,2026-07-01,email,MX,family,1,Show live events for artists in my library. This is important enough to keep me subscribed.,
+FB-0451,2026-02-27,email,MX,free,2,Tell me when artists I follow are playing concerts near me. Please prioritize this.,
+FB-0452,2026-08-13,support_chat,MX,student,2,I want local concert recommendations in the app. I keep running into this problem.,
+FB-0453,2026-08-10,support_chat,PH,student,1,Please surface nearby gigs based on what I listen to. Please prioritize this.,
+FB-0454,2026-05-02,email,TH,student,1,I want local concert recommendations in the app. Please prioritize this.,REQ-307
+FB-0455,2026-03-20,email,MY,family,1,Tell me when artists I follow are playing concerts near me.,
+FB-0456,2026-07-14,app_store,DE,duo,1,Please surface nearby gigs based on what I listen to. Please prioritize this.,
+FB-0457,2026-06-15,in_app,TH,free,1,Please surface nearby gigs based on what I listen to. Please prioritize this.,REQ-307
+FB-0458,2026-01-17,community,MX,family,3,Tell me when artists I follow are playing concerts near me.,REQ-307
+FB-0459,2026-04-04,email,DE,duo,3,Show live events for artists in my library. This has been missing for a long time.,REQ-307
+FB-0460,2026-04-21,support_chat,SG,student,1,Tell me when artists I follow are playing concerts near me. I would use this immediately.,
+FB-0461,2026-08-23,community,MX,family,2,Concert discovery would stop me missing shows. Please prioritize this.,
+FB-0462,2026-03-06,email,MY,free,2,Please surface nearby gigs based on what I listen to. I keep running into this problem.,REQ-307
+FB-0463,2026-04-04,email,DE,student,2,I want local concert recommendations in the app. I keep running into this problem.,
+FB-0464,2026-08-24,app_store,DE,student,2,Concert discovery would stop me missing shows. Please prioritize this.,
+FB-0465,2026-03-16,app_store,US,family,3,I want local concert recommendations in the app. I keep running into this problem.,REQ-307
+FB-0466,2026-07-15,app_store,JP,free,1,Tell me when artists I follow are playing concerts near me. This has been missing for a long time.,
+FB-0467,2026-07-07,community,DE,family,3,Show live events for artists in my library.,
+FB-0468,2026-08-18,support_chat,BR,family,2,Tell me when artists I follow are playing concerts near me.,
+FB-0469,2026-03-16,community,JP,individual,2,Tell me when artists I follow are playing concerts near me.,
+FB-0470,2026-06-05,in_app,IN,duo,4,Concert discovery would stop me missing shows. I would use this immediately.,
+FB-0471,2026-05-21,in_app,BR,family,3,Tell me when artists I follow are playing concerts near me. This is important enough to keep me subscribed.,
+FB-0472,2026-04-23,app_store,DE,individual,2,Tell me when artists I follow are playing concerts near me. Please prioritize this.,
+FB-0473,2026-04-04,in_app,TH,individual,2,I want local concert recommendations in the app. I would use this immediately.,
+FB-0474,2026-08-07,app_store,GB,individual,2,Show live events for artists in my library.,
+FB-0475,2026-05-07,app_store,TH,individual,3,Tell me when artists I follow are playing concerts near me. Please prioritize this.,
+FB-0476,2026-02-14,community,GB,duo,2,Show live events for artists in my library.,
+FB-0477,2026-05-05,email,PH,free,3,Tell me when artists I follow are playing concerts near me.,
+FB-0478,2026-05-08,email,MX,student,3,Show live events for artists in my library. I keep running into this problem.,REQ-307
+FB-0479,2026-07-26,support_chat,ID,free,2,Concert discovery would stop me missing shows. This would make the app much more useful.,
+FB-0480,2026-08-10,email,ID,free,2,Tell me when artists I follow are playing concerts near me. I keep running into this problem.,
+FB-0481,2026-05-07,community,PH,student,3,Concert discovery would stop me missing shows.,REQ-307
+FB-0482,2026-02-03,email,ID,student,3,Please surface nearby gigs based on what I listen to. This would make the app much more useful.,
+FB-0483,2026-07-04,email,JP,duo,4,Please surface nearby gigs based on what I listen to.,
+FB-0484,2026-03-10,support_chat,PH,individual,2,I want local concert recommendations in the app.,
+FB-0485,2026-05-24,in_app,TH,duo,1,I want local concert recommendations in the app. Please prioritize this.,
+FB-0486,2026-03-24,support_chat,SG,free,1,Tell me when artists I follow are playing concerts near me. This is important enough to keep me subscribed.,
+FB-0487,2026-03-19,email,MY,student,3,Tell me when artists I follow are playing concerts near me.,
+FB-0488,2026-01-13,community,MX,family,3,Please surface nearby gigs based on what I listen to. I keep running into this problem.,REQ-307
+FB-0489,2026-03-06,support_chat,TH,free,3,Tell me when artists I follow are playing concerts near me. This is important enough to keep me subscribed.,
+FB-0490,2026-04-20,app_store,MX,student,1,Tell me when artists I follow are playing concerts near me. Please prioritize this.,
+FB-0491,2026-03-11,app_store,DE,duo,2,Tell me when artists I follow are playing concerts near me. This would make the app much more useful.,REQ-307
+FB-0492,2026-02-13,in_app,TH,student,2,Show live events for artists in my library. This has been missing for a long time.,
+FB-0493,2026-03-05,email,PH,individual,1,I want local concert recommendations in the app. Please prioritize this.,
+FB-0494,2026-07-23,app_store,PH,individual,2,Tell me when artists I follow are playing concerts near me. This is important enough to keep me subscribed.,
+FB-0495,2026-06-24,email,US,free,3,Tell me when artists I follow are playing concerts near me.,
+FB-0496,2026-05-25,support_chat,IN,duo,3,Tell me when artists I follow are playing concerts near me. This has been missing for a long time.,
+FB-0497,2026-04-13,in_app,US,individual,1,Tell me when artists I follow are playing concerts near me. I would use this immediately.,REQ-307
+FB-0498,2026-05-08,support_chat,TH,free,2,Show live events for artists in my library. This has been missing for a long time.,
+FB-0499,2026-05-16,support_chat,SG,free,3,Tell me when artists I follow are playing concerts near me. Please prioritize this.,
+FB-0500,2026-04-16,app_store,TH,student,3,I want local concert recommendations in the app.,
+FB-0501,2026-03-08,in_app,SG,duo,2,Concert discovery would stop me missing shows.,
+FB-0502,2026-01-15,support_chat,MX,student,2,I want local concert recommendations in the app.,REQ-307
+FB-0503,2026-05-01,in_app,BR,student,1,Show live events for artists in my library.,REQ-307
+FB-0504,2026-06-15,community,SG,family,3,Show key moments and a short podcast summary. This is important enough to keep me subscribed.,
+FB-0505,2026-02-04,community,PH,family,1,Please generate the key points from a two hour podcast.,
+FB-0506,2026-08-22,in_app,MY,duo,2,Please generate the key points from a two hour podcast. I would use this immediately.,
+FB-0507,2026-03-04,app_store,SG,individual,3,An AI summary would help me decide which podcast episodes are worth my time.,
+FB-0508,2026-02-20,email,GB,student,3,I want a quick summary before starting a long episode. This would make the app much more useful.,
+FB-0509,2026-02-24,email,IN,family,2,Please generate the key points from a two hour podcast. Please prioritize this.,
+FB-0510,2026-01-15,app_store,JP,family,1,Please generate the key points from a two hour podcast.,
+FB-0511,2026-02-22,email,BR,student,3,Long podcasts need short summaries before I decide to listen. This is important enough to keep me subscribed.,
+FB-0512,2026-03-23,in_app,BR,individual,2,An AI summary would help me decide which podcast episodes are worth my time. I would use this immediately.,
+FB-0513,2026-08-25,in_app,SG,individual,3,Show key moments and a short podcast summary. Please prioritize this.,
+FB-0514,2026-02-06,community,SG,individual,2,I want a quick summary before starting a long episode. I would use this immediately.,
+FB-0515,2026-06-12,in_app,US,family,1,Show key moments and a short podcast summary. Please prioritize this.,REQ-308
+FB-0516,2026-01-28,email,PH,family,3,Show key moments and a short podcast summary.,
+FB-0517,2026-02-19,support_chat,JP,individual,1,Please generate the key points from a two hour podcast.,REQ-308
+FB-0518,2026-06-03,app_store,BR,free,2,Show key moments and a short podcast summary. Please prioritize this.,
+FB-0519,2026-03-05,community,ID,duo,1,Please generate the key points from a two hour podcast.,REQ-308
+FB-0520,2026-03-09,app_store,GB,free,2,An AI summary would help me decide which podcast episodes are worth my time. Please prioritize this.,
+FB-0521,2026-03-28,community,US,duo,4,I want a quick summary before starting a long episode. This is important enough to keep me subscribed.,
+FB-0522,2026-07-27,email,ID,individual,1,I want a quick summary before starting a long episode.,REQ-308
+FB-0523,2026-04-26,in_app,MX,family,2,Show key moments and a short podcast summary. Please prioritize this.,
+FB-0524,2026-01-02,community,SG,student,3,I want a quick summary before starting a long episode. This is important enough to keep me subscribed.,
+FB-0525,2026-05-02,app_store,US,student,2,Long podcasts need short summaries before I decide to listen.,
+FB-0526,2026-06-14,email,JP,duo,3,An AI summary would help me decide which podcast episodes are worth my time. Please prioritize this.,
+FB-0527,2026-03-09,in_app,MY,duo,2,An AI summary would help me decide which podcast episodes are worth my time. This is important enough to keep me subscribed.,
+FB-0528,2026-05-07,in_app,GB,duo,3,Long podcasts need short summaries before I decide to listen. This is important enough to keep me subscribed.,
+FB-0529,2026-01-25,support_chat,MY,individual,1,An AI summary would help me decide which podcast episodes are worth my time. This is important enough to keep me subscribed.,REQ-308
+FB-0530,2026-01-19,in_app,MY,individual,3,An AI summary would help me decide which podcast episodes are worth my time. This would make the app much more useful.,
+FB-0531,2026-07-21,app_store,BR,student,3,Show key moments and a short podcast summary. This has been missing for a long time.,
+FB-0532,2026-06-10,support_chat,DE,family,3,I want a quick summary before starting a long episode. I would use this immediately.,
+FB-0533,2026-01-21,email,IN,free,2,Please generate the key points from a two hour podcast. This would make the app much more useful.,
+FB-0534,2026-05-08,in_app,PH,individual,2,Show key moments and a short podcast summary. Please prioritize this.,
+FB-0535,2026-03-16,app_store,PH,duo,2,Show key moments and a short podcast summary. I would use this immediately.,
+FB-0536,2026-06-16,app_store,JP,free,2,Show key moments and a short podcast summary. This would make the app much more useful.,
+FB-0537,2026-01-05,app_store,US,duo,3,An AI summary would help me decide which podcast episodes are worth my time. This has been missing for a long time.,
+FB-0538,2026-03-21,community,DE,duo,3,I want a quick summary before starting a long episode.,
+FB-0539,2026-04-20,email,SG,free,1,Please generate the key points from a two hour podcast. I would use this immediately.,
+FB-0540,2026-03-26,community,MX,individual,2,Please generate the key points from a two hour podcast.,
+FB-0541,2026-04-06,community,MX,family,2,An AI summary would help me decide which podcast episodes are worth my time. This is important enough to keep me subscribed.,
+FB-0542,2026-08-12,support_chat,MY,individual,3,Long podcasts need short summaries before I decide to listen.,
+FB-0543,2026-03-20,support_chat,US,free,2,I want a quick summary before starting a long episode.,
+FB-0544,2026-01-22,community,ID,free,1,Show key moments and a short podcast summary.,
+FB-0545,2026-03-14,app_store,IN,student,2,Show key moments and a short podcast summary. Please prioritize this.,
+FB-0546,2026-04-09,in_app,PH,student,1,Show key moments and a short podcast summary. This has been missing for a long time.,
+FB-0547,2026-06-18,support_chat,ID,duo,2,I want a quick summary before starting a long episode. This is important enough to keep me subscribed.,
+FB-0548,2026-07-15,app_store,ID,family,2,Please generate the key points from a two hour podcast. This would make the app much more useful.,
+FB-0549,2026-01-13,email,US,free,3,Show key moments and a short podcast summary. This is important enough to keep me subscribed.,
+FB-0550,2026-04-10,support_chat,MX,student,2,Show key moments and a short podcast summary.,
+FB-0551,2026-02-10,app_store,MX,free,1,Please generate the key points from a two hour podcast.,
+FB-0552,2026-05-12,email,GB,duo,3,Long podcasts need short summaries before I decide to listen. This would make the app much more useful.,
+FB-0553,2026-08-16,community,GB,student,2,I want a quick summary before starting a long episode. This is important enough to keep me subscribed.,
+FB-0554,2026-08-26,support_chat,BR,individual,2,Long podcasts need short summaries before I decide to listen.,
+FB-0555,2026-01-15,support_chat,ID,free,2,Show key moments and a short podcast summary. I would use this immediately.,
+FB-0556,2026-02-01,support_chat,BR,family,2,Please generate the key points from a two hour podcast. I would use this immediately.,REQ-308
+FB-0557,2026-02-04,app_store,IN,individual,2,I want a quick summary before starting a long episode. I keep running into this problem.,
+FB-0558,2026-03-23,email,BR,family,4,I want a quick summary before starting a long episode. This would make the app much more useful.,
+FB-0559,2026-03-11,support_chat,TH,individual,5,Playback should recover when I go through a tunnel and lose signal.,REQ-309
+FB-0560,2026-08-24,app_store,TH,student,4,Playback should recover when I go through a tunnel and lose signal. I would use this immediately.,REQ-309
+FB-0561,2026-02-04,app_store,US,student,4,Playback should recover when I go through a tunnel and lose signal. Please prioritize this.,REQ-309
+FB-0562,2026-03-01,community,DE,free,4,Playback should recover when I go through a tunnel and lose signal. This is important enough to keep me subscribed.,
+FB-0563,2026-02-24,support_chat,TH,free,3,Music should continue or recover after a short network outage.,
+FB-0564,2026-08-04,app_store,DE,student,5,Please make playback resilient to temporary network loss. Please prioritize this.,
+FB-0565,2026-02-26,community,US,duo,5,Music should continue or recover after a short network outage. This would make the app much more useful.,REQ-309
+FB-0566,2026-01-21,in_app,ID,individual,4,The player loses my position when the connection disappears. Please prioritize this.,REQ-309
+FB-0567,2026-08-15,support_chat,JP,family,5,Playback should recover when I go through a tunnel and lose signal. This would make the app much more useful.,
+FB-0568,2026-03-11,in_app,JP,duo,5,Playback should recover when I go through a tunnel and lose signal. Please prioritize this.,
+FB-0569,2026-06-01,app_store,SG,student,4,The player loses my position when the connection disappears. This is important enough to keep me subscribed.,
+FB-0570,2026-04-11,in_app,DE,free,5,Please make playback resilient to temporary network loss. This has been missing for a long time.,
+FB-0571,2026-05-01,in_app,SG,family,3,The player loses my position when the connection disappears. Please prioritize this.,
+FB-0572,2026-06-18,in_app,IN,individual,4,Playback should recover when I go through a tunnel and lose signal. I would use this immediately.,
+FB-0573,2026-02-13,community,SG,family,2,Please make playback resilient to temporary network loss.,
+FB-0574,2026-08-12,in_app,MX,individual,3,Music should continue or recover after a short network outage. I would use this immediately.,REQ-309
+FB-0575,2026-03-19,support_chat,MY,individual,4,Music should continue or recover after a short network outage. I keep running into this problem.,REQ-309
+FB-0576,2026-01-12,email,ID,individual,3,Please make playback resilient to temporary network loss.,REQ-309
+FB-0577,2026-06-09,app_store,TH,free,3,Please make playback resilient to temporary network loss. Please prioritize this.,
+FB-0578,2026-06-19,community,BR,family,4,The player loses my position when the connection disappears.,
+FB-0579,2026-02-08,app_store,GB,free,3,Playback should recover when I go through a tunnel and lose signal. I keep running into this problem.,
+FB-0580,2026-06-14,community,DE,free,3,When connectivity drops the song sometimes restarts; please resume cleanly. This would make the app much more useful.,REQ-309
+FB-0581,2026-06-21,community,TH,family,4,Music should continue or recover after a short network outage.,
+FB-0582,2026-05-02,community,GB,student,4,The player loses my position when the connection disappears. Please prioritize this.,REQ-309
+FB-0583,2026-01-25,app_store,TH,individual,4,Music should continue or recover after a short network outage. I would use this immediately.,
+FB-0584,2026-06-28,support_chat,MX,family,4,The player loses my position when the connection disappears. I keep running into this problem.,REQ-309
+FB-0585,2026-01-05,email,JP,free,3,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0586,2026-07-19,in_app,GB,duo,3,Playback should recover when I go through a tunnel and lose signal. This has been missing for a long time.,REQ-309
+FB-0587,2026-04-06,in_app,JP,student,3,Please make playback resilient to temporary network loss. This has been missing for a long time.,
+FB-0588,2026-03-14,support_chat,PH,free,4,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0589,2026-03-15,support_chat,GB,free,2,When connectivity drops the song sometimes restarts; please resume cleanly. I would use this immediately.,
+FB-0590,2026-07-19,in_app,MX,individual,3,Music should continue or recover after a short network outage. This has been missing for a long time.,
+FB-0591,2026-01-10,community,MX,duo,3,Playback should recover when I go through a tunnel and lose signal. This would make the app much more useful.,
+FB-0592,2026-05-22,support_chat,JP,duo,4,When connectivity drops the song sometimes restarts; please resume cleanly.,REQ-309
+FB-0593,2026-02-13,support_chat,DE,duo,4,Music should continue or recover after a short network outage.,REQ-309
+FB-0594,2026-01-02,support_chat,PH,student,4,Please make playback resilient to temporary network loss.,
+FB-0595,2026-02-01,app_store,JP,free,4,Please make playback resilient to temporary network loss. I would use this immediately.,REQ-309
+FB-0596,2026-05-28,in_app,PH,duo,3,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0597,2026-03-14,support_chat,US,free,3,The player loses my position when the connection disappears.,REQ-309
+FB-0598,2026-05-04,email,DE,duo,4,When connectivity drops the song sometimes restarts; please resume cleanly.,REQ-309
+FB-0599,2026-01-05,email,BR,family,5,Playback should recover when I go through a tunnel and lose signal. I would use this immediately.,
+FB-0600,2026-02-13,support_chat,TH,duo,2,The player loses my position when the connection disappears. I keep running into this problem.,
+FB-0601,2026-06-09,support_chat,ID,family,5,When connectivity drops the song sometimes restarts; please resume cleanly. Please prioritize this.,REQ-309
+FB-0602,2026-06-16,community,DE,free,5,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0603,2026-02-14,support_chat,TH,duo,5,The player loses my position when the connection disappears. This has been missing for a long time.,
+FB-0604,2026-01-05,support_chat,GB,duo,4,Please make playback resilient to temporary network loss.,
+FB-0605,2026-06-18,app_store,JP,family,5,Music should continue or recover after a short network outage. This has been missing for a long time.,REQ-309
+FB-0606,2026-04-28,in_app,US,student,3,The player loses my position when the connection disappears. This is important enough to keep me subscribed.,REQ-309
+FB-0607,2026-05-24,email,IN,free,5,Please make playback resilient to temporary network loss.,
+FB-0608,2026-08-26,in_app,US,free,5,Please make playback resilient to temporary network loss. I would use this immediately.,
+FB-0609,2026-05-09,app_store,TH,student,4,When connectivity drops the song sometimes restarts; please resume cleanly. This would make the app much more useful.,
+FB-0610,2026-02-04,in_app,MY,free,4,Playback should recover when I go through a tunnel and lose signal. This is important enough to keep me subscribed.,
+FB-0611,2026-04-22,in_app,DE,duo,4,Music should continue or recover after a short network outage.,
+FB-0612,2026-02-14,support_chat,BR,family,4,The player loses my position when the connection disappears. I would use this immediately.,
+FB-0613,2026-01-01,support_chat,GB,duo,4,Music should continue or recover after a short network outage. I keep running into this problem.,
+FB-0614,2026-02-26,email,IN,student,5,The player loses my position when the connection disappears. I would use this immediately.,
+FB-0615,2026-06-05,app_store,ID,student,4,Playback should recover when I go through a tunnel and lose signal.,REQ-309
+FB-0616,2026-07-18,community,GB,individual,4,Playback should recover when I go through a tunnel and lose signal. I keep running into this problem.,
+FB-0617,2026-06-28,app_store,IN,student,3,Please make playback resilient to temporary network loss.,REQ-309
+FB-0618,2026-02-20,in_app,GB,duo,5,Please make playback resilient to temporary network loss.,
+FB-0619,2026-01-09,email,IN,free,4,When connectivity drops the song sometimes restarts; please resume cleanly. I would use this immediately.,
+FB-0620,2026-08-14,support_chat,PH,duo,5,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0621,2026-05-01,community,TH,duo,4,The player loses my position when the connection disappears. This would make the app much more useful.,
+FB-0622,2026-04-05,email,GB,family,3,The player loses my position when the connection disappears.,REQ-309
+FB-0623,2026-07-26,email,TH,family,4,Playback should recover when I go through a tunnel and lose signal.,REQ-309
+FB-0624,2026-01-23,app_store,US,free,4,When connectivity drops the song sometimes restarts; please resume cleanly. This has been missing for a long time.,
+FB-0625,2026-08-03,in_app,MX,duo,5,Music should continue or recover after a short network outage.,
+FB-0626,2026-02-25,community,SG,family,5,When connectivity drops the song sometimes restarts; please resume cleanly. I keep running into this problem.,
+FB-0627,2026-06-02,app_store,MX,family,4,When connectivity drops the song sometimes restarts; please resume cleanly. I keep running into this problem.,REQ-309
+FB-0628,2026-04-22,support_chat,PH,duo,5,Please make playback resilient to temporary network loss.,
+FB-0629,2026-07-11,community,JP,individual,4,Playback should recover when I go through a tunnel and lose signal. I keep running into this problem.,
+FB-0630,2026-08-16,support_chat,JP,family,3,Music should continue or recover after a short network outage.,
+FB-0631,2026-04-28,support_chat,US,family,2,The player loses my position when the connection disappears.,
+FB-0632,2026-01-22,support_chat,SG,student,5,Music should continue or recover after a short network outage.,
+FB-0633,2026-06-01,community,US,family,5,Playback should recover when I go through a tunnel and lose signal. I would use this immediately.,REQ-309
+FB-0634,2026-03-10,support_chat,IN,family,5,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0635,2026-04-12,email,MX,free,3,The player loses my position when the connection disappears.,
+FB-0636,2026-03-01,email,JP,free,2,Please make playback resilient to temporary network loss. I keep running into this problem.,
+FB-0637,2026-02-06,support_chat,ID,family,2,When connectivity drops the song sometimes restarts; please resume cleanly. This would make the app much more useful.,
+FB-0638,2026-06-18,community,DE,family,2,Please make playback resilient to temporary network loss. I keep running into this problem.,
+FB-0639,2026-03-26,in_app,ID,free,3,Please make playback resilient to temporary network loss.,REQ-309
+FB-0640,2026-08-17,email,TH,student,5,Please make playback resilient to temporary network loss. This has been missing for a long time.,
+FB-0641,2026-08-05,community,PH,individual,4,Playback should recover when I go through a tunnel and lose signal.,
+FB-0642,2026-08-11,support_chat,DE,individual,5,Please make playback resilient to temporary network loss.,
+FB-0643,2026-04-21,in_app,MY,free,3,Please make playback resilient to temporary network loss. This has been missing for a long time.,
+FB-0644,2026-07-02,support_chat,DE,family,5,The player loses my position when the connection disappears.,
+FB-0645,2026-02-01,app_store,DE,duo,4,Playback should recover when I go through a tunnel and lose signal.,
+FB-0646,2026-05-06,support_chat,ID,family,5,When connectivity drops the song sometimes restarts; please resume cleanly.,REQ-309
+FB-0647,2026-07-11,in_app,MY,student,5,When connectivity drops the song sometimes restarts; please resume cleanly.,
+FB-0648,2026-02-02,email,TH,family,5,Playback should recover when I go through a tunnel and lose signal. Please prioritize this.,
+FB-0649,2026-08-02,community,DE,student,5,Playback should recover when I go through a tunnel and lose signal.,
+FB-0650,2026-06-08,support_chat,ID,individual,4,Please make playback resilient to temporary network loss. This has been missing for a long time.,
+FB-0651,2026-02-19,in_app,IN,duo,4,Playback should recover when I go through a tunnel and lose signal.,
+FB-0652,2026-03-03,support_chat,ID,duo,5,When connectivity drops the song sometimes restarts; please resume cleanly. This would make the app much more useful.,
+FB-0653,2026-06-15,email,IN,individual,4,The player loses my position when the connection disappears. Please prioritize this.,REQ-309
+FB-0654,2026-01-15,support_chat,BR,student,4,When connectivity drops the song sometimes restarts; please resume cleanly. Please prioritize this.,
+FB-0655,2026-06-06,app_store,MY,individual,4,Music should continue or recover after a short network outage.,
+FB-0656,2026-07-17,support_chat,BR,free,4,Music should continue or recover after a short network outage.,
+FB-0657,2026-06-01,community,MY,family,3,Music should continue or recover after a short network outage. This has been missing for a long time.,
+FB-0658,2026-01-21,in_app,IN,family,4,Playback should recover when I go through a tunnel and lose signal.,
+FB-0659,2026-01-21,support_chat,BR,free,2,Please make playback resilient to temporary network loss. I would use this immediately.,REQ-309
+FB-0660,2026-07-12,app_store,DE,duo,4,Playback should recover when I go through a tunnel and lose signal.,
+FB-0661,2026-03-26,app_store,MX,student,4,The player loses my position when the connection disappears.,
+FB-0662,2026-07-25,in_app,PH,student,4,Please make playback resilient to temporary network loss. This would make the app much more useful.,
+FB-0663,2026-06-25,email,JP,free,4,Please make playback resilient to temporary network loss. This is important enough to keep me subscribed.,
+FB-0664,2026-06-08,app_store,SG,family,3,Playback should recover when I go through a tunnel and lose signal.,
+FB-0665,2026-08-26,email,MY,student,3,Playback should recover when I go through a tunnel and lose signal. I would use this immediately.,
+FB-0666,2026-05-04,community,ID,individual,4,Playback should recover when I go through a tunnel and lose signal. This is important enough to keep me subscribed.,REQ-309
+FB-0667,2026-08-01,support_chat,TH,duo,3,When connectivity drops the song sometimes restarts; please resume cleanly. I keep running into this problem.,
+FB-0668,2026-08-19,app_store,BR,free,5,Music should continue or recover after a short network outage. This would make the app much more useful.,REQ-309
+FB-0669,2026-07-11,in_app,DE,individual,3,Please add age appropriate settings for children on family accounts. This has been missing for a long time.,
+FB-0670,2026-05-14,in_app,ID,duo,3,I need parental controls for explicit songs on our family plan. This is important enough to keep me subscribed.,
+FB-0671,2026-03-26,in_app,US,individual,3,Family managers need explicit-content restrictions. I keep running into this problem.,
+FB-0672,2026-07-14,app_store,TH,free,2,Family accounts should let parents restrict explicit content.,
+FB-0673,2026-07-03,support_chat,SG,individual,4,I want controls for what my kids can play. I keep running into this problem.,
+FB-0674,2026-05-06,support_chat,IN,individual,5,I want controls for what my kids can play.,REQ-310
+FB-0675,2026-01-13,in_app,MX,student,3,Family accounts should let parents restrict explicit content. This has been missing for a long time.,
+FB-0676,2026-08-23,support_chat,MX,family,4,Family managers need explicit-content restrictions. This has been missing for a long time.,
+FB-0677,2026-02-22,in_app,MX,individual,4,Family managers need explicit-content restrictions. Please prioritize this.,
+FB-0678,2026-07-18,app_store,TH,individual,5,I need parental controls for explicit songs on our family plan.,
+FB-0679,2026-02-14,in_app,ID,family,3,Family accounts should let parents restrict explicit content.,
+FB-0680,2026-08-05,in_app,BR,family,3,I want controls for what my kids can play. This has been missing for a long time.,
+FB-0681,2026-03-27,email,SG,free,2,Family managers need explicit-content restrictions. Please prioritize this.,
+FB-0682,2026-04-14,in_app,PH,duo,3,I want controls for what my kids can play. Please prioritize this.,REQ-310
+FB-0683,2026-04-24,email,MY,individual,2,I want controls for what my kids can play. This would make the app much more useful.,
+FB-0684,2026-03-04,app_store,MY,family,2,Family managers need explicit-content restrictions.,
+FB-0685,2026-02-02,support_chat,US,free,3,Please add age appropriate settings for children on family accounts. This would make the app much more useful.,
+FB-0686,2026-03-05,support_chat,MY,individual,3,Family accounts should let parents restrict explicit content. I keep running into this problem.,
+FB-0687,2026-03-25,email,ID,free,5,Family managers need explicit-content restrictions.,
+FB-0688,2026-06-28,in_app,GB,duo,5,Family accounts should let parents restrict explicit content. This has been missing for a long time.,
+FB-0689,2026-07-26,app_store,PH,family,3,Family managers need explicit-content restrictions. This has been missing for a long time.,REQ-310
+FB-0690,2026-04-18,community,MY,family,4,Family managers need explicit-content restrictions.,REQ-310
+FB-0691,2026-02-13,in_app,MY,family,2,I want controls for what my kids can play. Please prioritize this.,
+FB-0692,2026-02-05,community,GB,duo,2,Family accounts should let parents restrict explicit content. This is important enough to keep me subscribed.,
+FB-0693,2026-02-04,support_chat,US,student,3,Please add age appropriate settings for children on family accounts.,REQ-310
+FB-0694,2026-01-28,support_chat,US,student,4,I want controls for what my kids can play.,
+FB-0695,2026-02-20,community,ID,family,2,Family managers need explicit-content restrictions. This is important enough to keep me subscribed.,
+FB-0696,2026-08-12,community,BR,duo,2,I want controls for what my kids can play. I would use this immediately.,
+FB-0697,2026-08-17,community,PH,individual,3,Family managers need explicit-content restrictions.,
+FB-0698,2026-07-14,in_app,IN,duo,3,Family accounts should let parents restrict explicit content. Please prioritize this.,
+FB-0699,2026-04-21,email,US,family,3,Family accounts should let parents restrict explicit content. Please prioritize this.,REQ-310
+FB-0700,2026-08-16,community,SG,free,2,I need parental controls for explicit songs on our family plan.,
+FB-0701,2026-08-21,email,MY,individual,3,I want controls for what my kids can play. This would make the app much more useful.,REQ-310
+FB-0702,2026-08-07,in_app,MY,family,4,Please add age appropriate settings for children on family accounts. This is important enough to keep me subscribed.,
+FB-0703,2026-07-17,app_store,US,individual,4,I want controls for what my kids can play.,REQ-310
+FB-0704,2026-01-20,community,JP,free,3,I want controls for what my kids can play. This has been missing for a long time.,REQ-310
+FB-0705,2026-01-23,in_app,JP,student,4,I need parental controls for explicit songs on our family plan. This would make the app much more useful.,REQ-310
+FB-0706,2026-01-09,support_chat,PH,individual,3,I need parental controls for explicit songs on our family plan.,
+FB-0707,2026-02-28,support_chat,US,duo,4,I need parental controls for explicit songs on our family plan. I keep running into this problem.,
+FB-0708,2026-03-13,community,BR,individual,4,Please add age appropriate settings for children on family accounts.,
+FB-0709,2026-02-20,community,PH,family,4,Family accounts should let parents restrict explicit content. I would use this immediately.,
+FB-0710,2026-07-26,community,IN,free,4,I need parental controls for explicit songs on our family plan. This has been missing for a long time.,REQ-310
+FB-0711,2026-04-15,community,GB,individual,3,Family accounts should let parents restrict explicit content.,
+FB-0712,2026-02-27,support_chat,US,duo,3,Please add age appropriate settings for children on family accounts. This would make the app much more useful.,
+FB-0713,2026-04-23,app_store,DE,individual,4,Family accounts should let parents restrict explicit content.,
+FB-0714,2026-04-01,app_store,TH,student,3,Please add age appropriate settings for children on family accounts.,REQ-310
+FB-0715,2026-05-23,community,PH,family,4,I want controls for what my kids can play. This would make the app much more useful.,
+FB-0716,2026-08-15,email,JP,free,2,Family accounts should let parents restrict explicit content. This would make the app much more useful.,
+FB-0717,2026-08-01,community,SG,free,4,Family accounts should let parents restrict explicit content. This would make the app much more useful.,
+FB-0718,2026-07-01,email,IN,individual,3,Please add age appropriate settings for children on family accounts. I keep running into this problem.,
+FB-0719,2026-01-26,email,IN,free,4,Family accounts should let parents restrict explicit content. This has been missing for a long time.,
+FB-0720,2026-01-19,support_chat,IN,duo,3,Family accounts should let parents restrict explicit content.,
+FB-0721,2026-03-15,support_chat,SG,student,3,I want controls for what my kids can play.,REQ-310
+FB-0722,2026-08-19,support_chat,US,individual,3,I need parental controls for explicit songs on our family plan.,REQ-310
+FB-0723,2026-04-24,email,IN,free,4,Please add age appropriate settings for children on family accounts. This is important enough to keep me subscribed.,
+FB-0724,2026-08-24,in_app,MY,free,4,Please add age appropriate settings for children on family accounts. I keep running into this problem.,
+FB-0725,2026-05-19,community,ID,free,4,Please add age appropriate settings for children on family accounts. I keep running into this problem.,REQ-310
+FB-0726,2026-08-20,community,PH,individual,4,I want controls for what my kids can play. I keep running into this problem.,
+FB-0727,2026-02-03,in_app,GB,family,3,Use time and session patterns to understand the listening situation.,REQ-311
+FB-0728,2026-04-25,email,US,student,2,Use time and session patterns to understand the listening situation.,REQ-311
+FB-0729,2026-02-05,support_chat,ID,student,1,Use time and session patterns to understand the listening situation. This has been missing for a long time.,REQ-311
+FB-0730,2026-04-02,support_chat,GB,free,2,The app should infer listening context to improve recommendations. This is important enough to keep me subscribed.,
+FB-0731,2026-03-25,support_chat,BR,free,1,Recommendation features need a reusable context signal. This has been missing for a long time.,
+FB-0732,2026-02-16,app_store,SG,free,2,Recommendation features need a reusable context signal. This is important enough to keep me subscribed.,REQ-311
+FB-0733,2026-02-24,app_store,PH,free,3,Recommendation features need a reusable context signal. Please prioritize this.,
+FB-0734,2026-07-25,in_app,IN,free,2,Use time and session patterns to understand the listening situation. This is important enough to keep me subscribed.,
+FB-0735,2026-06-23,support_chat,ID,duo,1,Use time and session patterns to understand the listening situation.,REQ-311
+FB-0736,2026-04-05,app_store,DE,free,1,I want smarter context-aware recommendations across the app. This has been missing for a long time.,
+FB-0737,2026-01-24,app_store,JP,family,2,Use time and session patterns to understand the listening situation.,
+FB-0738,2026-06-21,app_store,GB,free,2,Recommendation features need a reusable context signal. I keep running into this problem.,REQ-311
+FB-0739,2026-03-04,support_chat,MY,duo,2,The app should infer listening context to improve recommendations.,
+FB-0740,2026-04-15,email,MY,family,2,"Recommendations should understand whether I am commuting, studying, or exercising. Please prioritize this.",
+FB-0741,2026-05-01,support_chat,MX,duo,3,"Recommendations should understand whether I am commuting, studying, or exercising. Please prioritize this.",
+FB-0742,2026-02-15,email,SG,student,2,The app should infer listening context to improve recommendations. This is important enough to keep me subscribed.,REQ-311
+FB-0743,2026-01-21,app_store,BR,duo,3,Recommendation features need a reusable context signal. Please prioritize this.,
+FB-0744,2026-01-19,community,GB,duo,2,Recommendation features need a reusable context signal.,
+FB-0745,2026-04-16,app_store,DE,individual,2,The app should infer listening context to improve recommendations. This is important enough to keep me subscribed.,
+FB-0746,2026-08-24,in_app,BR,individual,2,The app should infer listening context to improve recommendations. This would make the app much more useful.,
+FB-0747,2026-01-22,app_store,US,family,2,The app should infer listening context to improve recommendations. I would use this immediately.,
+FB-0748,2026-08-23,in_app,TH,student,2,"Recommendations should understand whether I am commuting, studying, or exercising. This is important enough to keep me subscribed.",REQ-311
+FB-0749,2026-08-26,email,GB,duo,2,I want smarter context-aware recommendations across the app.,REQ-311
+FB-0750,2026-05-21,support_chat,IN,family,1,I want smarter context-aware recommendations across the app. I keep running into this problem.,REQ-311
+FB-0751,2026-08-14,support_chat,PH,individual,1,"Recommendations should understand whether I am commuting, studying, or exercising. I keep running into this problem.",
+FB-0752,2026-03-21,in_app,DE,free,2,Use time and session patterns to understand the listening situation. I would use this immediately.,REQ-311
+FB-0753,2026-07-20,support_chat,BR,family,1,Recommendation features need a reusable context signal. This is important enough to keep me subscribed.,
+FB-0754,2026-07-07,community,MY,free,2,I want smarter context-aware recommendations across the app.,
+FB-0755,2026-03-07,support_chat,MY,duo,2,"Recommendations should understand whether I am commuting, studying, or exercising. Please prioritize this.",
+FB-0756,2026-07-11,in_app,DE,student,2,Use time and session patterns to understand the listening situation. I keep running into this problem.,
+FB-0757,2026-02-19,app_store,IN,individual,2,The app should infer listening context to improve recommendations. This is important enough to keep me subscribed.,
+FB-0758,2026-05-16,community,US,free,3,"Recommendations should understand whether I am commuting, studying, or exercising.",REQ-311
+FB-0759,2026-04-19,in_app,JP,student,2,"Recommendations should understand whether I am commuting, studying, or exercising.",
+FB-0760,2026-06-20,in_app,SG,duo,2,The app should infer listening context to improve recommendations.,
+FB-0761,2026-06-13,community,BR,free,3,"Recommendations should understand whether I am commuting, studying, or exercising. I would use this immediately.",
+FB-0762,2026-04-02,in_app,MY,duo,2,Use time and session patterns to understand the listening situation. This would make the app much more useful.,REQ-311
+FB-0763,2026-03-28,in_app,BR,duo,2,"Recommendations should understand whether I am commuting, studying, or exercising. This has been missing for a long time.",REQ-311
+FB-0764,2026-08-01,in_app,MX,duo,4,"Recommendations should understand whether I am commuting, studying, or exercising. Please prioritize this.",
+FB-0765,2026-01-06,in_app,MY,individual,1,"Recommendations should understand whether I am commuting, studying, or exercising.",
+FB-0766,2026-06-28,in_app,MX,individual,3,"Recommendations should understand whether I am commuting, studying, or exercising.",REQ-311
+FB-0767,2026-07-02,in_app,MY,individual,2,The app should infer listening context to improve recommendations.,REQ-311
+FB-0768,2026-02-23,community,MY,individual,1,The app should infer listening context to improve recommendations. This would make the app much more useful.,
+FB-0769,2026-04-05,community,US,free,2,The app should infer listening context to improve recommendations. This is important enough to keep me subscribed.,
+FB-0770,2026-04-17,app_store,JP,individual,3,The app should infer listening context to improve recommendations. This has been missing for a long time.,
+FB-0771,2026-04-08,community,JP,free,4,Modernize audio delivery so quality settings are reliable.,
+FB-0772,2026-04-23,email,ID,student,3,The audio pipeline needs better codec switching.,
+FB-0773,2026-01-04,email,DE,duo,3,Codec negotiation sometimes chooses the wrong quality. I keep running into this problem.,
+FB-0774,2026-01-24,email,DE,family,4,Modernize audio delivery so quality settings are reliable.,
+FB-0775,2026-04-25,email,US,free,4,Modernize audio delivery so quality settings are reliable.,
+FB-0776,2026-05-02,app_store,PH,individual,3,The audio pipeline needs better codec switching.,
+FB-0777,2026-03-01,email,IN,duo,2,The audio pipeline needs better codec switching. Please prioritize this.,
+FB-0778,2026-03-17,support_chat,BR,family,2,Playback quality negotiation is inconsistent across my devices. Please prioritize this.,
+FB-0779,2026-03-01,app_store,SG,family,3,The audio pipeline needs better codec switching. This has been missing for a long time.,
+FB-0780,2026-04-19,email,JP,student,3,Modernize audio delivery so quality settings are reliable. This has been missing for a long time.,
+FB-0781,2026-04-23,app_store,US,duo,4,Please improve high-quality audio delivery across devices.,
+FB-0782,2026-02-05,in_app,GB,free,1,Modernize audio delivery so quality settings are reliable.,
+FB-0783,2026-01-12,support_chat,BR,duo,3,Playback quality negotiation is inconsistent across my devices. I would use this immediately.,
+FB-0784,2026-08-23,in_app,IN,free,2,The audio pipeline needs better codec switching. I would use this immediately.,
+FB-0785,2026-02-04,in_app,SG,family,3,Codec negotiation sometimes chooses the wrong quality.,
+FB-0786,2026-06-18,email,MY,duo,3,Codec negotiation sometimes chooses the wrong quality. This is important enough to keep me subscribed.,
+FB-0787,2026-07-16,community,ID,family,4,Please improve high-quality audio delivery across devices. I would use this immediately.,
+FB-0788,2026-05-26,support_chat,PH,student,1,Please improve high-quality audio delivery across devices. This has been missing for a long time.,
+FB-0789,2026-05-19,app_store,PH,duo,3,Playback quality negotiation is inconsistent across my devices. I would use this immediately.,
+FB-0790,2026-03-28,app_store,TH,duo,3,The audio pipeline needs better codec switching.,
+FB-0791,2026-04-21,support_chat,SG,duo,4,Please improve high-quality audio delivery across devices. I would use this immediately.,
+FB-0792,2026-06-19,support_chat,TH,family,2,The audio pipeline needs better codec switching. I would use this immediately.,
+FB-0793,2026-02-16,support_chat,BR,free,3,Modernize audio delivery so quality settings are reliable. This is important enough to keep me subscribed.,
+FB-0794,2026-03-09,app_store,IN,duo,3,Please improve high-quality audio delivery across devices. Please prioritize this.,
+FB-0795,2026-02-11,app_store,BR,duo,4,The audio pipeline needs better codec switching. I keep running into this problem.,
+FB-0796,2026-06-28,community,DE,individual,4,Codec negotiation sometimes chooses the wrong quality. I would use this immediately.,
+FB-0797,2026-08-03,email,ID,free,2,Modernize audio delivery so quality settings are reliable. This is important enough to keep me subscribed.,REQ-312
+FB-0798,2026-03-26,community,JP,free,3,Please improve high-quality audio delivery across devices. I would use this immediately.,
+FB-0799,2026-01-23,app_store,TH,student,2,Modernize audio delivery so quality settings are reliable.,
+FB-0800,2026-07-15,email,MX,duo,3,The audio pipeline needs better codec switching.,
+FB-0801,2026-02-05,community,US,free,3,The audio pipeline needs better codec switching. This has been missing for a long time.,REQ-312
+FB-0802,2026-03-08,community,JP,free,3,Please improve high-quality audio delivery across devices. This would make the app much more useful.,REQ-312
+FB-0803,2026-05-04,email,IN,individual,2,Playback quality negotiation is inconsistent across my devices. I would use this immediately.,REQ-312
+FB-0804,2026-04-19,app_store,MY,family,5,Playback quality negotiation is inconsistent across my devices. This is important enough to keep me subscribed.,
+FB-0805,2026-01-12,email,MX,free,3,The audio pipeline needs better codec switching. I keep running into this problem.,
+FB-0806,2026-08-24,email,IN,family,3,Playback quality negotiation is inconsistent across my devices. This is important enough to keep me subscribed.,
+FB-0807,2026-07-22,email,ID,duo,2,The audio pipeline needs better codec switching. This is important enough to keep me subscribed.,
+FB-0808,2026-01-14,community,GB,student,2,Codec negotiation sometimes chooses the wrong quality.,
+FB-0809,2026-08-05,community,MY,free,2,Please improve high-quality audio delivery across devices.,
+FB-0810,2026-03-22,in_app,JP,family,2,Codec negotiation sometimes chooses the wrong quality. Please prioritize this.,
+FB-0811,2026-01-04,app_store,ID,duo,1,Codec negotiation sometimes chooses the wrong quality.,
+FB-0812,2026-01-16,app_store,SG,duo,2,The audio pipeline needs better codec switching.,
+FB-0813,2026-01-10,in_app,IN,free,4,Please improve high-quality audio delivery across devices. This has been missing for a long time.,
+FB-0814,2026-03-12,in_app,ID,student,3,Please improve high-quality audio delivery across devices. I would use this immediately.,
+FB-0815,2026-08-04,in_app,US,family,4,Playback quality negotiation is inconsistent across my devices.,
+FB-0816,2026-07-21,app_store,MY,duo,2,Modernize audio delivery so quality settings are reliable. This has been missing for a long time.,REQ-312
+FB-0817,2026-03-26,app_store,IN,free,3,Please improve high-quality audio delivery across devices. This has been missing for a long time.,
+FB-0818,2026-07-15,support_chat,PH,student,3,Codec negotiation sometimes chooses the wrong quality. This has been missing for a long time.,REQ-312
+FB-0819,2026-05-01,app_store,TH,family,1,Why does the desktop app open on startup?,
+FB-0820,2026-07-23,support_chat,IN,free,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0821,2026-06-19,app_store,ID,free,2,Can I hide recently played items from my home screen?,
+FB-0822,2026-06-07,app_store,IN,duo,2,Please add more colors to playlist covers.,OTHER
+FB-0823,2026-03-11,community,DE,student,2,My profile picture upload is blurry.,
+FB-0824,2026-06-06,community,GB,free,3,Can I rearrange the settings menu?,
+FB-0825,2026-01-04,in_app,JP,family,1,Can I hide recently played items from my home screen?,
+FB-0826,2026-03-13,email,TH,student,1,The share button is too close to the menu button.,
+FB-0827,2026-03-26,community,PH,individual,1,The app icon changed after the update and I prefer the old one.,
+FB-0828,2026-04-25,support_chat,MY,free,1,My profile picture upload is blurry.,
+FB-0829,2026-08-25,support_chat,BR,free,1,Can I hide recently played items from my home screen?,OTHER
+FB-0830,2026-07-24,in_app,MX,student,3,Please add more colors to playlist covers.,
+FB-0831,2026-04-28,community,US,free,2,Please add more colors to playlist covers.,
+FB-0832,2026-05-19,app_store,US,duo,2,Can I hide recently played items from my home screen?,OTHER
+FB-0833,2026-04-11,email,MY,duo,1,Please let me rename devices in account settings.,
+FB-0834,2026-08-09,in_app,MX,student,1,Can I rearrange the settings menu?,
+FB-0835,2026-06-24,in_app,BR,student,1,Please let me rename devices in account settings.,
+FB-0836,2026-07-08,support_chat,SG,duo,1,My profile picture upload is blurry.,
+FB-0837,2026-04-10,email,JP,free,1,Please let me rename devices in account settings.,OTHER
+FB-0838,2026-06-12,app_store,US,student,3,Can I rearrange the settings menu?,OTHER
+FB-0839,2026-06-11,email,JP,family,1,My profile picture upload is blurry.,OTHER
+FB-0840,2026-06-11,email,ID,duo,1,I want a different notification sound.,
+FB-0841,2026-04-20,app_store,SG,student,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0842,2026-01-05,app_store,PH,individual,2,My profile picture upload is blurry.,
+FB-0843,2026-05-14,community,JP,student,2,Please make the login screen remember my email.,
+FB-0844,2026-04-20,community,MX,student,1,Please let me rename devices in account settings.,OTHER
+FB-0845,2026-05-25,community,JP,free,2,Please make the login screen remember my email.,OTHER
+FB-0846,2026-02-13,community,DE,family,1,Why does the desktop app open on startup?,
+FB-0847,2026-04-27,in_app,SG,student,2,Why does the desktop app open on startup?,
+FB-0848,2026-05-09,email,US,individual,1,My profile picture upload is blurry.,OTHER
+FB-0849,2026-06-26,email,SG,individual,1,Please let me rename devices in account settings.,
+FB-0850,2026-07-23,support_chat,DE,family,1,My profile picture upload is blurry.,OTHER
+FB-0851,2026-01-10,app_store,SG,individual,1,Please add more colors to playlist covers.,
+FB-0852,2026-06-14,in_app,MX,duo,2,I want a different notification sound.,
+FB-0853,2026-06-21,app_store,SG,duo,2,Can I rearrange the settings menu?,
+FB-0854,2026-08-08,in_app,DE,student,2,Can I hide recently played items from my home screen?,
+FB-0855,2026-04-01,community,MY,family,2,Please add more colors to playlist covers.,
+FB-0856,2026-06-08,community,BR,individual,1,I want a different notification sound.,
+FB-0857,2026-07-21,community,US,family,2,The share button is too close to the menu button.,
+FB-0858,2026-01-11,community,IN,individual,2,The share button is too close to the menu button.,
+FB-0859,2026-04-24,app_store,DE,free,2,Can I rearrange the settings menu?,
+FB-0860,2026-07-19,email,IN,individual,1,Can I hide recently played items from my home screen?,
+FB-0861,2026-03-12,email,BR,student,3,My profile picture upload is blurry.,OTHER
+FB-0862,2026-01-22,support_chat,US,student,2,Why does the desktop app open on startup?,OTHER
+FB-0863,2026-03-28,email,MY,free,1,Can I rearrange the settings menu?,OTHER
+FB-0864,2026-05-06,in_app,BR,family,1,Can I hide recently played items from my home screen?,OTHER
+FB-0865,2026-05-25,community,US,family,1,Why does the desktop app open on startup?,
+FB-0866,2026-07-25,community,ID,individual,2,My profile picture upload is blurry.,OTHER
+FB-0867,2026-01-04,email,US,free,1,Why does the desktop app open on startup?,OTHER
+FB-0868,2026-03-13,email,MX,individual,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0869,2026-06-06,community,TH,duo,1,I want a different notification sound.,
+FB-0870,2026-07-14,in_app,TH,duo,3,Can I hide recently played items from my home screen?,
+FB-0871,2026-07-17,in_app,PH,student,2,Why does the desktop app open on startup?,OTHER
+FB-0872,2026-06-18,in_app,DE,duo,2,The app icon changed after the update and I prefer the old one.,
+FB-0873,2026-01-10,community,PH,individual,2,I want a different notification sound.,
+FB-0874,2026-02-07,in_app,SG,free,1,Please add more colors to playlist covers.,
+FB-0875,2026-01-19,app_store,MY,individual,1,The share button is too close to the menu button.,
+FB-0876,2026-05-22,in_app,ID,duo,1,Please make the login screen remember my email.,OTHER
+FB-0877,2026-08-19,community,PH,family,2,The share button is too close to the menu button.,
+FB-0878,2026-04-18,app_store,DE,individual,1,The share button is too close to the menu button.,
+FB-0879,2026-03-10,app_store,IN,individual,2,I want a different notification sound.,OTHER
+FB-0880,2026-02-10,app_store,MY,free,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0881,2026-01-24,support_chat,SG,duo,2,Please make the login screen remember my email.,OTHER
+FB-0882,2026-05-17,email,GB,individual,3,My profile picture upload is blurry.,
+FB-0883,2026-06-25,app_store,ID,student,3,My profile picture upload is blurry.,
+FB-0884,2026-05-16,support_chat,MY,individual,2,The share button is too close to the menu button.,
+FB-0885,2026-04-27,support_chat,TH,student,1,My profile picture upload is blurry.,
+FB-0886,2026-08-27,support_chat,JP,duo,1,I want a different notification sound.,
+FB-0887,2026-05-20,email,JP,student,1,Please let me rename devices in account settings.,
+FB-0888,2026-08-23,community,ID,student,1,Can I rearrange the settings menu?,OTHER
+FB-0889,2026-01-22,community,SG,family,2,Please make the login screen remember my email.,
+FB-0890,2026-06-08,email,IN,student,1,The share button is too close to the menu button.,
+FB-0891,2026-05-08,support_chat,DE,free,2,My profile picture upload is blurry.,
+FB-0892,2026-01-21,in_app,DE,duo,3,The share button is too close to the menu button.,OTHER
+FB-0893,2026-05-23,app_store,PH,family,1,Can I rearrange the settings menu?,
+FB-0894,2026-07-03,email,JP,duo,3,Can I rearrange the settings menu?,
+FB-0895,2026-01-11,support_chat,IN,family,2,My profile picture upload is blurry.,OTHER
+FB-0896,2026-08-15,app_store,MY,family,2,My profile picture upload is blurry.,
+FB-0897,2026-03-08,community,GB,student,2,I want a different notification sound.,
+FB-0898,2026-08-25,community,JP,student,1,Please add more colors to playlist covers.,OTHER
+FB-0899,2026-03-24,app_store,JP,duo,2,My profile picture upload is blurry.,OTHER
+FB-0900,2026-02-06,app_store,MY,duo,2,I want a different notification sound.,OTHER
+FB-0901,2026-03-20,community,SG,individual,2,Please make the login screen remember my email.,OTHER
+FB-0902,2026-08-13,email,MX,duo,1,Can I hide recently played items from my home screen?,OTHER
+FB-0903,2026-03-09,email,BR,family,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0904,2026-08-05,in_app,ID,family,2,Please make the login screen remember my email.,
+FB-0905,2026-08-19,community,TH,free,2,Please add more colors to playlist covers.,
+FB-0906,2026-01-21,email,DE,free,2,Please make the login screen remember my email.,
+FB-0907,2026-03-18,email,MX,student,2,Why does the desktop app open on startup?,
+FB-0908,2026-02-13,support_chat,IN,individual,1,My profile picture upload is blurry.,
+FB-0909,2026-03-16,community,GB,individual,1,I want a different notification sound.,
+FB-0910,2026-06-19,app_store,JP,family,1,The app icon changed after the update and I prefer the old one.,OTHER
+FB-0911,2026-01-20,support_chat,BR,student,1,Why does the desktop app open on startup?,OTHER
+FB-0912,2026-03-12,app_store,PH,individual,2,Please add more colors to playlist covers.,
+FB-0913,2026-05-08,support_chat,MY,family,1,Why does the desktop app open on startup?,OTHER
+FB-0914,2026-06-17,app_store,MX,duo,2,Please make the login screen remember my email.,
+FB-0915,2026-03-06,email,ID,family,2,The app icon changed after the update and I prefer the old one.,
+FB-0916,2026-01-06,support_chat,JP,duo,2,Please let me rename devices in account settings.,OTHER
+FB-0917,2026-05-17,email,MX,duo,1,Please make the login screen remember my email.,
+FB-0918,2026-03-11,support_chat,SG,family,2,Please add more colors to playlist covers.,
+FB-0919,2026-06-19,email,MX,family,2,Please make the login screen remember my email.,OTHER
+FB-0920,2026-02-25,community,ID,family,1,Can I rearrange the settings menu?,OTHER
+FB-0921,2026-05-06,in_app,MY,free,1,Can I rearrange the settings menu?,OTHER
+FB-0922,2026-07-21,email,GB,free,1,My profile picture upload is blurry.,
+FB-0923,2026-07-14,support_chat,SG,duo,2,Please make the login screen remember my email.,
+FB-0924,2026-07-07,community,TH,free,2,Please make the login screen remember my email.,
+FB-0925,2026-03-04,app_store,ID,student,1,The app icon changed after the update and I prefer the old one.,
+FB-0926,2026-03-24,support_chat,DE,free,2,Please let me rename devices in account settings.,
+FB-0927,2026-04-22,community,US,duo,1,Please make the login screen remember my email.,
+FB-0928,2026-03-19,email,SG,student,1,The share button is too close to the menu button.,
+FB-0929,2026-04-03,community,MX,family,2,Please let me rename devices in account settings.,
+FB-0930,2026-05-24,app_store,ID,student,1,Can I rearrange the settings menu?,
+FB-0931,2026-08-08,app_store,IN,student,1,Why does the desktop app open on startup?,
+FB-0932,2026-08-12,app_store,GB,individual,3,Can I rearrange the settings menu?,
+FB-0933,2026-07-09,support_chat,BR,duo,2,Please let me rename devices in account settings.,OTHER
+FB-0934,2026-07-26,community,JP,free,2,I want a different notification sound.,
+FB-0935,2026-03-22,app_store,ID,individual,1,Please let me rename devices in account settings.,OTHER
+FB-0936,2026-02-06,support_chat,MY,individual,1,The share button is too close to the menu button.,
+FB-0937,2026-01-06,community,SG,free,3,Why does the desktop app open on startup?,
+FB-0938,2026-02-26,support_chat,DE,free,2,My profile picture upload is blurry.,
+FB-0939,2026-07-02,in_app,TH,family,4,My profile picture upload is blurry.,
+FB-0940,2026-01-16,support_chat,GB,family,1,Why does the desktop app open on startup?,
+FB-0941,2026-04-13,community,US,family,1,Please add more colors to playlist covers.,OTHER
+FB-0942,2026-02-22,community,PH,family,1,Please let me rename devices in account settings.,
+FB-0943,2026-07-11,support_chat,JP,family,2,Please make the login screen remember my email.,
+FB-0944,2026-07-07,in_app,ID,free,1,Please add more colors to playlist covers.,
+FB-0945,2026-06-25,community,IN,student,2,Why does the desktop app open on startup?,
+FB-0946,2026-06-09,in_app,PH,student,1,Can I hide recently played items from my home screen?,OTHER
+FB-0947,2026-03-25,app_store,TH,family,2,Please let me rename devices in account settings.,
+FB-0948,2026-03-14,support_chat,SG,student,1,I want a different notification sound.,OTHER
+FB-0949,2026-02-12,community,PH,duo,2,Please let me rename devices in account settings.,
+FB-0950,2026-04-16,email,TH,individual,2,Why does the desktop app open on startup?,OTHER
+FB-0951,2026-06-22,email,IN,student,2,The share button is too close to the menu button.,OTHER
+FB-0952,2026-01-12,in_app,SG,family,2,Please make the login screen remember my email.,
+FB-0953,2026-03-23,app_store,MX,free,2,Please add more colors to playlist covers.,
+FB-0954,2026-06-03,app_store,DE,individual,2,Can I hide recently played items from my home screen?,
+FB-0955,2026-03-23,in_app,IN,duo,1,The share button is too close to the menu button.,
+FB-0956,2026-06-28,community,IN,family,1,Can I rearrange the settings menu?,
+FB-0957,2026-05-10,in_app,SG,duo,1,I want a different notification sound.,
+FB-0958,2026-07-15,email,BR,student,1,Can I rearrange the settings menu?,

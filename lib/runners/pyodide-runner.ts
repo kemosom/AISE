@@ -44,7 +44,7 @@ export class PyodideRunner implements CodeRunner {
 
           // Preload common scientific packages
           try {
-            await this.pyodide.loadPackage(['numpy', 'matplotlib']);
+            await this.pyodide.loadPackage(['numpy', 'matplotlib', 'scikit-learn']);
           } catch (pkgErr) {
             console.warn('Optional packages loading deferred:', pkgErr);
           }
@@ -101,7 +101,15 @@ if '' not in sys.path:
 
 # Force-reload or clear cached local modules so student code changes take effect immediately
 for _mod in list(sys.modules.keys()):
-    if _mod in ['helpers', 'main', 'solution', 'starter']:
+    if _mod in [
+        'helpers',
+        'main',
+        'solution',
+        'starter',
+        'priority_model',
+        'requirements_data',
+        'data_pipeline',
+    ]:
         try:
             importlib.reload(sys.modules[_mod])
         except Exception:
