@@ -3,39 +3,39 @@
   "sections": [
     {
       "id": "decision",
-      "title": "1. Prioritization Decision Before Coding",
+      "title": "1. Engineering Hypothesis Before AI",
       "required": true,
-      "placeholder": "Explain why user votes alone are insufficient for release planning. State how you expect historical NLP evidence, business value, strategic fit, effort, and accessibility impact to influence the decision."
+      "placeholder": "After running the vote-only baseline, identify one questionable release outcome and state your hypothesis about which additional evidence should influence prioritization."
     },
     {
       "id": "baseline",
-      "title": "2. Vote-Only Baseline",
+      "title": "2. Baseline Release Evidence",
       "required": true,
-      "placeholder": "Document the baseline ranking, selected requirements, budget usage, and the visible product features shown in the Spotify-style preview."
+      "placeholder": "Document the selected baseline requirements, budget usage, visible product capabilities, and one limitation of vote-only prioritization."
     },
     {
       "id": "ai-method",
-      "title": "3. AI-Assisted Prioritization Method",
+      "title": "3. NLP Investigation and Policy Design",
       "required": true,
-      "placeholder": "Describe the supplied Multinomial Naive Bayes model, the meaning of p_high and confidence, and your implementation of the hybrid priority score."
+      "placeholder": "Explain what the Naive Bayes model predicts, include evidence from at least three backlog items and one wording experiment, then justify your chosen AI/business/strategic/vote/accessibility/effort policy."
     },
     {
       "id": "comparison",
-      "title": "4. Release Comparison and Visual Evidence",
+      "title": "4. AI-Assisted Release and Verification",
       "required": true,
-      "placeholder": "Compare the baseline and AI-assisted release plans. Identify which visible interface features appeared or disappeared, report budget usage, and include supporting screenshots or execution evidence."
+      "placeholder": "Document the AI-assisted ranking, selected release, visible product changes, verification results, and whether the release differs from the baseline."
     },
     {
       "id": "analysis",
-      "title": "5. Critical Analysis",
+      "title": "5. Sensitivity and Critical Analysis",
       "required": true,
-      "placeholder": "Interpret the validation metrics and sensitivity experiment. Discuss historical-data bias, confidence, implementation cost, accessibility, explainability, and whether the AI model should have final authority."
+      "placeholder": "Report both wording-sensitivity and policy-sensitivity experiments. Discuss stability, bias, confidence, explainability, cost, accessibility, and how much decision authority the AI should have."
     },
     {
       "id": "conclusion",
-      "title": "6. Conclusion",
+      "title": "6. Release Recommendation and Conclusion",
       "required": true,
-      "placeholder": "Summarize what the experiment demonstrates about using AI to prioritize software requirements under realistic release constraints."
+      "placeholder": "State whether you would ship the baseline or AI-assisted release. Defend the recommendation using model evidence, engineering constraints, product impact, and experiment results."
     }
   ]
 }
