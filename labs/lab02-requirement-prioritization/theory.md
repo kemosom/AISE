@@ -49,6 +49,8 @@ For a new requirement, the model returns:
 - prediction confidence,
 - influential text tokens.
 
+In the coding workspace, the **NLP Model** tab exposes these values visually. You can click any backlog requirement to inspect its probability distribution and evidence tokens. A **Live NLP Playground** also lets you type a completely new requirement and run it through the same Python model.
+
 The purpose is not to treat the predicted class as the final decision. The model supplies **learned evidence** to the release-planning process.
 
 ## 4. Hybrid AI-assisted prioritization
@@ -89,7 +91,13 @@ A Master's-level result is not simply that one ranking is "better." Your analysi
 - what risks arise if historical product decisions contain bias,
 - why implementation effort and accessibility impact should not disappear inside a black-box model.
 
-The right-side product preview is part of the evidence. When the selected requirements change, the interface changes with them.
+The right-side workspace is part of the evidence. It has three views:
+
+1. **Live Product**: an interactive Spotify-style application where prioritized requirements visibly enable features.
+2. **NLP Model**: the actual classifier output, probabilities, confidence, evidence tokens, validation metrics, and a live text playground.
+3. **Console**: the raw Python execution trace.
+
+The product mockup is interactive: play/pause, track selection, search, queue voting, lyrics controls, volume, progress, and other functions respond to the release plan. Its audio is generated locally by the browser for teaching and does not stream Spotify catalogue music.
 
 ## Continue to the laboratory
 
