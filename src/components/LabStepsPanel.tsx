@@ -72,33 +72,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
             Do these steps in order
           </h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            You do not need any visual-design tool. Read the decision problem,
-            run the supplied baseline, implement one function, verify the
-            requirements, then complete the report.
-          </p>
         </div>
-
-        {manifest.courseAlignment && manifest.courseAlignment.length > 0 && (
-          <div className="mb-6 rounded-lg border border-slate-200 bg-white px-4 py-3">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              Course alignment
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {manifest.courseAlignment.map((item) => (
-                <span
-                  key={`${item.clo}-${item.plo}`}
-                  className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
-                  title={item.evidence}
-                >
-                  <strong>{item.clo} → {item.plo}</strong>
-                  <span className="ml-1 text-slate-500">({item.contribution})</span>
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
         <div className="space-y-3">
           {tasks.map((task, index) => {
             const complete = completedStepIds.includes(task.id);
@@ -151,12 +125,6 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
           })}
         </div>
 
-        <div className="mt-6 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm leading-6 text-blue-950">
-          <strong>Important:</strong> the goal is not to write a large amount of
-          Python. The goal is to justify an AI/software-engineering integration
-          choice, implement the selected control logic, and interpret the
-          evidence produced by the system.
-        </div>
       </div>
     </div>
   );
