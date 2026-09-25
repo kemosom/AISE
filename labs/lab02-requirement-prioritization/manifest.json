@@ -1,0 +1,89 @@
+{
+  "id": "lab02-requirement-prioritization",
+  "labNumber": 2,
+  "week": 3,
+  "title": "AI Techniques for Software Requirements Prioritization",
+  "shortDescription": "Use a supervised NLP model and release-planning signals to prioritize a realistic music-streaming product backlog, then inspect the selected requirements directly in a Spotify-style product preview.",
+  "estimatedDuration": "2 hours",
+  "language": "python",
+  "runner": "pyodide",
+  "packages": [],
+  "features": {
+    "visualDesigner": false,
+    "blockly": false,
+    "functionPalette": false,
+    "testRunner": true,
+    "reportEditor": true,
+    "webPreview": true
+  },
+  "learningOutcomes": [
+    "Apply supervised NLP classification to unstructured software requirements.",
+    "Integrate learned priority evidence with stakeholder value, strategic fit, effort, and accessibility impact.",
+    "Compare a vote-only baseline with an AI-assisted release plan under a fixed implementation budget.",
+    "Interpret model confidence and prioritization trade-offs rather than treating AI ranking as unquestioned authority."
+  ],
+  "courseAlignment": [
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "primary",
+      "evidence": "Students select and apply an AI-assisted prioritization method to a constrained software release-planning problem."
+    },
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "secondary",
+      "evidence": "Students investigate how supervised NLP can support requirements prioritization and identify limitations of vote-only and AI-only reasoning."
+    },
+    {
+      "clo": "CLO3",
+      "plo": "PLO7",
+      "contribution": "preparatory",
+      "evidence": "Students interpret validation metrics, confidence values, ranking changes, and release-budget outcomes."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "l2-t1",
+      "title": "Understand the Release-Planning Problem",
+      "description": "Review the fictional music-streaming backlog, the release budget, and the difference between stakeholder votes and learned priority evidence.",
+      "category": "analysis",
+      "action": "theory"
+    },
+    {
+      "id": "l2-t2",
+      "title": "Run the Vote-Only Baseline",
+      "description": "Run the starter program in BASELINE mode and inspect which requirements appear in the Spotify-style release preview.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l2-t3",
+      "title": "Implement AI-Assisted Priority Scoring",
+      "description": "Complete one scoring function that combines the NLP model probability with product value, strategic fit, user demand, accessibility impact, and implementation effort.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l2-t4",
+      "title": "Compare the Product Release",
+      "description": "Switch to AI_ASSISTED mode and compare both the requirement ranking and the visible product changes in the right-side preview.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l2-t5",
+      "title": "Verify Requirements",
+      "description": "Run the executable requirement checks for model validity, scoring logic, budget compliance, ranking order, and release-plan behavior.",
+      "category": "test",
+      "action": "verify"
+    },
+    {
+      "id": "l2-t6",
+      "title": "Complete the Technical Report",
+      "description": "Interpret the ranking change, model evidence, product impact, and limitations, then submit the final report.",
+      "category": "report",
+      "action": "report"
+    }
+  ]
+}
