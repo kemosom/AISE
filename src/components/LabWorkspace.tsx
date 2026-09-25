@@ -397,7 +397,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddPlotToReport = (plotBase64: string, caption?: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const curImages = targetSection.images || [];
@@ -411,7 +414,10 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   const handleAddTestResultsToReport = (testSummary: string) => {
-    const targetSection = reportState.sections.find((s) => s.id === 'results') || reportState.sections[0];
+    const targetSection =
+      reportState.sections.find((s) => s.id === 'results') ||
+      reportState.sections.find((s) => s.id === 'comparison') ||
+      reportState.sections[0];
     if (!targetSection) return;
 
     const currentContent = targetSection.content ? `${targetSection.content}\n\n` : '';
