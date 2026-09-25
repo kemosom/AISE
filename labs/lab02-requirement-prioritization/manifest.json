@@ -3,11 +3,14 @@
   "labNumber": 2,
   "week": 3,
   "title": "AI Techniques for Software Requirements Prioritization",
-  "shortDescription": "Act as a release engineer for a Spotify-style product: interrogate an NLP model, design your own hybrid prioritization policy, implement it, stress-test it, and watch the selected requirements change the live application.",
+  "shortDescription": "Work as a release engineer on a Spotify-style product using 958 customer-feedback records, 360 historical release decisions, TF-IDF NLP, supervised ML, dependencies, and a 75 engineer-day release budget.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
-  "packages": [],
+  "packages": [
+    "scikit-learn",
+    "numpy"
+  ],
   "features": {
     "visualDesigner": false,
     "blockly": false,
@@ -17,85 +20,85 @@
     "webPreview": true
   },
   "learningOutcomes": [
-    "Apply supervised NLP classification to unstructured software requirements.",
-    "Integrate learned priority evidence with stakeholder value, strategic fit, effort, and accessibility impact.",
-    "Compare a vote-only baseline with an AI-assisted release plan under a fixed implementation budget.",
-    "Interpret model confidence and prioritization trade-offs rather than treating AI ranking as unquestioned authority."
+    "Extract requirements evidence from unstructured customer feedback using TF-IDF and cosine similarity.",
+    "Evaluate and select a supervised ML model for requirements prioritization using cross-validated metrics.",
+    "Construct a consistent feature pipeline joining NLP-derived evidence with measurable product telemetry and engineering estimates.",
+    "Apply AI predictions to a dependency-aware release plan under a finite engineering budget and critically test the robustness of the recommendation."
   ],
   "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Students investigate real NLP and supervised ML techniques applied to requirements engineering and identify limitations in automated prioritization."
+    },
     {
       "clo": "CLO2",
       "plo": "PLO2",
       "contribution": "primary",
-      "evidence": "Students select and apply an AI-assisted prioritization method to a constrained software release-planning problem."
-    },
-    {
-      "clo": "CLO1",
-      "plo": "PLO1",
-      "contribution": "secondary",
-      "evidence": "Students investigate how supervised NLP can support requirements prioritization and identify limitations of vote-only and AI-only reasoning."
+      "evidence": "Students select an NLP threshold and supervised model, implement the evidence pipeline, and apply it to a constrained release-planning problem."
     },
     {
       "clo": "CLO3",
       "plo": "PLO7",
-      "contribution": "preparatory",
-      "evidence": "Students interpret validation metrics, confidence values, ranking changes, and release-budget outcomes."
+      "contribution": "primary",
+      "evidence": "Students interpret audited NLP accuracy, coverage, five-fold macro-F1, model feature importance, release probabilities, and counterfactual changes."
     }
   ],
   "tasks": [
     {
       "id": "l2-t1",
-      "title": "Diagnose the Baseline Release",
-      "description": "Run the vote-only baseline, use the live product, and identify at least one release decision you believe is questionable before touching the AI.",
+      "title": "Run the Operational Baseline",
+      "description": "Use support-ticket pressure and the 75-day constraint to generate a non-ML release. Inspect the live product and identify what the baseline ignores.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t2",
-      "title": "Interrogate the NLP Model",
-      "description": "Inspect probability distributions and evidence tokens for three backlog items, then use the live NLP playground to test your own requirement wording.",
+      "title": "Inspect the Raw Datasets",
+      "description": "Examine the current backlog, customer-feedback corpus, and historical release decisions. Identify which fields are observed, estimated, NLP-derived, or historical labels.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t3",
-      "title": "Design Your Release Policy",
-      "description": "Choose and justify your own valid weights for AI evidence, business value, strategic fit, user demand, accessibility, and implementation effort.",
+      "title": "Tune the NLP Matching Threshold",
+      "description": "Run ANALYZE mode, inspect audited TF-IDF/cosine matching accuracy versus coverage, and select a defensible threshold.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t4",
-      "title": "Implement the Hybrid Priority Function",
-      "description": "Translate your policy into Python so the score integrates learned NLP evidence with current software-engineering constraints.",
-      "category": "code",
-      "action": "code"
-    },
-    {
-      "id": "l2-t5",
-      "title": "Ship and Inspect the AI-Assisted Release",
-      "description": "Run AI_ASSISTED mode, interact with the product features that were actually selected, and compare the release with the baseline.",
+      "title": "Compare Prioritization Models",
+      "description": "Compare Logistic Regression and Random Forest using five-fold macro-F1 and accuracy, then choose the model you will deploy.",
       "category": "analysis",
       "action": "code"
     },
     {
+      "id": "l2-t5",
+      "title": "Implement the Current Feature Pipeline",
+      "description": "Join NLP-derived feedback evidence with telemetry, support data, engineering estimates, dependencies, and risk fields using the same schema as historical releases.",
+      "category": "code",
+      "action": "code"
+    },
+    {
       "id": "l2-t6",
-      "title": "Stress-Test the Decision",
-      "description": "Perform a wording-sensitivity experiment and a policy-sensitivity experiment. Explain what changed and why.",
+      "title": "Generate the AI-Assisted Release",
+      "description": "Run the chosen model, inspect P(SHIPPED_NEXT), feature importance and matched customer evidence, then inspect the dependency-aware product release.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t7",
-      "title": "Verify Engineering Requirements",
-      "description": "Run the verification suite to test probability validity, model performance, policy constraints, scoring behavior, AI influence, ranking, and budget compliance.",
-      "category": "test",
-      "action": "verify"
+      "title": "Run a Counterfactual or Feature Ablation",
+      "description": "Change one realistic input assumption or remove one feature, retrain/re-run, and explain whether the ranking or release changes.",
+      "category": "analysis",
+      "action": "code"
     },
     {
       "id": "l2-t8",
-      "title": "Defend a Release Decision",
-      "description": "Decide whether you would ship the baseline or AI-assisted plan. Support the decision with model evidence, product impact, sensitivity results, and limitations.",
+      "title": "Verify and Defend the Release",
+      "description": "Run engineering verification, then submit a report that distinguishes AI evidence from the final release decision.",
       "category": "report",
       "action": "report"
     }
