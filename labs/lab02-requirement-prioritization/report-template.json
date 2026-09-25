@@ -1,41 +1,41 @@
 {
-  "title": "Lab 02 Report: AI-Assisted Software Requirements Prioritization",
+  "title": "Lab 02 Report: Data-Driven AI for Requirements Prioritization",
   "sections": [
     {
       "id": "decision",
-      "title": "1. Engineering Hypothesis Before AI",
+      "title": "1. Baseline Diagnosis",
       "required": true,
-      "placeholder": "After running the vote-only baseline, identify one questionable release outcome and state your hypothesis about which additional evidence should influence prioritization."
+      "placeholder": "Document the support-pressure baseline, selected release, engineer-day usage, and one limitation you observed before using NLP or supervised ML."
     },
     {
       "id": "baseline",
-      "title": "2. Baseline Release Evidence",
+      "title": "2. NLP Evidence Extraction",
       "required": true,
-      "placeholder": "Document the selected baseline requirements, budget usage, visible product capabilities, and one limitation of vote-only prioritization."
+      "placeholder": "Report the TF-IDF/cosine-similarity threshold you selected, audited matching accuracy, coverage, examples of correct/ambiguous matches, and why the threshold is defensible."
     },
     {
       "id": "ai-method",
-      "title": "3. NLP Investigation and Policy Design",
+      "title": "3. Model Selection and Feature Engineering",
       "required": true,
-      "placeholder": "Explain what the Naive Bayes model predicts, include evidence from at least three backlog items and one wording experiment, then justify your chosen AI/business/strategic/vote/accessibility/effort policy."
+      "placeholder": "Explain how raw telemetry and NLP-derived feedback were joined into the historical feature schema. Compare Logistic Regression and Random Forest using 5-fold macro-F1 and justify the model you deployed."
     },
     {
       "id": "comparison",
-      "title": "4. AI-Assisted Release and Verification",
+      "title": "4. AI-Assisted Release and Product Impact",
       "required": true,
-      "placeholder": "Document the AI-assisted ranking, selected release, visible product changes, verification results, and whether the release differs from the baseline."
+      "placeholder": "Present P(SHIPPED_NEXT) for the leading requirements, the dependency-aware 75-day release plan, visible changes in the live product, and verification evidence."
     },
     {
       "id": "analysis",
-      "title": "5. Sensitivity and Critical Analysis",
+      "title": "5. Counterfactual / Ablation Analysis",
       "required": true,
-      "placeholder": "Report both wording-sensitivity and policy-sensitivity experiments. Discuss stability, bias, confidence, explainability, cost, accessibility, and how much decision authority the AI should have."
+      "placeholder": "Change one realistic assumption or remove one model feature. Re-run the model and release plan. Explain which priorities changed, why, and what this says about robustness and historical bias."
     },
     {
       "id": "conclusion",
-      "title": "6. Release Recommendation and Conclusion",
+      "title": "6. Release Recommendation",
       "required": true,
-      "placeholder": "State whether you would ship the baseline or AI-assisted release. Defend the recommendation using model evidence, engineering constraints, product impact, and experiment results."
+      "placeholder": "State what you would ship and what additional evidence you would request before committing engineering resources. Distinguish model evidence from the final engineering decision."
     }
   ]
 }
