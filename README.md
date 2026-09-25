@@ -211,6 +211,28 @@ Use Lab 01 as the pattern:
 
 See `docs/LAB_MODULE_SPEC.md` for the detailed module contract.
 
+## One final submission per student
+
+Final submissions are protected at the **database level**, not only by the browser UI.
+
+For each laboratory, Supabase enforces a unique normalized pair:
+
+```text
+lab_id + student_code
+```
+
+This means the same student ID cannot submit the same lab twice even if the student:
+
+- changes browser,
+- uses incognito/private mode,
+- clears browser storage,
+- changes device,
+- receives a new anonymous-auth session.
+
+The client also performs a safe pre-check through `public.has_submitted_lab(...)` so students receive a clear message before upload. The unique database index remains the final authority and protects against race conditions.
+
+Because the site deliberately has no student login, this guarantees **one submission per claimed student ID**, not proof of the student's real identity. If institutional identity assurance is required later, add Sunway SSO/email authentication or roster-linked access tokens.
+
 ## Student report submission to Supabase
 
 The open-access student interface has no visible login. When a student submits a final report, the browser creates an **invisible Supabase anonymous-auth session**. This gives the submission a real `auth.uid()` so Row Level Security can protect the student's record and private Word file without adding a login screen.

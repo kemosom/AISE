@@ -68,6 +68,25 @@ export async function submitLabReportToSupabase(
   }
 
   const user = await ensureAnonymousUser(client);
+  const normalizedStudentId = input.studentId.trim().toUpperCase();
+
+  const { data: studentAlreadySubmitted, error: studentCheckError } =
+    await client.rpc('has_submitted_lab', {
+      p_lab_id: input.labId,
+      p_student_code: normalizedStudentId,
+    });
+
+  if (studentCheckError) {
+    throw new Error(
+      `Unable to verify previous submissions: ${studentCheckError.message}`
+    );
+  }
+
+  if (studentAlreadySubmitted) {
+    throw new Error(
+      `Student ID ${normalizedStudentId} has already submitted this laboratory. Contact the lecturer if a replacement submission is required.`
+    );
+  }
 
   const { data: existing, error: existingError } = await client
     .from('submissions')
@@ -115,7 +134,7 @@ export async function submitLabReportToSupabase(
       lab_id: input.labId,
       user_id: user.id,
       student_name: input.studentName.trim(),
-      student_code: input.studentId.trim(),
+      student_code: normalizedStudentId,
       report_snapshot: input.reportSnapshot,
       workspace_snapshot: input.codeSnapshot || {},
       design_snapshot: {},
@@ -129,6 +148,13 @@ export async function submitLabReportToSupabase(
 
   if (insertError || !submission) {
     await client.storage.from('lab-submissions').remove([storagePath]);
+
+    if (insertError?.code === '23505') {
+      throw new Error(
+        `Student ID ${normalizedStudentId} has already submitted this laboratory. Only one final submission is allowed per student ID.`
+      );
+    }
+
     throw new Error(
       `Submission record could not be saved: ${insertError?.message || 'Unknown database error'}`
     );
