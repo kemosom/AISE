@@ -118,7 +118,7 @@ function createLabShell(
     week,
     title,
     shortDescription,
-    estimatedDuration: '3 hours',
+    estimatedDuration: '2 hours',
     language: 'python',
     runner: 'pyodide',
     packages: ['numpy', 'matplotlib', 'pandas'],
@@ -184,7 +184,7 @@ function createLabShell(
         weight: 50,
       },
     ],
-    instructionsMarkdown: `# ${title}\n\n**Course:** MAI5124 AI in Software Engineering  \n**Estimated Duration:** 3 hours\n\n### 1. Overview\n${shortDescription}\n\n### 2. Learning Outcomes\n${outcomes.map((o) => `- ${o}`).join('\n')}\n\n### 3. Required Tasks\n1. Review the initial code in \`main.py\`.\n2. Implement the designated algorithm or AI pipeline.\n3. Run automated tests in the workspace toolbar.\n4. Document your results in the **Report** workspace.`,
+    instructionsMarkdown: `# ${title}\n\n**Course:** MAI5124 AI in Software Engineering  \n**Estimated Duration:** 2 hours\n\n### 1. Overview\n${shortDescription}\n\n### 2. Learning Outcomes\n${outcomes.map((o) => `- ${o}`).join('\n')}\n\n### 3. Required Tasks\n1. Review the initial code in \`main.py\`.\n2. Implement the designated algorithm or AI pipeline.\n3. Run automated tests in the workspace toolbar.\n4. Document your results in the **Report** workspace.`,
   };
 }
 

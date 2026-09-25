@@ -59,7 +59,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Report State
   const [reportState, setReportState] = useState<ReportState>({ title: '', sections: [] });
   const [reportSaveStatus, setReportSaveStatus] = useState<string>('All changes saved');
-  const [checkpoints, setCheckpoints] = useState<any[]>([]);
   const [completedStepIds, setCompletedStepIds] = useState<string[]>([]);
 
   // Debounced auto-save timers
@@ -158,14 +157,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         const [
           savedFiles,
           savedReport,
-          savedCheckpoints,
           savedSubmission,
           savedTestStats,
           savedSteps,
         ] = await Promise.all([
           readLocal<EditorFile[]>('files'),
           readLocal<ReportState>('report'),
-          readLocal<any[]>('checkpoints'),
           readLocal<any>('submission'),
           readLocal<{ passed: number; total: number }>('test-stats'),
           readLocal<string[]>('steps'),
@@ -177,7 +174,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             : loadedManifest.starterFiles
         );
         setReportState(mergeReportWithTemplate(savedReport, loadedManifest));
-        setCheckpoints(savedCheckpoints || []);
         setTestStats(savedTestStats);
         setCompletedStepIds(savedSteps || []);
         return;
@@ -208,12 +204,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         setReportState(createInitialReport(loadedManifest));
       }
 
-      try {
-        const cpData = await apiClient.get(`/api/checkpoints/${labId}`);
-        setCheckpoints(cpData.checkpoints || []);
-      } catch {
-        setCheckpoints([]);
-      }
     } catch (err: any) {
       setError(err.message || 'Error loading lab');
     } finally {
@@ -324,34 +314,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         setReportSaveStatus('Save failed');
       }
     }, 700);
-  };
-
-  // Checkpoints
-  const handleCreateCheckpoint = async (label: string, snapshot: any) => {
-    if (useLocalPersistence) {
-      const checkpoint = {
-        id: `local-${Date.now()}`,
-        label,
-        snapshot,
-        createdAt: new Date().toISOString(),
-      };
-      const updated = [checkpoint, ...checkpoints];
-      setCheckpoints(updated);
-      await writeLocal('checkpoints', updated);
-      return;
-    }
-
-    try {
-      const res = await apiClient.post(`/api/checkpoints/${labId}`, {
-        label,
-        snapshot,
-      });
-      if (res.checkpoint) {
-        setCheckpoints((prev) => [res.checkpoint, ...prev]);
-      }
-    } catch (err) {
-      console.error('Failed to create checkpoint', err);
-    }
   };
 
   // Evidence Insertion Handlers
@@ -633,8 +595,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               onUpdateReportState={handleUpdateReportState}
               onSaveReport={async (rep) => handleUpdateReportState(rep)}
               saveStatus={reportSaveStatus}
-              checkpoints={checkpoints}
-              onCreateCheckpoint={handleCreateCheckpoint}
               codeFiles={files}
               testStats={testStats}
             />

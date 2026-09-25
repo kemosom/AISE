@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import {
-  FileText,
   FileDown,
   Upload,
-  Bookmark,
   Check,
   Eye,
   Trash2,
-  Clock,
-  Plus,
   Image as ImageIcon,
   Code,
   CheckCircle,
@@ -46,8 +42,6 @@ interface ReportWorkspaceProps {
   onUpdateReportState: (newState: ReportState) => void;
   onSaveReport: (reportToSave: ReportState) => Promise<void>;
   saveStatus: string;
-  checkpoints: any[];
-  onCreateCheckpoint: (label: string, snapshot: any) => Promise<void>;
   codeFiles?: Array<{ name: string; language: string; content: string }>;
   testStats?: { passed: number; total: number } | null;
 }
@@ -61,8 +55,6 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   onUpdateReportState,
   onSaveReport,
   saveStatus,
-  checkpoints,
-  onCreateCheckpoint,
   codeFiles = [],
   testStats = null,
 }) => {
@@ -75,10 +67,6 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   const [submissionReceipt, setSubmissionReceipt] =
     useState<LabSubmissionReceipt | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
-
-  // Checkpoint input
-  const [checkpointLabel, setCheckpointLabel] = useState('');
-  const [isCreatingCheckpoint, setIsCreatingCheckpoint] = useState(false);
 
   // Image Upload input
   const [imageCaption, setImageCaption] = useState('');
@@ -269,13 +257,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     }
   };
 
-  const handleSaveCheckpoint = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!checkpointLabel.trim()) return;
-    await onCreateCheckpoint(checkpointLabel.trim(), reportState);
-    setCheckpointLabel('');
-    setIsCreatingCheckpoint(false);
-  };
+
 
   return (
     <div className="h-full flex flex-col bg-slate-100">
@@ -294,14 +276,6 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
 
         <div className="flex items-center space-x-3 text-xs">
           <span className="text-slate-500 font-mono text-[11px]">{saveStatus}</span>
-
-          <button
-            onClick={() => setIsCreatingCheckpoint(true)}
-            className="inline-flex items-center space-x-1 px-2.5 py-1 text-slate-700 hover:bg-slate-100 border border-slate-200 rounded text-xs font-medium cursor-pointer"
-          >
-            <Bookmark className="w-3.5 h-3.5" />
-            <span>Checkpoint ({checkpoints.length})</span>
-          </button>
 
           <button
             onClick={() => setIsPreviewOpen(true)}
@@ -331,7 +305,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                 ? 'Submitted'
                 : isSubmitting
                 ? 'Submitting...'
-                : 'Submit to Lecturer'}
+                : 'Submit'}
             </span>
           </button>
         </div>
@@ -347,10 +321,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
         >
           {submissionReceipt ? (
             <span>
-              Report submitted successfully on{' '}
-              {new Date(submissionReceipt.submittedAt).toLocaleString()}.
-              The final Word document is stored in Supabase as{' '}
-              <strong>{submissionReceipt.fileName}</strong>.
+              Report submitted successfully.
             </span>
           ) : (
             submissionError
@@ -559,47 +530,6 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Checkpoint Modal */}
-      {isCreatingCheckpoint && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-slate-200 rounded-lg max-w-sm w-full p-5 shadow-lg">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
-              Create Lab Report Checkpoint
-            </h3>
-            <p className="text-[11px] text-slate-500 mb-3">
-              Save a named milestone of your current report and evidence state.
-            </p>
-
-            <form onSubmit={handleSaveCheckpoint} className="space-y-3">
-              <input
-                type="text"
-                autoFocus
-                required
-                value={checkpointLabel}
-                onChange={(e) => setCheckpointLabel(e.target.value)}
-                placeholder="e.g. Checkpoint 1: Initial Findings"
-                className="w-full px-2.5 py-1.5 text-xs border border-slate-300 rounded outline-none"
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsCreatingCheckpoint(false)}
-                  className="px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-100 rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-3 py-1 bg-slate-900 text-white text-xs font-medium rounded cursor-pointer"
-                >
-                  Save Checkpoint
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Preview Document Modal */}
       {isPreviewOpen && (
