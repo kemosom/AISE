@@ -159,7 +159,16 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             <img
               src={SUNWAY_LOGO}
               alt="Sunway University"
+              referrerPolicy="no-referrer"
               className="h-auto w-52 object-contain sm:w-56"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src =
+                  "data:image/svg+xml;charset=UTF-8," +
+                  encodeURIComponent(
+                    '<svg xmlns="http://www.w3.org/2000/svg" width="520" height="110" viewBox="0 0 520 110"><rect width="520" height="110" fill="white"/><text x="8" y="48" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="800" fill="#111827">SUNWAY</text><text x="8" y="88" font-family="Arial,Helvetica,sans-serif" font-size="34" font-weight="400" fill="#111827">UNIVERSITY</text></svg>'
+                  );
+              }}
             />
           </a>
 
