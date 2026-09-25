@@ -27,3 +27,14 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Lab 02 ML dependencies
+        run: python -m pip install --disable-pip-version-check numpy scikit-learn
+
+      - name: Validate Lab 02 data and ML pipeline
+        run: python scripts/validate_lab02.py
