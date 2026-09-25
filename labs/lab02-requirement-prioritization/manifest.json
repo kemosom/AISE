@@ -3,7 +3,7 @@
   "labNumber": 2,
   "week": 3,
   "title": "AI Techniques for Software Requirements Prioritization",
-  "shortDescription": "Use a supervised NLP model and release-planning signals to prioritize a realistic music-streaming product backlog, then inspect the selected requirements directly in a Spotify-style product preview.",
+  "shortDescription": "Act as a release engineer for a Spotify-style product: interrogate an NLP model, design your own hybrid prioritization policy, implement it, stress-test it, and watch the selected requirements change the live application.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
@@ -45,43 +45,57 @@
   "tasks": [
     {
       "id": "l2-t1",
-      "title": "Understand the Release-Planning Problem",
-      "description": "Review the fictional music-streaming backlog, the release budget, and the difference between stakeholder votes and learned priority evidence.",
+      "title": "Diagnose the Baseline Release",
+      "description": "Run the vote-only baseline, use the live product, and identify at least one release decision you believe is questionable before touching the AI.",
       "category": "analysis",
-      "action": "theory"
+      "action": "code"
     },
     {
       "id": "l2-t2",
-      "title": "Run the Vote-Only Baseline",
-      "description": "Run the starter program in BASELINE mode and inspect which requirements appear in the Spotify-style release preview.",
-      "category": "code",
+      "title": "Interrogate the NLP Model",
+      "description": "Inspect probability distributions and evidence tokens for three backlog items, then use the live NLP playground to test your own requirement wording.",
+      "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t3",
-      "title": "Implement AI-Assisted Priority Scoring",
-      "description": "Complete one scoring function that combines the NLP model probability with product value, strategic fit, user demand, accessibility impact, and implementation effort.",
-      "category": "code",
-      "action": "code"
-    },
-    {
-      "id": "l2-t4",
-      "title": "Compare the Product Release",
-      "description": "Switch to AI_ASSISTED mode and compare both the requirement ranking and the visible product changes in the right-side preview.",
+      "title": "Design Your Release Policy",
+      "description": "Choose and justify your own valid weights for AI evidence, business value, strategic fit, user demand, accessibility, and implementation effort.",
       "category": "analysis",
       "action": "code"
     },
     {
+      "id": "l2-t4",
+      "title": "Implement the Hybrid Priority Function",
+      "description": "Translate your policy into Python so the score integrates learned NLP evidence with current software-engineering constraints.",
+      "category": "code",
+      "action": "code"
+    },
+    {
       "id": "l2-t5",
-      "title": "Verify Requirements",
-      "description": "Run the executable requirement checks for model validity, scoring logic, budget compliance, ranking order, and release-plan behavior.",
+      "title": "Ship and Inspect the AI-Assisted Release",
+      "description": "Run AI_ASSISTED mode, interact with the product features that were actually selected, and compare the release with the baseline.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l2-t6",
+      "title": "Stress-Test the Decision",
+      "description": "Perform a wording-sensitivity experiment and a policy-sensitivity experiment. Explain what changed and why.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l2-t7",
+      "title": "Verify Engineering Requirements",
+      "description": "Run the verification suite to test probability validity, model performance, policy constraints, scoring behavior, AI influence, ranking, and budget compliance.",
       "category": "test",
       "action": "verify"
     },
     {
-      "id": "l2-t6",
-      "title": "Complete the Technical Report",
-      "description": "Interpret the ranking change, model evidence, product impact, and limitations, then submit the final report.",
+      "id": "l2-t8",
+      "title": "Defend a Release Decision",
+      "description": "Decide whether you would ship the baseline or AI-assisted plan. Support the decision with model evidence, product impact, sensitivity results, and limitations.",
       "category": "report",
       "action": "report"
     }
