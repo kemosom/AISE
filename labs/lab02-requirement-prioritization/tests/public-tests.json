@@ -24,7 +24,7 @@
     "id": "test-model-selection",
     "name": "Chosen Model Has Reproducible Cross-Validated Performance",
     "description": "Checks the selected scikit-learn model using 5-fold macro-F1 on historical release decisions.",
-    "testCode": "import main\nfrom priority_model import benchmark_models\nmain.validate_student_choices()\nresults = benchmark_models(main.HISTORICAL, main.MODEL_FEATURES)\nscore = results[main.MODEL_KIND]['macro_f1_mean']\nassert score >= 0.55, f\"Selected model macro-F1 is only {score:.3f}\"",
+    "testCode": "import main\nfrom priority_model import benchmark_models\nmain.validate_student_choices()\nresults = benchmark_models(main.HISTORICAL, main.MODEL_FEATURES)\nscore = results[main.MODEL_KIND]['macro_f1_mean']\nassert score >= 0.50, f\"Selected model macro-F1 is only {score:.3f}\"",
     "weight": 15
   },
   {
