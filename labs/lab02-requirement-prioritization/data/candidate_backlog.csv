@@ -1,0 +1,13 @@
+id,title,description,visual_feature,affected_mau,support_tickets_90d,engineering_days,dependency_count,premium_share,churn_risk_share,accessibility_or_compliance,incident_linked_count,prerequisite_ready,prerequisite
+REQ-301,Low Data Mode,Reduce audio bitrate and prefetch adaptively when mobile connectivity is constrained.,data_saver,680000,491,18,1,0.28,0.34,0,7,1,
+REQ-302,Live Lyrics Translation,Translate synchronized lyrics into the listener's selected language during playback.,lyrics_translation,410000,238,24,2,0.36,0.22,1,1,1,
+REQ-303,Collaborative Queue Voting,Allow listeners in a group session to vote tracks up or down in the shared queue.,queue_voting,92000,110,22,2,0.41,0.09,0,0,1,
+REQ-304,Lossless Audio,Offer a lossless playback quality option for eligible premium listeners.,lossless,180000,64,46,3,0.88,0.08,0,0,0,REQ-312
+REQ-305,Accessible Lyrics Mode,"Provide larger high-contrast lyrics, keyboard navigation, and improved screen-reader labels.",accessible_lyrics,135000,176,16,1,0.18,0.17,1,2,1,
+REQ-306,AI DJ Context Mix,"Generate a context-aware DJ sequence for focus, commute, or workout sessions.",ai_dj,320000,82,34,3,0.62,0.19,0,0,0,REQ-311
+REQ-307,Concert Discovery,Recommend nearby concerts and live events based on followed artists and listening history.,concerts,240000,95,20,2,0.44,0.11,0,0,1,
+REQ-308,Podcast AI Summaries,Generate concise summaries and key moments for long podcast episodes.,podcast_summary,205000,73,38,3,0.33,0.13,0,0,0,REQ-311
+REQ-309,Offline Recovery,Recover playback gracefully when connectivity disappears and resume without losing position.,offline_recovery,720000,612,21,2,0.31,0.41,0,11,1,
+REQ-310,Family Content Controls,Give family-plan managers explicit-content controls and age-appropriate listening settings.,family_controls,155000,287,28,3,0.76,0.24,1,3,1,
+REQ-311,Listening Context Service,Create a reusable service that infers coarse listening context for recommendation features.,context_service,540000,40,26,4,0.52,0.15,0,1,1,
+REQ-312,Audio Pipeline Upgrade,Modernize audio delivery to support higher fidelity and improved codec negotiation across devices.,audio_pipeline,610000,149,32,4,0.49,0.18,0,5,1,
