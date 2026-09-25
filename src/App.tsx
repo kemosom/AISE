@@ -127,11 +127,19 @@ export default function App() {
         body: JSON.stringify({ code }),
       });
 
-      const payload = await response.json().catch(() => ({}));
+      const responseText = await response.text();
+      let payload: any = {};
+
+      try {
+        payload = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        payload = {};
+      }
 
       if (!response.ok) {
         throw new Error(
-          payload.error || 'Unable to unlock instructor materials.'
+          payload.error ||
+            `Instructor access request failed (HTTP ${response.status}).`
         );
       }
 

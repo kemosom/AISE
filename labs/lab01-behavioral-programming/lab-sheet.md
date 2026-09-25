@@ -7,20 +7,6 @@
 
 Evaluate alternative ways of integrating an AI defect-risk predictor into a software release workflow, justify an appropriate architecture, then implement and verify an independent Behavioral Programming guardrail.
 
-## Course alignment
-
-**Primary alignment: CLO1 → PLO1**
-
-You investigate an AI application in software engineering, identify the limitations of AI-only release decisions, and distinguish model prediction from software authority.
-
-**Secondary alignment: CLO2 → PLO2**
-
-You compare alternative integration strategies, justify an appropriate method for the release-governance problem, and apply that method to the supplied software system.
-
-**Preparation for CLO3 → PLO7**
-
-You interpret risk probability and model confidence in context. Full quantitative evaluation of AI-powered software is developed across later labs and the Final Project.
-
 ## What is already provided
 
 The starter project contains:

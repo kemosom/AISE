@@ -157,16 +157,7 @@ IF AI confidence is below the accepted threshold:
 
 The AI model remains unchanged. The engineering policy remains explicit and independently verifiable.
 
-## 6. Course alignment
-
-This lab contributes primarily to:
-
-- **CLO1 → PLO1:** investigate how AI is applied in a software-engineering workflow and identify limitations of AI-only decisions.
-- **CLO2 → PLO2:** compare alternative integration strategies, justify an appropriate method, and apply it to the software system.
-
-It also introduces quantitative interpretation through risk probability and confidence, which prepares you for **CLO3 → PLO7**. Full quantitative performance evaluation is developed later and culminates in the Final Project.
-
-## 7. What you will do
+## 6. What you will do
 
 You will:
 
