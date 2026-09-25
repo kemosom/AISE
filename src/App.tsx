@@ -105,7 +105,9 @@ export default function App() {
   };
 
   const handleInstructorTrigger = () => {
-    if (instructorData) {
+    const requestedLabId = activeLabId || 'lab01-behavioral-programming';
+
+    if (instructorData?.labId === requestedLabId) {
       setActiveView('instructor');
       return;
     }
@@ -124,7 +126,10 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({
+          code,
+          labId: activeLabId || 'lab01-behavioral-programming',
+        }),
       });
 
       const responseText = await response.text();
