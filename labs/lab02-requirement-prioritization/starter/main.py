@@ -4,12 +4,13 @@ Lab 02: AI Techniques for Software Requirements Prioritization
 
 STUDENT TASK
 ------------
-1. Run the vote-only BASELINE.
-2. Inspect the right-side product preview.
-3. Implement ai_assisted_priority_score().
-4. Set MODE = "AI_ASSISTED".
-5. Run again and compare both the ranking and the visible release.
-6. Verify requirements and complete the report.
+1. Run and diagnose the vote-only BASELINE.
+2. Interrogate the NLP model and test your own requirement wording.
+3. Design a defensible hybrid release policy.
+4. Implement ai_assisted_priority_score().
+5. Set MODE = "AI_ASSISTED" and inspect the live product release.
+6. Stress-test wording and policy sensitivity.
+7. Verify requirements and defend a release recommendation.
 """
 
 import json
