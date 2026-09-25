@@ -14,15 +14,17 @@ import lab01VisualNodes from './lab01-behavioral-programming/visual-nodes.json';
 import lab01Tests from './lab01-behavioral-programming/tests/public-tests.json';
 import lab01ReportTemplate from './lab01-behavioral-programming/report-template.json';
 
+import lab02Metadata from './lab02-requirement-prioritization/manifest.json';
+import lab02Theory from './lab02-requirement-prioritization/theory.md?raw';
+import lab02LabSheet from './lab02-requirement-prioritization/lab-sheet.md?raw';
+import lab02MainPy from './lab02-requirement-prioritization/starter/main.py?raw';
+import lab02PriorityModelPy from './lab02-requirement-prioritization/starter/priority_model.py?raw';
+import lab02RequirementsDataPy from './lab02-requirement-prioritization/starter/requirements_data.py?raw';
+import lab02Tests from './lab02-requirement-prioritization/tests/public-tests.json';
+import lab02ReportTemplate from './lab02-requirement-prioritization/report-template.json';
+
 // Curriculum-aligned task catalog mapping for all MAI5124 laboratories
 export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
-  'lab02-requirement-prioritization': [
-    { id: 'l2-t1', title: 'Requirement Text Pre-Processing', description: 'Clean, tokenize, and compute TF-IDF vector embeddings', category: 'code' },
-    { id: 'l2-t2', title: 'Machine Learning Classifier', description: 'Train supervised model to predict priority classes (High/Medium/Low)', category: 'code' },
-    { id: 'l2-t3', title: 'MoSCoW Tagging & Ranking', description: 'Automate priority ranking and MoSCoW categorization pipeline', category: 'design' },
-    { id: 'l2-t4', title: 'Automated Model Verification', description: 'Run assertion tests to validate classifier performance and metrics', category: 'test' },
-    { id: 'l2-t5', title: 'Technical Report & Final Submission', description: 'Document findings and submit formal laboratory report', category: 'submission' },
-  ],
   'lab03-social-commitment-agents': [
     { id: 'l3-t1', title: 'Agent Speech-Act Communication', description: 'Implement communicative protocols and message schemas', category: 'code' },
     { id: 'l3-t2', title: 'Conditional Commitment Engine', description: 'Build commitment state transitions (Create, Detach, Discharge)', category: 'code' },
@@ -212,23 +214,21 @@ labRegistryMap.set('lab01-behavioral-programming', {
   instructionsMarkdown: `${lab01Theory}\n\n---\n\n${lab01LabSheet}`,
 });
 
-// Lab 02
-labRegistryMap.set(
-  'lab02-requirement-prioritization',
-  createLabShell(
-    'lab02-requirement-prioritization',
-    2,
-    2,
-    'AI Techniques for Software Requirements Prioritization',
-    'Implement NLP and machine-learning classifiers to automate software requirement ranking and MoSCoW tagging.',
-    [
-      'Pre-process unstructured requirement statements using TF-IDF and word embeddings.',
-      'Train supervised classifiers (Random Forest, SVM) to predict priority classes.',
-      'Evaluate model accuracy, F1-scores, and trade-offs in requirement prioritization.',
-    ],
-    `# Lab 02: Software Requirements Prioritization\nimport numpy as np\n\ndef prioritize_requirements(requirements_list):\n    print(f"Analyzing {len(requirements_list)} requirements...")\n    # Implement classifier here\n    return [{"req": r, "priority": "High"} for r in requirements_list]\n\nif __name__ == '__main__':\n    sample = ["System must support 10,000 concurrent sessions", "Export report to PDF"]\n    print(prioritize_requirements(sample))\n`
-  )
-);
+// Lab 02 - Content-driven requirements-prioritization module.
+labRegistryMap.set('lab02-requirement-prioritization', {
+  ...(lab02Metadata as any),
+  starterFiles: [
+    { name: 'main.py', language: 'python', content: lab02MainPy },
+    { name: 'priority_model.py', language: 'python', content: lab02PriorityModelPy },
+    { name: 'requirements_data.py', language: 'python', content: lab02RequirementsDataPy },
+  ],
+  reportTemplate: lab02ReportTemplate as any,
+  snippets: [],
+  tests: lab02Tests as any,
+  theoryMarkdown: lab02Theory,
+  labSheetMarkdown: lab02LabSheet,
+  instructionsMarkdown: `${lab02Theory}\n\n---\n\n${lab02LabSheet}`,
+});
 
 // Lab 03
 labRegistryMap.set(
