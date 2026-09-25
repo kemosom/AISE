@@ -142,7 +142,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           throw new Error('Laboratory module not found.');
         }
 
-        if (loadedManifest.labNumber !== 1) {
+        if (loadedManifest.labNumber > 2) {
           throw new Error('This laboratory is not released yet.');
         }
 
