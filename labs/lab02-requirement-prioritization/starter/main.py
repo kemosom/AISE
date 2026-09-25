@@ -1,220 +1,355 @@
 """
 MAI5124 AI in Software Engineering
-Lab 02: AI Techniques for Software Requirements Prioritization
+Lab 02: Data-Driven AI for Software Requirements Prioritization
 
-STUDENT TASK
-------------
-1. Run and diagnose the vote-only BASELINE.
-2. Interrogate the NLP model and test your own requirement wording.
-3. Design a defensible hybrid release policy.
-4. Implement ai_assisted_priority_score().
-5. Set MODE = "AI_ASSISTED" and inspect the live product release.
-6. Stress-test wording and policy sensitivity.
-7. Verify requirements and defend a release recommendation.
+This lab uses:
+- 958 synthetic customer-feedback records,
+- 360 synthetic historical release decisions,
+- 12 current candidate requirements,
+- TF-IDF + cosine similarity for feedback-to-requirement NLP matching,
+- Logistic Regression and Random Forest for supervised release prioritization,
+- a dependency-aware release optimizer with a 75 engineer-day budget.
+
+The datasets are realistic teaching data. They are NOT Spotify internal data.
 """
 
+import itertools
 import json
 
-from priority_model import evaluate_model, predict_priority
-from requirements_data import CANDIDATE_REQUIREMENTS
+from data_pipeline import (
+    FeedbackRequirementMatcher,
+    aggregate_feedback,
+    evaluate_audited_matches,
+    load_candidates,
+    load_feedback,
+    load_historical,
+    threshold_sweep,
+    top_feedback_examples,
+)
+from priority_model import (
+    DEFAULT_FEATURES,
+    benchmark_models,
+    feature_importance,
+    shipped_probability,
+    train_model,
+    training_fit_metrics,
+)
 
 
-RELEASE_BUDGET = 9
+# ---------------------------------------------------------------------------
+# STUDENT DECISIONS
+# ---------------------------------------------------------------------------
 
-# Start with the transparent vote-only baseline.
+# Start with BASELINE.
+# Then use ANALYZE to evaluate the NLP threshold and compare ML models.
+# Finally use AI_ASSISTED after completing the decisions and feature pipeline.
 MODE = "BASELINE"
 
-# STUDENT DECISION 1: design your release policy.
-#
-# Choose values that satisfy:
-#   0.30 <= AI_WEIGHT <= 0.60
-#   0.10 <= BUSINESS_WEIGHT <= 0.30
-#   0.10 <= STRATEGIC_WEIGHT <= 0.30
-#   0.05 <= VOTE_WEIGHT <= 0.25
-#   AI_WEIGHT + BUSINESS_WEIGHT + STRATEGIC_WEIGHT + VOTE_WEIGHT == 1.0
-#   0.00 <= ACCESSIBILITY_BONUS <= 0.10
-#   0.02 <= EFFORT_PENALTY <= 0.08
-#
-# There is no single accepted weighting. Your values must be technically valid
-# and justified in the report.
-AI_WEIGHT = None
-BUSINESS_WEIGHT = None
-STRATEGIC_WEIGHT = None
-VOTE_WEIGHT = None
-ACCESSIBILITY_BONUS = None
-EFFORT_PENALTY = None
+# STUDENT DECISION 1:
+# Choose this after inspecting the audited NLP threshold sweep.
+# Typical useful values are between 0.10 and 0.42, but do not guess.
+NLP_SIMILARITY_THRESHOLD = None
+
+# STUDENT DECISION 2:
+# Choose after comparing 5-fold macro-F1 and considering interpretability.
+# Allowed: "LOGISTIC_REGRESSION" or "RANDOM_FOREST"
+MODEL_KIND = None
+
+# You may later remove one or more features for an ablation experiment.
+MODEL_FEATURES = DEFAULT_FEATURES.copy()
+
+MAX_RELEASE_DAYS = 75
+
+# Optional what-if experiment.
+# Example:
+# COUNTERFACTUAL_OVERRIDES = {
+#     "REQ-304": {"engineering_days": 25}
+# }
+COUNTERFACTUAL_OVERRIDES = {}
 
 
-def clamp(value, lower=0.0, upper=1.0):
-    return max(lower, min(upper, value))
+CANDIDATES = load_candidates()
+FEEDBACK = load_feedback()
+HISTORICAL = load_historical()
+MATCHER = FeedbackRequirementMatcher(CANDIDATES, FEEDBACK)
 
 
-def baseline_priority_score(requirement):
+def apply_counterfactual_overrides(candidates):
+    rows = [dict(row) for row in candidates]
+
+    for row in rows:
+        updates = COUNTERFACTUAL_OVERRIDES.get(row["id"], {})
+        for field, value in updates.items():
+            if field not in row:
+                raise KeyError(
+                    f"Unknown field {field!r} for {row['id']}."
+                )
+            row[field] = value
+
+    return rows
+
+
+def baseline_release_value(requirement):
     """
-    Transparent baseline: stakeholder/user demand only.
+    Transparent non-ML baseline:
+    prioritize support pressure, measured by support tickets in the last 90 days.
     """
-    return clamp(requirement["user_votes"] / 100.0)
+    return float(requirement["support_tickets_90d"])
 
 
-def validate_policy():
-    """
-    Validate the policy chosen by the student before AI-assisted planning.
-    """
-    values = {
-        "AI_WEIGHT": AI_WEIGHT,
-        "BUSINESS_WEIGHT": BUSINESS_WEIGHT,
-        "STRATEGIC_WEIGHT": STRATEGIC_WEIGHT,
-        "VOTE_WEIGHT": VOTE_WEIGHT,
-        "ACCESSIBILITY_BONUS": ACCESSIBILITY_BONUS,
-        "EFFORT_PENALTY": EFFORT_PENALTY,
-    }
-
-    missing = [name for name, value in values.items() if value is None]
-    if missing:
+def validate_student_choices():
+    if NLP_SIMILARITY_THRESHOLD is None:
         raise ValueError(
-            "Design the AI-assisted release policy first. "
-            "Set these constants: " + ", ".join(missing)
+            "Choose NLP_SIMILARITY_THRESHOLD after running MODE = 'ANALYZE'."
         )
 
-    core_total = (
-        AI_WEIGHT
-        + BUSINESS_WEIGHT
-        + STRATEGIC_WEIGHT
-        + VOTE_WEIGHT
-    )
-
-    if abs(core_total - 1.0) > 1e-9:
+    if not (0.08 <= NLP_SIMILARITY_THRESHOLD <= 0.50):
         raise ValueError(
-            f"Core policy weights must sum to 1.0, not {core_total:.3f}."
+            "NLP_SIMILARITY_THRESHOLD must be between 0.08 and 0.50."
+        )
+
+    if MODEL_KIND not in {
+        "LOGISTIC_REGRESSION",
+        "RANDOM_FOREST",
+    }:
+        raise ValueError(
+            "Choose MODEL_KIND after comparing the two models in ANALYZE mode."
+        )
+
+    if len(MODEL_FEATURES) < 6:
+        raise ValueError(
+            "Use at least six evidence features for the deployed model."
+        )
+
+    unknown = [
+        feature
+        for feature in MODEL_FEATURES
+        if feature not in DEFAULT_FEATURES
+    ]
+    if unknown:
+        raise ValueError(
+            "Unknown model feature(s): " + ", ".join(unknown)
         )
 
 
-def ai_assisted_priority_score(requirement, prediction):
+def build_current_feature_rows(candidates, feedback_evidence):
     """
-    STUDENT DECISION 2: implement your hybrid priority score.
+    STUDENT TASK: construct the feature table for current requirements.
 
-    Your score MUST use:
-      - prediction["p_high"]
-      - normalized business value
-      - normalized strategic fit
-      - normalized user demand
-      - an accessibility bonus
-      - an implementation-effort penalty
+    Historical release decisions use the columns in DEFAULT_FEATURES.
+    Your current requirements must be transformed into the SAME feature schema.
 
-    Use the policy constants you chose above.
+    The first two features come from the NLP-matched customer feedback:
+        feedback_mentions_90d
+        mean_feedback_severity
 
-    The score must be clamped to [0.0, 1.0].
+    The remaining fields come from current product telemetry and engineering
+    estimates in candidate_backlog.csv.
+
+    Return a list of dictionaries. Each row must include:
+        id, title, description, visual_feature, prerequisite,
+        every feature in DEFAULT_FEATURES
+
+    Do not invent scores such as business_value=9 or strategic_fit=8.
     """
 
-    # TODO:
-    # 1. Normalize business_value, strategic_fit, and user_votes.
-    # 2. Combine them with prediction["p_high"] using your chosen weights.
-    # 3. Add the accessibility bonus when applicable.
-    # 4. Penalize implementation effort.
-    # 5. Clamp and return the final score.
+    # TODO: implement the feature-engineering join.
+    #
+    # Hints:
+    #   evidence = feedback_evidence[requirement["id"]]
+    #   evidence["feedback_mentions_90d"]
+    #   evidence["mean_feedback_severity"]
+    #
+    # Copy measurable fields such as affected_mau, support_tickets_90d,
+    # engineering_days, dependency_count, premium_share, churn_risk_share,
+    # accessibility_or_compliance, incident_linked_count, prerequisite_ready.
     raise NotImplementedError(
-        "Implement ai_assisted_priority_score() using your chosen policy."
+        "Build the current feature table from NLP evidence + telemetry."
     )
 
 
-def moscow_label(score):
-    if score >= 0.75:
-        return "MUST"
-    if score >= 0.55:
-        return "SHOULD"
-    if score >= 0.35:
-        return "COULD"
-    return "WONT"
+def _dependency_valid(selected_ids, requirement):
+    prerequisite = requirement.get("prerequisite", "")
+    prerequisite_ready = int(requirement.get("prerequisite_ready", 0))
+
+    if not prerequisite:
+        return prerequisite_ready == 1
+
+    return prerequisite_ready == 1 or prerequisite in selected_ids
 
 
-def rank_requirements(mode=None):
+def optimize_release(requirements, value_by_id, budget=MAX_RELEASE_DAYS):
     """
-    Score and rank every candidate requirement.
+    Exhaustively search all 2^N subsets.
+
+    N=12 in this lab, so exhaustive search is small (4096 subsets) and makes
+    the release decision reproducible. A subset is valid when:
+    - total engineering days <= budget
+    - every unmet prerequisite is included in the same release
     """
-    selected_mode = mode or MODE
-    rows = []
+    best = None
 
-    for requirement in CANDIDATE_REQUIREMENTS:
-        prediction = predict_priority(requirement)
+    for mask in range(1 << len(requirements)):
+        selected = [
+            requirements[index]
+            for index in range(len(requirements))
+            if mask & (1 << index)
+        ]
 
-        if selected_mode == "BASELINE":
-            score = baseline_priority_score(requirement)
-        elif selected_mode == "AI_ASSISTED":
-            validate_policy()
-            score = ai_assisted_priority_score(requirement, prediction)
-        else:
-            raise ValueError(
-                "MODE must be either 'BASELINE' or 'AI_ASSISTED'"
-            )
+        total_days = sum(row["engineering_days"] for row in selected)
+        if total_days > budget:
+            continue
 
-        rows.append(
-            {
-                **requirement,
-                "score": score,
-                "moscow": moscow_label(score),
-                "prediction": prediction,
-            }
+        selected_ids = {row["id"] for row in selected}
+
+        if any(
+            not _dependency_valid(selected_ids, row)
+            for row in selected
+        ):
+            continue
+
+        total_value = sum(
+            float(value_by_id[row["id"]])
+            for row in selected
         )
 
-    return sorted(
-        rows,
-        key=lambda row: (-row["score"], row["effort"], row["id"]),
-    )
+        candidate = {
+            "selected": selected,
+            "days_used": total_days,
+            "objective_value": total_value,
+        }
 
+        if best is None:
+            best = candidate
+            continue
 
-def build_release_plan(mode=None):
-    """
-    Greedily select the highest-ranked requirements that fit the release
-    budget. The ranking algorithm and budget constraint are kept separate.
-    """
-    selected_mode = mode or MODE
-    ranking = rank_requirements(selected_mode)
+        if total_value > best["objective_value"]:
+            best = candidate
+        elif (
+            abs(total_value - best["objective_value"]) < 1e-12
+            and total_days < best["days_used"]
+        ):
+            best = candidate
 
-    selected = []
-    budget_used = 0
-
-    for requirement in ranking:
-        effort = requirement["effort"]
-
-        if budget_used + effort <= RELEASE_BUDGET:
-            selected.append(requirement)
-            budget_used += effort
-
-    return {
-        "mode": selected_mode,
-        "budget": RELEASE_BUDGET,
-        "budget_used": budget_used,
-        "selected": selected,
-        "ranking": ranking,
+    return best or {
+        "selected": [],
+        "days_used": 0,
+        "objective_value": 0.0,
     }
 
 
-def preview_payload(plan):
-    """
-    Send both release-plan evidence and NLP-model evidence to the browser.
-    This lets the student inspect the AI model directly instead of treating
-    the model as a hidden implementation detail.
-    """
-    metrics = evaluate_model()
+def analyze_mode():
+    print("=" * 78)
+    print("LAB 02 | DATA + NLP + MODEL ANALYSIS")
+    print("=" * 78)
+    print(
+        f"Dataset: {len(FEEDBACK)} feedback records | "
+        f"{len(HISTORICAL)} historical release decisions | "
+        f"{len(CANDIDATES)} current requirements"
+    )
 
-    return {
-        "mode": plan["mode"],
-        "budget": plan["budget"],
-        "budget_used": plan["budget_used"],
-        "model": {
-            "name": "Multinomial Naive Bayes",
-            "accuracy": round(metrics["accuracy"], 4),
-            "macro_f1": round(metrics["macro_f1"], 4),
-            "classes": ["HIGH", "MEDIUM", "LOW"],
+    print()
+    print("NLP THRESHOLD SWEEP")
+    print("-" * 78)
+
+    sweep = threshold_sweep(MATCHER)
+    for row in sweep:
+        print(
+            f"threshold={row['threshold']:.2f} | "
+            f"audited accuracy={row['accuracy']:.3f} | "
+            f"coverage={row['coverage']:.3f} | "
+            f"assigned={row['assigned_count']}"
+        )
+
+    print()
+    print("MODEL COMPARISON | 5-FOLD CROSS-VALIDATION")
+    print("-" * 78)
+
+    benchmark = benchmark_models(
+        HISTORICAL,
+        DEFAULT_FEATURES,
+    )
+
+    for kind, metrics in benchmark.items():
+        print(
+            f"{kind:<20} | "
+            f"macro-F1={metrics['macro_f1_mean']:.3f} "
+            f"(+/- {metrics['macro_f1_std']:.3f}) | "
+            f"accuracy={metrics['accuracy_mean']:.3f}"
+        )
+
+    payload = {
+        "mode": "ANALYZE",
+        "data": {
+            "feedback_rows": len(FEEDBACK),
+            "historical_rows": len(HISTORICAL),
+            "candidate_rows": len(CANDIDATES),
+        },
+        "threshold_sweep": sweep,
+        "benchmarks": benchmark,
+    }
+
+    print("__AISE_ANALYSIS__ " + json.dumps(payload, separators=(",", ":")))
+    print()
+    print(
+        "Next: choose an NLP threshold and model kind, then implement "
+        "build_current_feature_rows()."
+    )
+
+
+def baseline_mode():
+    candidates = apply_counterfactual_overrides(CANDIDATES)
+
+    value_by_id = {
+        row["id"]: baseline_release_value(row)
+        for row in candidates
+    }
+
+    plan = optimize_release(
+        candidates,
+        value_by_id,
+        budget=MAX_RELEASE_DAYS,
+    )
+
+    ranking = sorted(
+        candidates,
+        key=lambda row: (
+            -value_by_id[row["id"]],
+            row["engineering_days"],
+            row["id"],
+        ),
+    )
+
+    print("=" * 78)
+    print("LAB 02 | SUPPORT-PRESSURE BASELINE")
+    print("=" * 78)
+    print(
+        f"Release budget: {plan['days_used']}/{MAX_RELEASE_DAYS} engineer-days"
+    )
+    print()
+    for index, row in enumerate(ranking, start=1):
+        print(
+            f"{index:>2}. {row['id']} | {row['title']:<28} | "
+            f"tickets={row['support_tickets_90d']:<4} | "
+            f"days={row['engineering_days']}"
+        )
+
+    payload = {
+        "mode": "BASELINE",
+        "budget": MAX_RELEASE_DAYS,
+        "budget_used": plan["days_used"],
+        "data": {
+            "feedback_rows": len(FEEDBACK),
+            "historical_rows": len(HISTORICAL),
+            "candidate_rows": len(CANDIDATES),
         },
         "selected": [
             {
                 "id": row["id"],
                 "title": row["title"],
-                "score": round(row["score"], 4),
-                "moscow": row["moscow"],
-                "effort": row["effort"],
                 "visual_feature": row["visual_feature"],
+                "engineering_days": row["engineering_days"],
+                "score": value_by_id[row["id"]],
             }
             for row in plan["selected"]
         ],
@@ -223,83 +358,187 @@ def preview_payload(plan):
                 "id": row["id"],
                 "title": row["title"],
                 "description": row["description"],
-                "score": round(row["score"], 4),
-                "predicted_priority": row["prediction"]["label"],
-                "p_high": round(row["prediction"]["p_high"], 4),
-                "p_medium": round(row["prediction"]["p_medium"], 4),
-                "p_low": round(row["prediction"]["p_low"], 4),
-                "confidence": round(row["prediction"]["confidence"], 4),
-                "evidence_tokens": row["prediction"]["evidence_tokens"],
-                "effort": row["effort"],
-                "user_votes": row["user_votes"],
-                "business_value": row["business_value"],
-                "strategic_fit": row["strategic_fit"],
-                "accessibility_impact": row["accessibility_impact"],
+                "engineering_days": row["engineering_days"],
+                "support_tickets_90d": row["support_tickets_90d"],
+                "affected_mau": row["affected_mau"],
                 "visual_feature": row["visual_feature"],
+                "baseline_value": value_by_id[row["id"]],
             }
-            for row in plan["ranking"]
+            for row in ranking
         ],
     }
 
+    print("__AISE_PREVIEW__ " + json.dumps(payload, separators=(",", ":")))
 
-def print_release_summary(plan):
-    metrics = evaluate_model()
 
-    print("=" * 76)
-    print("LAB 02 | AI-ASSISTED SOFTWARE REQUIREMENTS PRIORITIZATION")
-    print("=" * 76)
+def ai_assisted_mode():
+    validate_student_choices()
+
+    candidates = apply_counterfactual_overrides(CANDIDATES)
+    matches = MATCHER.match_all(NLP_SIMILARITY_THRESHOLD)
+    audit = evaluate_audited_matches(matches)
+    evidence = aggregate_feedback(matches, candidates)
+
+    current_rows = build_current_feature_rows(
+        candidates,
+        evidence,
+    )
+
+    model_benchmarks = benchmark_models(
+        HISTORICAL,
+        MODEL_FEATURES,
+    )
+    model = train_model(
+        HISTORICAL,
+        MODEL_FEATURES,
+        MODEL_KIND,
+    )
+    probabilities = shipped_probability(
+        model,
+        current_rows,
+        MODEL_FEATURES,
+    )
+    fit_metrics = training_fit_metrics(
+        model,
+        HISTORICAL,
+        MODEL_FEATURES,
+    )
+
+    value_by_id = {
+        row["id"]: float(probability)
+        for row, probability in zip(current_rows, probabilities)
+    }
+
+    plan = optimize_release(
+        current_rows,
+        value_by_id,
+        budget=MAX_RELEASE_DAYS,
+    )
+
+    ranking = sorted(
+        current_rows,
+        key=lambda row: (
+            -value_by_id[row["id"]],
+            row["engineering_days"],
+            row["id"],
+        ),
+    )
+
+    print("=" * 78)
+    print("LAB 02 | AI-ASSISTED REQUIREMENTS PRIORITIZATION")
+    print("=" * 78)
     print(
-        f"NLP validation: accuracy={metrics['accuracy']:.3f}, "
-        f"macro-F1={metrics['macro_f1']:.3f}"
+        f"NLP threshold={NLP_SIMILARITY_THRESHOLD:.2f} | "
+        f"audited match accuracy={audit['accuracy']:.3f} "
+        f"on {audit['audited_count']} audited records"
     )
     print(
-        f"Release mode: {plan['mode']} | "
-        f"budget={plan['budget_used']}/{plan['budget']} effort points"
+        f"Model={MODEL_KIND} | "
+        f"5-fold macro-F1="
+        f"{model_benchmarks[MODEL_KIND]['macro_f1_mean']:.3f}"
+    )
+    print(
+        f"Release budget: {plan['days_used']}/{MAX_RELEASE_DAYS} engineer-days"
     )
     print()
-    print("RANKING")
-    print("-" * 76)
+    print("CURRENT BACKLOG RANKING")
+    print("-" * 78)
 
-    for index, row in enumerate(plan["ranking"], start=1):
-        prediction = row["prediction"]
+    for index, row in enumerate(ranking, start=1):
+        probability = value_by_id[row["id"]]
+        matched = evidence[row["id"]]
         print(
-            f"{index:>2}. {row['id']} | {row['title']:<28} "
-            f"score={row['score']:.3f} | "
-            f"AI={prediction['label']} "
-            f"(p_high={prediction['p_high']:.3f}, "
-            f"conf={prediction['confidence']:.3f}) | "
-            f"effort={row['effort']}"
+            f"{index:>2}. {row['id']} | {row['title']:<28} | "
+            f"P(ship_next)={probability:.3f} | "
+            f"feedback={matched['feedback_mentions_90d']:<3} | "
+            f"days={row['engineering_days']}"
         )
 
+    importance = feature_importance(
+        model,
+        MODEL_FEATURES,
+    )
+
+    payload = {
+        "mode": "AI_ASSISTED",
+        "budget": MAX_RELEASE_DAYS,
+        "budget_used": plan["days_used"],
+        "data": {
+            "feedback_rows": len(FEEDBACK),
+            "historical_rows": len(HISTORICAL),
+            "candidate_rows": len(CANDIDATES),
+            "audited_feedback_rows": audit["audited_count"],
+        },
+        "nlp": {
+            "method": "TF-IDF (1-2 grams) + cosine similarity",
+            "threshold": NLP_SIMILARITY_THRESHOLD,
+            "audited_accuracy": audit["accuracy"],
+        },
+        "model": {
+            "kind": MODEL_KIND,
+            "features": MODEL_FEATURES,
+            "benchmarks": model_benchmarks,
+            "training_fit": fit_metrics,
+            "feature_importance": importance,
+        },
+        "selected": [
+            {
+                "id": row["id"],
+                "title": row["title"],
+                "visual_feature": row["visual_feature"],
+                "engineering_days": row["engineering_days"],
+                "score": value_by_id[row["id"]],
+            }
+            for row in plan["selected"]
+        ],
+        "ranking": [
+            {
+                "id": row["id"],
+                "title": row["title"],
+                "description": row["description"],
+                "visual_feature": row["visual_feature"],
+                "engineering_days": row["engineering_days"],
+                "affected_mau": row["affected_mau"],
+                "support_tickets_90d": row["support_tickets_90d"],
+                "feedback_mentions_90d": row["feedback_mentions_90d"],
+                "mean_feedback_severity": round(
+                    row["mean_feedback_severity"],
+                    3,
+                ),
+                "ship_probability": round(
+                    value_by_id[row["id"]],
+                    5,
+                ),
+                "prerequisite": row.get("prerequisite", ""),
+                "feedback_examples": top_feedback_examples(
+                    matches,
+                    row["id"],
+                    limit=4,
+                ),
+            }
+            for row in ranking
+        ],
+    }
+
+    print("__AISE_PREVIEW__ " + json.dumps(payload, separators=(",", ":")))
     print()
-    print("SELECTED FOR RELEASE")
-    print("-" * 76)
-
-    for row in plan["selected"]:
-        print(
-            f"{row['id']} | {row['title']} | "
-            f"{row['moscow']} | effort={row['effort']}"
-        )
+    print(
+        "Now inspect the AI Evidence tab and the live product. "
+        "Then run a counterfactual or feature-ablation experiment."
+    )
 
 
 def main():
-    plan = build_release_plan()
-    print_release_summary(plan)
-
-    # The right-side React preview reads this marker and renders the selected
-    # requirements inside the Spotify-style interface.
-    print(
-        "__AISE_PREVIEW__ "
-        + json.dumps(preview_payload(plan), separators=(",", ":"))
-    )
-
-    print()
     if MODE == "BASELINE":
-        print("Next: inspect the NLP model, design your policy weights, implement the hybrid score, then set MODE = 'AI_ASSISTED'.")
+        baseline_mode()
+    elif MODE == "ANALYZE":
+        analyze_mode()
+    elif MODE == "AI_ASSISTED":
+        ai_assisted_mode()
     else:
-        print("Compare the visible release with the baseline, then Verify Requirements.")
-
-    return plan
+        raise ValueError(
+            "MODE must be 'BASELINE', 'ANALYZE', or 'AI_ASSISTED'."
+        )
 
 
 if __name__ == "__main__":
