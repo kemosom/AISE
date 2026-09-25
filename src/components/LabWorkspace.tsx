@@ -7,6 +7,7 @@ import {
   Code,
   ListChecks,
   BookOpen,
+  RotateCcw,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
@@ -261,6 +262,37 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     setFiles(updated);
     setActiveFileIndex(0);
     writeLocal('files', updated);
+  };
+
+
+  const handleResetStarterCode = async () => {
+    if (!manifest) return;
+
+    const confirmed = window.confirm(
+      'Reset all code files in this lab to the latest starter version? Your current code edits will be replaced. Your report will not be changed.'
+    );
+
+    if (!confirmed) return;
+
+    const freshFiles = manifest.starterFiles.map((file) => ({ ...file }));
+    setFiles(freshFiles);
+    setActiveFileIndex(0);
+    setExecResult(null);
+    setTestStats(null);
+    setCodeSaveStatus('Saving...');
+
+    try {
+      if (useLocalPersistence) {
+        await writeLocal('files', freshFiles);
+        await writeLocal('test-stats', null);
+        setCodeSaveStatus('Saved');
+      } else {
+        await apiClient.post(`/api/workspaces/${labId}`, { files: freshFiles });
+        setCodeSaveStatus('Saved');
+      }
+    } catch {
+      setCodeSaveStatus('Save failed');
+    }
   };
 
   // Run Code via Pyodide
@@ -559,6 +591,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         <div className="flex items-center gap-2">
           {viewMode === 'code' && (
             <>
+              <button
+                onClick={handleResetStarterCode}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 cursor-pointer"
+                title="Replace current code with the latest starter files"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Code
+              </button>
+
               <button
                 onClick={() => setIsTestHarnessOpen(!isTestHarnessOpen)}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded border cursor-pointer transition-colors ${
