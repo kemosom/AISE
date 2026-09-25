@@ -1,14 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Accessibility,
-  Activity,
   AudioLines,
   BarChart3,
   BrainCircuit,
   CheckCircle2,
   ChevronRight,
   Database,
-  Gauge,
   Heart,
   Home,
   Languages,
@@ -410,15 +408,15 @@ export const Lab02ProductPreviewPanel: React.FC<Lab02ProductPreviewPanelProps> =
     <div className="h-full flex flex-col bg-slate-950">
       <div className="h-10 shrink-0 border-b border-slate-800 bg-slate-900 px-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
-          {[
-            ['product', 'Live Product', Music2],
-            ['evidence', 'Data & NLP', Database],
-            ['model', 'ML Model', BrainCircuit],
-            ['console', 'Console', Terminal],
-          ].map(([id, label, Icon]) => (
+          {([
+            { id: 'product' as const, label: 'Live Product', Icon: Music2 },
+            { id: 'evidence' as const, label: 'Data & NLP', Icon: Database },
+            { id: 'model' as const, label: 'ML Model', Icon: BrainCircuit },
+            { id: 'console' as const, label: 'Console', Icon: Terminal },
+          ]).map(({ id, label, Icon }) => (
             <button
-              key={id as string}
-              onClick={() => setTab(id as typeof tab)}
+              key={id}
+              onClick={() => setTab(id)}
               className={`px-2 py-1.5 rounded text-[11px] font-semibold flex items-center gap-1.5 transition-colors ${
                 tab === id
                   ? 'bg-slate-800 text-white'
