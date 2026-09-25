@@ -1,0 +1,41 @@
+{
+  "title": "Lab 02 Report: AI-Assisted Software Requirements Prioritization",
+  "sections": [
+    {
+      "id": "decision",
+      "title": "1. Prioritization Decision Before Coding",
+      "required": true,
+      "placeholder": "Explain why user votes alone are insufficient for release planning. State how you expect historical NLP evidence, business value, strategic fit, effort, and accessibility impact to influence the decision."
+    },
+    {
+      "id": "baseline",
+      "title": "2. Vote-Only Baseline",
+      "required": true,
+      "placeholder": "Document the baseline ranking, selected requirements, budget usage, and the visible product features shown in the Spotify-style preview."
+    },
+    {
+      "id": "ai-method",
+      "title": "3. AI-Assisted Prioritization Method",
+      "required": true,
+      "placeholder": "Describe the supplied Multinomial Naive Bayes model, the meaning of p_high and confidence, and your implementation of the hybrid priority score."
+    },
+    {
+      "id": "comparison",
+      "title": "4. Release Comparison and Visual Evidence",
+      "required": true,
+      "placeholder": "Compare the baseline and AI-assisted release plans. Identify which visible interface features appeared or disappeared, report budget usage, and include supporting screenshots or execution evidence."
+    },
+    {
+      "id": "analysis",
+      "title": "5. Critical Analysis",
+      "required": true,
+      "placeholder": "Interpret the validation metrics and sensitivity experiment. Discuss historical-data bias, confidence, implementation cost, accessibility, explainability, and whether the AI model should have final authority."
+    },
+    {
+      "id": "conclusion",
+      "title": "6. Conclusion",
+      "required": true,
+      "placeholder": "Summarize what the experiment demonstrates about using AI to prioritize software requirements under realistic release constraints."
+    }
+  ]
+}

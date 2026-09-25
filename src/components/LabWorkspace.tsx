@@ -17,6 +17,7 @@ import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
+import { Lab02ProductPreviewPanel } from './Lab02ProductPreviewPanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -570,16 +571,29 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                 onAddCodeToReport={handleAddCodeSnapshotToReport}
               />
             </div>
-            <div className="w-[32%] min-w-[300px] max-w-[430px] shrink-0 h-full border-l border-slate-800">
-              <OutputConsolePanel
-                result={execResult}
-                isRunning={isRunningCode}
-                onClearConsole={() => setExecResult(null)}
-                onRestartRuntime={() => defaultCodeRunner.reset()}
-                onAddOutputToReport={handleAddOutputToReport}
-                onAddPlotToReport={handleAddPlotToReport}
-              />
-            </div>
+            {labId === 'lab02-requirement-prioritization' ? (
+              <div className="w-[46%] min-w-[440px] max-w-[720px] shrink-0 h-full border-l border-slate-800">
+                <Lab02ProductPreviewPanel
+                  result={execResult}
+                  isRunning={isRunningCode}
+                  onClearConsole={() => setExecResult(null)}
+                  onRestartRuntime={() => defaultCodeRunner.reset()}
+                  onAddOutputToReport={handleAddOutputToReport}
+                  onAddPlotToReport={handleAddPlotToReport}
+                />
+              </div>
+            ) : (
+              <div className="w-[32%] min-w-[300px] max-w-[430px] shrink-0 h-full border-l border-slate-800">
+                <OutputConsolePanel
+                  result={execResult}
+                  isRunning={isRunningCode}
+                  onClearConsole={() => setExecResult(null)}
+                  onRestartRuntime={() => defaultCodeRunner.reset()}
+                  onAddOutputToReport={handleAddOutputToReport}
+                  onAddPlotToReport={handleAddPlotToReport}
+                />
+              </div>
+            )}
           </div>
         )}
 

@@ -65,7 +65,7 @@ export default function App() {
       );
 
       const summaries: LabSummary[] = manifests.map((manifest, index) => {
-        const isUnlocked = manifest.labNumber === 1;
+        const isUnlocked = manifest.labNumber <= 2;
         const isSubmitted = localSubmissionStates[index];
 
         return {
