@@ -23,13 +23,25 @@ RELEASE_BUDGET = 9
 # Start with the transparent vote-only baseline.
 MODE = "BASELINE"
 
-# Restore these values before running Verify Requirements.
-AI_WEIGHT = 0.55
-BUSINESS_WEIGHT = 0.20
-STRATEGIC_WEIGHT = 0.15
-VOTE_WEIGHT = 0.10
-ACCESSIBILITY_BONUS = 0.05
-EFFORT_PENALTY = 0.04
+# STUDENT DECISION 1: design your release policy.
+#
+# Choose values that satisfy:
+#   0.30 <= AI_WEIGHT <= 0.60
+#   0.10 <= BUSINESS_WEIGHT <= 0.30
+#   0.10 <= STRATEGIC_WEIGHT <= 0.30
+#   0.05 <= VOTE_WEIGHT <= 0.25
+#   AI_WEIGHT + BUSINESS_WEIGHT + STRATEGIC_WEIGHT + VOTE_WEIGHT == 1.0
+#   0.00 <= ACCESSIBILITY_BONUS <= 0.10
+#   0.02 <= EFFORT_PENALTY <= 0.08
+#
+# There is no single accepted weighting. Your values must be technically valid
+# and justified in the report.
+AI_WEIGHT = None
+BUSINESS_WEIGHT = None
+STRATEGIC_WEIGHT = None
+VOTE_WEIGHT = None
+ACCESSIBILITY_BONUS = None
+EFFORT_PENALTY = None
 
 
 def clamp(value, lower=0.0, upper=1.0):
@@ -43,27 +55,65 @@ def baseline_priority_score(requirement):
     return clamp(requirement["user_votes"] / 100.0)
 
 
+def validate_policy():
+    """
+    Validate the policy chosen by the student before AI-assisted planning.
+    """
+    values = {
+        "AI_WEIGHT": AI_WEIGHT,
+        "BUSINESS_WEIGHT": BUSINESS_WEIGHT,
+        "STRATEGIC_WEIGHT": STRATEGIC_WEIGHT,
+        "VOTE_WEIGHT": VOTE_WEIGHT,
+        "ACCESSIBILITY_BONUS": ACCESSIBILITY_BONUS,
+        "EFFORT_PENALTY": EFFORT_PENALTY,
+    }
+
+    missing = [name for name, value in values.items() if value is None]
+    if missing:
+        raise ValueError(
+            "Design the AI-assisted release policy first. "
+            "Set these constants: " + ", ".join(missing)
+        )
+
+    core_total = (
+        AI_WEIGHT
+        + BUSINESS_WEIGHT
+        + STRATEGIC_WEIGHT
+        + VOTE_WEIGHT
+    )
+
+    if abs(core_total - 1.0) > 1e-9:
+        raise ValueError(
+            f"Core policy weights must sum to 1.0, not {core_total:.3f}."
+        )
+
+
 def ai_assisted_priority_score(requirement, prediction):
     """
-    TODO: Implement the AI-assisted release-priority score.
+    STUDENT DECISION 2: implement your hybrid priority score.
 
-    Required design:
+    Your score MUST use:
+      - prediction["p_high"]
+      - normalized business value
+      - normalized strategic fit
+      - normalized user demand
+      - an accessibility bonus
+      - an implementation-effort penalty
 
-        AI_WEIGHT          * prediction["p_high"]
-      + BUSINESS_WEIGHT    * (business_value / 10)
-      + STRATEGIC_WEIGHT   * (strategic_fit / 10)
-      + VOTE_WEIGHT        * min(user_votes / 100, 1)
-      + ACCESSIBILITY_BONUS if accessibility_impact is True
-      - EFFORT_PENALTY     * (effort - 1)
+    Use the policy constants you chose above.
 
-    Clamp the final result to [0.0, 1.0].
-
-    The placeholder deliberately returns the vote-only baseline so the
-    starter program runs before you implement the function.
+    The score must be clamped to [0.0, 1.0].
     """
 
-    # TODO: replace this placeholder with the hybrid AI-assisted score.
-    return baseline_priority_score(requirement)
+    # TODO:
+    # 1. Normalize business_value, strategic_fit, and user_votes.
+    # 2. Combine them with prediction["p_high"] using your chosen weights.
+    # 3. Add the accessibility bonus when applicable.
+    # 4. Penalize implementation effort.
+    # 5. Clamp and return the final score.
+    raise NotImplementedError(
+        "Implement ai_assisted_priority_score() using your chosen policy."
+    )
 
 
 def moscow_label(score):
@@ -89,6 +139,7 @@ def rank_requirements(mode=None):
         if selected_mode == "BASELINE":
             score = baseline_priority_score(requirement)
         elif selected_mode == "AI_ASSISTED":
+            validate_policy()
             score = ai_assisted_priority_score(requirement, prediction)
         else:
             raise ValueError(
@@ -243,7 +294,7 @@ def main():
 
     print()
     if MODE == "BASELINE":
-        print("Next: implement ai_assisted_priority_score(), then set MODE = 'AI_ASSISTED'.")
+        print("Next: inspect the NLP model, design your policy weights, implement the hybrid score, then set MODE = 'AI_ASSISTED'.")
     else:
         print("Compare the visible release with the baseline, then Verify Requirements.")
 
