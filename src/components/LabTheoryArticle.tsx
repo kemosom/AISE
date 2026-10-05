@@ -105,6 +105,7 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   // Sticky Notes state
   const [notes, setNotes] = useState<StickyNoteItem[]>([]);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [annotationsHydrated, setAnnotationsHydrated] = useState(false);
 
   // UI status
   const [isExportingDocx, setIsExportingDocx] = useState(false);
@@ -116,35 +117,48 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load saved annotations for this lab
+  // Load saved annotations for this lab before any persistence effect runs.
+  // Without this hydration guard, the initial empty React state can briefly
+  // overwrite saved notes/strokes during a browser refresh.
   useEffect(() => {
+    setAnnotationsHydrated(false);
+
     try {
       const savedStrokes = localStorage.getItem(`lab_strokes_${manifest.id}`);
-      if (savedStrokes) setStrokes(JSON.parse(savedStrokes));
-
       const savedNotes = localStorage.getItem(`lab_notes_${manifest.id}`);
-      if (savedNotes) setNotes(JSON.parse(savedNotes));
+
+      setStrokes(savedStrokes ? JSON.parse(savedStrokes) : []);
+      setNotes(savedNotes ? JSON.parse(savedNotes) : []);
+      setUndoneStrokes([]);
+      setEditingNoteId(null);
     } catch {
-      // ignore
+      setStrokes([]);
+      setNotes([]);
+    } finally {
+      setAnnotationsHydrated(true);
     }
   }, [manifest.id]);
 
-  // Persist strokes & notes
+  // Persist strokes & notes only after the saved state has been hydrated.
   useEffect(() => {
+    if (!annotationsHydrated) return;
+
     try {
       localStorage.setItem(`lab_strokes_${manifest.id}`, JSON.stringify(strokes));
     } catch {
       // ignore
     }
-  }, [strokes, manifest.id]);
+  }, [strokes, manifest.id, annotationsHydrated]);
 
   useEffect(() => {
+    if (!annotationsHydrated) return;
+
     try {
       localStorage.setItem(`lab_notes_${manifest.id}`, JSON.stringify(notes));
     } catch {
       // ignore
     }
-  }, [notes, manifest.id]);
+  }, [notes, manifest.id, annotationsHydrated]);
 
   // Scroll Progress listener
   useEffect(() => {
