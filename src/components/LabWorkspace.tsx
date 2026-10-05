@@ -130,6 +130,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           id: templateSection.id,
           title: templateSection.title,
           content: existing?.content || '',
+          codeSnapshots: existing?.codeSnapshots || [],
+          images: existing?.images || [],
         };
       }),
     };
