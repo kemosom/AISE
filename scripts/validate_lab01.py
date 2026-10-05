@@ -48,7 +48,9 @@ def validate_model_contract() -> None:
 
 
 def validate_behavioral_engine() -> None:
-    bp = helpers.BProgram()
+    bp = helpers.BProgram(
+        terminal_events={"DEPLOY", "HUMAN_REVIEW", "BLOCK_RELEASE"}
+    )
 
     def requester():
         yield {"request": ["DEPLOY"], "waitFor": [], "block": []}
