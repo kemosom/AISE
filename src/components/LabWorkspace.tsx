@@ -46,7 +46,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Keep the student workflow explicit: theory, steps, code, and report.
-  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>('theory');
+  // Session persistence prevents a browser refresh from throwing the student
+  // out of the page they were actively using.
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>(() => {
+    if (typeof window === 'undefined') return 'theory';
+    const saved = window.sessionStorage.getItem(`aise:${labId}:view-mode`);
+    return saved === 'steps' || saved === 'code' || saved === 'report'
+      ? saved
+      : 'theory';
+  });
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
@@ -131,6 +139,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     loadLabWorkspace();
   }, [labId]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.setItem(`aise:${labId}:view-mode`, viewMode);
+  }, [labId, viewMode]);
+
   const loadLabWorkspace = async () => {
     setLoading(true);
     setError(null);
@@ -162,13 +175,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         const [
           savedFiles,
           savedReport,
-          savedSubmission,
           savedTestStats,
           savedSteps,
         ] = await Promise.all([
           readLocal<EditorFile[]>('files'),
           readLocal<ReportState>('report'),
-          readLocal<any>('submission'),
           readLocal<{ passed: number; total: number }>('test-stats'),
           readLocal<string[]>('steps'),
         ]);
