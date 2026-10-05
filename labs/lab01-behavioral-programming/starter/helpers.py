@@ -19,10 +19,11 @@ def _as_list(value: Any) -> List[str]:
 
 
 class BProgram:
-    def __init__(self):
+    def __init__(self, terminal_events=None):
         self.threads: List[Generator] = []
         self.history: List[str] = []
         self.termination_reason: str | None = None
+        self.terminal_events: Set[str] = set(terminal_events or [])
 
     def add_bthread(self, generator_func):
         """Register a generator function as a behavioral thread."""
@@ -91,6 +92,13 @@ class BProgram:
             step += 1
 
             print(f"[STEP {step:02d}] {selected_event}")
+
+            # Some BP applications use terminal events to represent a
+            # completed one-shot decision. Once selected, no later b-thread
+            # request may produce a contradictory second decision.
+            if selected_event in self.terminal_events:
+                self.termination_reason = "terminal_event"
+                break
 
             new_syncs: List[Dict[str, Any]] = []
             new_active: List[Generator] = []
