@@ -143,7 +143,9 @@ def build_release_program(change, prediction, enable_guardrail=None):
     if enable_guardrail is None:
         enable_guardrail = ENABLE_GUARDRAIL
 
-    bp = BProgram()
+    bp = BProgram(
+        terminal_events={DEPLOY, HUMAN_REVIEW, BLOCK_RELEASE}
+    )
 
     bp.add_bthread(lambda: ai_recommendation(change, prediction))
 

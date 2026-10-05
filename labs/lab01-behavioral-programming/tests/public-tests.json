@@ -17,28 +17,28 @@
     "id": "test-security-block",
     "name": "Security Finding Blocks Deployment",
     "description": "A critical security finding must override a low-risk AI deployment recommendation.",
-    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1042']\nprediction = main.predict_risk(change)\nresult = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert result, 'Guarded workflow produced no decision'\nassert result[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {result[0]}'",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1042']\nprediction = main.predict_risk(change)\nresult = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert result, 'Guarded workflow produced no decision'\nassert result[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {result[0]}'\nassert len(trace) == 1, f'Expected one terminal release decision, got trace {trace}'",
     "weight": 20
   },
   {
     "id": "test-failed-tests-block",
     "name": "Failed Tests Block Deployment",
     "description": "Failed CI tests must block release even when the AI predicts low defect risk.",
-    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1057']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1057 should be low risk according to the supplied model'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {trace[0]}'",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1057']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1057 should be low risk according to the supplied model'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.BLOCK_RELEASE, f'Expected BLOCK_RELEASE, got {trace[0]}'\nassert len(trace) == 1, f'Expected one terminal release decision, got trace {trace}'",
     "weight": 20
   },
   {
     "id": "test-low-confidence-review",
     "name": "Low AI Confidence Requires Human Review",
     "description": "A boundary prediction below the accepted confidence threshold must not auto-deploy.",
-    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1093']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1093 should remain a LOW-risk prediction'\nassert prediction['confidence'] < main.MIN_AI_CONFIDENCE, 'PR-1093 should exercise the low-confidence policy'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.HUMAN_REVIEW, f'Expected HUMAN_REVIEW, got {trace[0]}'",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1093']\nprediction = main.predict_risk(change)\nassert prediction['risk_label'] == 'LOW', 'PR-1093 should remain a LOW-risk prediction'\nassert prediction['confidence'] < main.MIN_AI_CONFIDENCE, 'PR-1093 should exercise the low-confidence policy'\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert trace[0] == main.HUMAN_REVIEW, f'Expected HUMAN_REVIEW, got {trace[0]}'\nassert len(trace) == 1, f'Expected one terminal release decision, got trace {trace}'",
     "weight": 15
   },
   {
     "id": "test-safe-change-deploys",
     "name": "Safe Change Can Still Deploy",
     "description": "The guardrail must not block a low-risk change that satisfies release requirements.",
-    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1001']\nprediction = main.predict_risk(change)\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert prediction['risk_label'] == 'LOW', 'PR-1001 should be a LOW-risk AI prediction'\nassert trace[0] == main.DEPLOY, f'Expected DEPLOY for the safe case, got {trace[0]}'",
+    "testCode": "import main\n\nchange = main.PULL_REQUESTS['PR-1001']\nprediction = main.predict_risk(change)\ntrace = main.build_release_program(change, prediction, enable_guardrail=True).run(max_steps=5)\nassert prediction['risk_label'] == 'LOW', 'PR-1001 should be a LOW-risk AI prediction'\nassert trace[0] == main.DEPLOY, f'Expected DEPLOY for the safe case, got {trace[0]}'\nassert len(trace) == 1, f'Expected one terminal release decision, got trace {trace}'",
     "weight": 15
   }
 ]
