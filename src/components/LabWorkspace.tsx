@@ -375,23 +375,22 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     } as FeedbackMatchPrediction;
   };
 
-  // Debounced Save Report
+  // Save browser-local reports immediately. The authenticated/server path
+  // stays debounced, but open-access students should not lose the latest text
+  // if they refresh or close the tab immediately after typing.
   const handleUpdateReportState = (newReport: ReportState) => {
     setReportState(newReport);
     setReportSaveStatus('Saving...');
 
+    if (useLocalPersistence) {
+      void writeLocal('report', newReport)
+        .then(() => setReportSaveStatus('Saved in this browser'))
+        .catch(() => setReportSaveStatus('Save failed'));
+      return;
+    }
+
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
-      if (useLocalPersistence) {
-        try {
-          await writeLocal('report', newReport);
-          setReportSaveStatus('Saved in this browser');
-        } catch {
-          setReportSaveStatus('Save failed');
-        }
-        return;
-      }
-
       try {
         await apiClient.post(`/api/reports/${labId}`, {
           title: newReport.title,
