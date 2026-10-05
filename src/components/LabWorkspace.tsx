@@ -46,7 +46,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Keep the student workflow explicit: theory, steps, code, and report.
-  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>('theory');
+  // Session persistence prevents a browser refresh from throwing the student
+  // out of the page they were actively using.
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>(() => {
+    if (typeof window === 'undefined') return 'theory';
+    const saved = window.sessionStorage.getItem(`aise:${labId}:view-mode`);
+    return saved === 'steps' || saved === 'code' || saved === 'report'
+      ? saved
+      : 'theory';
+  });
 
   // Code files
   const [files, setFiles] = useState<EditorFile[]>([]);
@@ -122,6 +130,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           id: templateSection.id,
           title: templateSection.title,
           content: existing?.content || '',
+          codeSnapshots: existing?.codeSnapshots || [],
+          images: existing?.images || [],
         };
       }),
     };
@@ -130,6 +140,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   useEffect(() => {
     loadLabWorkspace();
   }, [labId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.sessionStorage.setItem(`aise:${labId}:view-mode`, viewMode);
+  }, [labId, viewMode]);
 
   const loadLabWorkspace = async () => {
     setLoading(true);
@@ -162,13 +177,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         const [
           savedFiles,
           savedReport,
-          savedSubmission,
           savedTestStats,
           savedSteps,
         ] = await Promise.all([
           readLocal<EditorFile[]>('files'),
           readLocal<ReportState>('report'),
-          readLocal<any>('submission'),
           readLocal<{ passed: number; total: number }>('test-stats'),
           readLocal<string[]>('steps'),
         ]);
@@ -364,23 +377,22 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     } as FeedbackMatchPrediction;
   };
 
-  // Debounced Save Report
+  // Save browser-local reports immediately. The authenticated/server path
+  // stays debounced, but open-access students should not lose the latest text
+  // if they refresh or close the tab immediately after typing.
   const handleUpdateReportState = (newReport: ReportState) => {
     setReportState(newReport);
     setReportSaveStatus('Saving...');
 
+    if (useLocalPersistence) {
+      void writeLocal('report', newReport)
+        .then(() => setReportSaveStatus('Saved in this browser'))
+        .catch(() => setReportSaveStatus('Save failed'));
+      return;
+    }
+
     if (reportSaveTimeoutRef.current) clearTimeout(reportSaveTimeoutRef.current);
     reportSaveTimeoutRef.current = setTimeout(async () => {
-      if (useLocalPersistence) {
-        try {
-          await writeLocal('report', newReport);
-          setReportSaveStatus('Saved in this browser');
-        } catch {
-          setReportSaveStatus('Save failed');
-        }
-        return;
-      }
-
       try {
         await apiClient.post(`/api/reports/${labId}`, {
           title: newReport.title,

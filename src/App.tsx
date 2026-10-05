@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import type { AuthUserPublic } from '../lib/auth/types';
 import { apiClient } from './lib/api-client';
 import { LabRegistry } from '../labs/registry';
-import { getBrowserValue } from './lib/browser-persistence';
 import { Header } from './components/Header';
 import { StudentDashboard, type LabSummary } from './components/StudentDashboard';
 import { LecturerDashboard } from './components/LecturerDashboard';
@@ -25,8 +24,15 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<
     'dashboard' | 'lab' | 'students' | 'submissions' | 'inspect' | 'instructor'
-  >('dashboard');
-  const [activeLabId, setActiveLabId] = useState<string | null>(null);
+  >(() => {
+    if (typeof window === 'undefined') return 'dashboard';
+    const saved = window.sessionStorage.getItem('aise:active-view');
+    return saved === 'lab' ? 'lab' : 'dashboard';
+  });
+  const [activeLabId, setActiveLabId] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return window.sessionStorage.getItem('aise:active-lab');
+  });
   const [isInstructorPreview, setIsInstructorPreview] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState<any | null>(null);
   const [labs, setLabs] = useState<LabSummary[]>([]);
@@ -45,6 +51,21 @@ export default function App() {
     fetchLabs().finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (activeView === 'lab' && activeLabId) {
+      window.sessionStorage.setItem('aise:active-view', 'lab');
+      window.sessionStorage.setItem('aise:active-lab', activeLabId);
+      return;
+    }
+
+    if (activeView === 'dashboard') {
+      window.sessionStorage.removeItem('aise:active-view');
+      window.sessionStorage.removeItem('aise:active-lab');
+    }
+  }, [activeView, activeLabId]);
+
   const fetchLabs = async () => {
     setLabsLoading(true);
     setLabsError(null);
@@ -52,21 +73,8 @@ export default function App() {
     try {
       const manifests = LabRegistry.getAllLabs();
 
-      const localSubmissionStates = await Promise.all(
-        manifests.map(async (manifest) => {
-          try {
-            return Boolean(
-              await getBrowserValue(`aise:${manifest.id}:submission`)
-            );
-          } catch {
-            return false;
-          }
-        })
-      );
-
-      const summaries: LabSummary[] = manifests.map((manifest, index) => {
+      const summaries: LabSummary[] = manifests.map((manifest) => {
         const isUnlocked = manifest.labNumber <= 2;
-        const isSubmitted = localSubmissionStates[index];
 
         return {
           id: manifest.id,
@@ -77,19 +85,15 @@ export default function App() {
           estimatedDuration: manifest.estimatedDuration,
           isUnlocked,
           isPublished: true,
-          status: isSubmitted
-            ? 'Submitted'
-            : isUnlocked
-            ? 'Available'
-            : 'Locked',
-          progressPercentage: isSubmitted ? 100 : 0,
-          completedTasks: isSubmitted ? manifest.tasks?.length || 0 : 0,
+          status: isUnlocked ? 'Available' : 'Locked',
+          progressPercentage: 0,
+          completedTasks: 0,
           totalTasks: manifest.tasks?.length || 0,
           tasks: (manifest.tasks || []).map((task) => ({
             ...task,
-            completed: isSubmitted,
+            completed: false,
           })),
-          isSubmitted,
+          isSubmitted: false,
           submittedAt: null,
           examMode: manifest.labNumber === 12,
         };

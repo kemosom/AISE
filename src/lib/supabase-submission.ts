@@ -3,7 +3,6 @@ import {
   getSupabaseBrowserClient,
   isSupabaseConfigured,
 } from '../../lib/supabase/client';
-import { setBrowserValue } from './browser-persistence';
 
 export interface LabSubmissionInput {
   labId: string;
@@ -88,23 +87,6 @@ export async function submitLabReportToSupabase(
     );
   }
 
-  const { data: existing, error: existingError } = await client
-    .from('submissions')
-    .select('id, submitted_at, report_docx_path, report_docx_name')
-    .eq('user_id', user.id)
-    .eq('lab_id', input.labId)
-    .maybeSingle();
-
-  if (existingError) {
-    throw new Error(existingError.message);
-  }
-
-  if (existing) {
-    throw new Error(
-      'This browser has already submitted this laboratory. Contact the lecturer if a replacement submission is required.'
-    );
-  }
-
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const studentCode = safePart(input.studentId) || 'student';
   const studentName = safePart(input.studentName) || 'student';
@@ -166,13 +148,6 @@ export async function submitLabReportToSupabase(
     storagePath: submission.report_docx_path,
     fileName: submission.report_docx_name,
   };
-
-  // Keep both keys because the dashboard currently reads the older key while
-  // the lab workspace uses the v2 namespace.
-  await Promise.all([
-    setBrowserValue(`aise:${input.labId}:submission`, receipt),
-    setBrowserValue(`aise:v2:${input.labId}:submission`, receipt),
-  ]);
 
   return receipt;
 }

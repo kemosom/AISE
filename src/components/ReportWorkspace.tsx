@@ -218,7 +218,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
     }
 
     const confirmed = window.confirm(
-      'Submit this report to the lecturer? The final Word document will be stored in Supabase and this browser will not be able to submit the same lab again.'
+      'Submit this report? Only one final submission is allowed per student ID for this laboratory.'
     );
 
     if (!confirmed) return;
