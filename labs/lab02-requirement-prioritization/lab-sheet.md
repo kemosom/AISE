@@ -97,13 +97,16 @@ FR-06 enable public AND collaborative on the same playlist, 2 days; L=5, P=5, E=
 Our total budget is 8 engineer-days. The stakeholder weights are
 L=0.50, P=0.30, E=0.20. Do not invent Spotify usage data or developer costs.
 
-Return:
-(1) a ranked list of all six requirement IDs, explicitly flagging infeasible IDs;
-(2) a recommended feasible release subset, total effort and reasoning;
-(3) for each API claim, its precise D1-D4 source and the relevant documented rule;
-(4) any unsupported assumption or uncertainty;
-(5) a short recommendation of which stakeholder should review the remaining
-    uncertainties.
+Return a single JSON object with exactly these keys:
+"ranked_ids": all six requirement IDs in your preferred order;
+"infeasible_ids": IDs that violate API requirements, with reasons;
+"release_ids": your feasible recommended subset of IDs;
+"total_engineer_days": total effort for the selected subset;
+"evidence": short API claims with source IDs D1-D4 and their URLs;
+"uncertainties": claims that cannot be supported from those documents;
+"recommended_reviewer": who should validate the most important uncertainty.
+Use JSON arrays and objects, not Markdown prose. Explain key decisions inside
+the JSON values. If you cannot inspect a source, explicitly mark it unverified.
 Do not assume that being ranked highly makes an invalid requirement shippable.
 ```
 
