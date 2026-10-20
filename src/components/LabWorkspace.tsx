@@ -18,10 +18,6 @@ import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
-import {
-  Lab02ProductPreviewPanel,
-  type FeedbackMatchPrediction,
-} from './Lab02ProductPreviewPanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -82,7 +78,9 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // workspace in this browser so one learner can never overwrite another
   // learner's code/report through the synthetic "open-student" account.
   const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
-  const localKey = (kind: string) => `aise:v2:${labId}:${kind}`;
+  // A versioned Lab 02 store avoids restoring files from its retired ML activity.
+  const localKey = (kind: string) =>
+    `aise:${labId === 'lab02-requirement-prioritization' ? 'v3' : 'v2'}:${labId}:${kind}`;
 
   const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
@@ -161,7 +159,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           throw new Error('Laboratory module not found.');
         }
 
-        if (loadedManifest.labNumber > 2) {
+        if (loadedManifest.labNumber > 1) {
           throw new Error('This laboratory is not released yet.');
         }
 
@@ -336,46 +334,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
     }
   };
 
-
-  const handleAnalyzeLab02Requirement = async (
-    text: string
-  ): Promise<FeedbackMatchPrediction> => {
-    if (isRunningCode) {
-      throw new Error('Wait for the current Python execution to finish.');
-    }
-
-    const pythonText = JSON.stringify(text);
-    const snippet = [
-      'import json',
-      'import main',
-      `text = ${pythonText}`,
-      'matches = main.MATCHER.match_single(text)',
-      'print("__AISE_NLP__ " + json.dumps(matches, separators=(",", ":")))',
-    ].join('\n');
-
-    const analysisResult = await defaultCodeRunner.run(snippet, files);
-
-    if (analysisResult.exitCode !== 0 || analysisResult.error) {
-      throw new Error(
-        analysisResult.error ||
-          analysisResult.stderr ||
-          'The TF-IDF matcher could not analyse this feedback.'
-      );
-    }
-
-    const marker = '__AISE_NLP__ ';
-    const line = analysisResult.stdout
-      .split('\n')
-      .find((item) => item.startsWith(marker));
-
-    if (!line) {
-      throw new Error('The NLP pipeline did not return a matching payload.');
-    }
-
-    return {
-      matches: JSON.parse(line.slice(marker.length)),
-    } as FeedbackMatchPrediction;
-  };
 
   // Save browser-local reports immediately. The authenticated/server path
   // stays debounced, but open-access students should not lose the latest text
@@ -682,30 +640,16 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
                 onAddCodeToReport={handleAddCodeSnapshotToReport}
               />
             </div>
-            {labId === 'lab02-requirement-prioritization' ? (
-              <div className="w-[52%] min-w-[520px] max-w-[920px] shrink-0 h-full border-l border-slate-800">
-                <Lab02ProductPreviewPanel
-                  result={execResult}
-                  isRunning={isRunningCode}
-                  onClearConsole={() => setExecResult(null)}
-                  onRestartRuntime={() => defaultCodeRunner.reset()}
-                  onAddOutputToReport={handleAddOutputToReport}
-                  onAddPlotToReport={handleAddPlotToReport}
-                  onAnalyzeRequirement={handleAnalyzeLab02Requirement}
-                />
-              </div>
-            ) : (
-              <div className="w-[32%] min-w-[300px] max-w-[430px] shrink-0 h-full border-l border-slate-800">
-                <OutputConsolePanel
-                  result={execResult}
-                  isRunning={isRunningCode}
-                  onClearConsole={() => setExecResult(null)}
-                  onRestartRuntime={() => defaultCodeRunner.reset()}
-                  onAddOutputToReport={handleAddOutputToReport}
-                  onAddPlotToReport={handleAddPlotToReport}
-                />
-              </div>
-            )}
+            <div className="w-[36%] min-w-[310px] max-w-[470px] shrink-0 h-full border-l border-slate-800">
+              <OutputConsolePanel
+                result={execResult}
+                isRunning={isRunningCode}
+                onClearConsole={() => setExecResult(null)}
+                onRestartRuntime={() => defaultCodeRunner.reset()}
+                onAddOutputToReport={handleAddOutputToReport}
+                onAddPlotToReport={handleAddPlotToReport}
+              />
+            </div>
           </div>
         )}
 
