@@ -74,7 +74,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        const isUnlocked = manifest.labNumber <= 2;
+        // Only Lab 01 is released. Lab 02 remains visible but locked during revision.
+        const isUnlocked = manifest.labNumber === 1;
 
         return {
           id: manifest.id,
@@ -173,6 +174,8 @@ export default function App() {
   };
 
   const handleSelectLab = (labId: string) => {
+    // Also enforce the lock in navigation, not just on the dashboard card.
+    if (!labs.some((lab) => lab.id === labId && lab.isUnlocked)) return;
     setActiveLabId(labId);
     setIsInstructorPreview(false);
     setActiveView('lab');
@@ -203,6 +206,10 @@ export default function App() {
   }
 
   const isStudent = user.role?.toLowerCase() === 'student';
+  // Guard restored browser sessions that may still point at a now-locked lab.
+  const canOpenActiveLab = isInstructorPreview || labs.some(
+    (lab) => lab.id === activeLabId && lab.isUnlocked
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900">
@@ -236,7 +243,7 @@ export default function App() {
           />
         )}
         {/* VIEW: LAB WORKSPACE (STUDENT OR PREVIEW) */}
-        {activeView === 'lab' && activeLabId && (
+        {activeView === 'lab' && activeLabId && canOpenActiveLab && (
           <LabWorkspace
             labId={activeLabId}
             user={user}
@@ -248,6 +255,26 @@ export default function App() {
             }}
             isInstructorPreview={isInstructorPreview}
           />
+        )}
+
+        {activeView === 'lab' && activeLabId && !canOpenActiveLab && (
+          <section className="mx-auto w-full max-w-xl p-8 text-center">
+            <h2 className="text-xl font-semibold text-slate-800">Lab temporarily locked</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              This laboratory is being revised and is not yet available to students.
+            </p>
+            <button
+              type="button"
+              className="mt-5 rounded bg-slate-900 px-4 py-2 text-sm text-white"
+              onClick={() => {
+                setActiveLabId(null);
+                setActiveView('dashboard');
+                setIsInstructorPreview(false);
+              }}
+            >
+              Return to laboratories
+            </button>
+          </section>
         )}
 
         {/* VIEW: LECTURER SUBMISSIONS LIST */}
