@@ -77,7 +77,7 @@ client for Spotify's playlist Web API. Our authoritative source is:
 D1 https://developer.spotify.com/documentation/web-api/concepts/playlists
 D2 https://developer.spotify.com/documentation/web-api/reference/change-playlist-details
 D3 https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist
-D4 https://developer.spotify.com/documentation/web-api/reference/remove-playlist-items
+D4 https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist
 
 Real documented constraints to verify:
 - Spotify playlist public=true and collaborative=true cannot coexist.
