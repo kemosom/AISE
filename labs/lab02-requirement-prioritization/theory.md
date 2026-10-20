@@ -19,7 +19,7 @@ Open these *public, official* references:
 - **D1: [Spotify Playlists, including public/private/collaborative status and snapshots](https://developer.spotify.com/documentation/web-api/concepts/playlists)**
 - **D2: [Change Playlist Details](https://developer.spotify.com/documentation/web-api/reference/change-playlist-details)**
 - **D3: [Add Items to Playlist](https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist)**
-- **D4: [Remove Playlist Items](https://developer.spotify.com/documentation/web-api/reference/remove-playlist-items)**
+- **D4: [Remove Playlist Items](https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist)**
 
 ### What D1 actually says
 
