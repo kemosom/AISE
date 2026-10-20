@@ -12,7 +12,7 @@ model are required. Students use a live LLM separately and audit its output.
 # D1 https://developer.spotify.com/documentation/web-api/concepts/playlists
 # D2 https://developer.spotify.com/documentation/web-api/reference/change-playlist-details
 # D3 https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist
-# D4 https://developer.spotify.com/documentation/web-api/reference/remove-playlist-items
+# D4 https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist
 
 BUDGET_DAYS = 8
 
