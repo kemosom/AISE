@@ -29,10 +29,10 @@ Write down why that is a software engineering defect.
 
 Locate:
 
-\`\`\`python
+```python
 def playlist_policy_ok(public, collaborative):
     return True  # TODO
-\`\`\`
+```
 
 Replace the placeholder with a Boolean expression that implements the D1 rule. Confirm that the release excludes **FR-06**.
 
@@ -51,13 +51,13 @@ Check these cases:
 
 The supplied stakeholder evaluations are scenario assumptions.
 
-Edit \`requirement_utility(row)\` so that it computes:
+Edit `requirement_utility(row)` so that it computes:
 
-\`\`\`text
+```text
 utility = 0.50 * listeners
         + 0.30 * product
         + 0.20 * engineering
-\`\`\`
+```
 
 Do not use the provided listener-only placeholder. For FR-01, the correct result is **3.70**.
 
@@ -71,7 +71,7 @@ Open the official documentation links **D1** and **D2** first, then copy the pro
 
 ### Prompt to copy into the AI assistant
 
-\`\`\`text
+```text
 Act as a software requirements engineer. We are building a hypothetical
 client for Spotify's playlist Web API. Our authoritative source is:
 D1 https://developer.spotify.com/documentation/web-api/concepts/playlists
@@ -105,7 +105,7 @@ Return:
 (5) a short recommendation of which stakeholder should review the remaining
     uncertainties.
 Do not assume that being ranked highly makes an invalid requirement shippable.
-\`\`\`
+```
 
 **No response is guaranteed to be correct.** If your model cannot access URLs, provide it with the short verified excerpts from the lab theory. Do not claim it independently retrieved the pages.
 
@@ -113,11 +113,11 @@ Record the exact AI model/tool used, the date, and its suggested subset in your 
 
 ## Step 6 (15 min): Audit the AI, not just its answer
 
-From the model's ranking, copy *only the ordered IDs* into the list at the top of \`main.py\`:
+From the model's ranking, copy *only the ordered IDs* into the list at the top of `main.py`:
 
-\`\`\`python
+```python
 AI_SUGGESTED_ORDER = ["FR-03", "FR-04", "FR-02", "FR-01", "FR-05", "FR-06"]
-\`\`\`
+```
 
 (The order above is an **illustration**, not a supplied AI answer.) Run Python.
 
@@ -127,9 +127,9 @@ Explain whether the LLM suggested FR-06 or otherwise overlooked a rule or depend
 
 ## Step 7 (15 min): Test one what-if scenario
 
-Temporarily set \`BUDGET_DAYS = 6\`, rerun, and record whether the chosen release changes.
+Temporarily set `BUDGET_DAYS = 6`, rerun, and record whether the chosen release changes.
 
-Restore \`BUDGET_DAYS = 8\` before testing. Click **Verify Requirements**. Fix any failed checks.
+Restore `BUDGET_DAYS = 8` before testing. Click **Verify Requirements**. Fix any failed checks.
 
 ## Step 8 (10 min): Submit the case-study report
 
