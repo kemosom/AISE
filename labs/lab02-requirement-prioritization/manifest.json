@@ -2,103 +2,100 @@
   "id": "lab02-requirement-prioritization",
   "labNumber": 2,
   "week": 3,
-  "title": "AI Techniques for Software Requirements Prioritization",
-  "shortDescription": "Work as a release engineer on a Spotify-style product using 958 customer-feedback records, 360 historical release decisions, TF-IDF NLP, supervised ML, dependencies, and a 75 engineer-day release budget.",
+  "title": "AI-Assisted Requirements Prioritization: Spotify Playlist Case Study",
+  "shortDescription": "Use real Spotify Web API documentation, stakeholder ratings, a live generative-AI recommendation, and automated Python policy checks to select a feasible playlist-feature release. No Spotify login required.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
-  "packages": [
-    "scikit-learn",
-    "numpy"
-  ],
+  "packages": [],
   "features": {
     "visualDesigner": false,
     "blockly": false,
     "functionPalette": false,
     "testRunner": true,
     "reportEditor": true,
-    "webPreview": true
+    "webPreview": false
   },
   "learningOutcomes": [
-    "Extract requirements evidence from unstructured customer feedback using TF-IDF and cosine similarity.",
-    "Evaluate and select a supervised ML model for requirements prioritization using cross-validated metrics.",
-    "Construct a consistent feature pipeline joining NLP-derived evidence with measurable product telemetry and engineering estimates.",
-    "Apply AI predictions to a dependency-aware release plan under a finite engineering budget and critically test the robustness of the recommendation."
+    "Extract traceable software requirements and hard constraints from official Spotify API documentation.",
+    "Use stakeholder utility analysis and a small engineering budget to prioritize a proposed software release.",
+    "Use a live generative AI assistant to propose and explain a requirements ranking, then audit its claims against authoritative documentation.",
+    "Implement and test a deterministic guardrail so invalid AI recommendations cannot enter a release plan."
   ],
   "courseAlignment": [
     {
       "clo": "CLO1",
       "plo": "PLO1",
       "contribution": "primary",
-      "evidence": "Students investigate real NLP and supervised ML techniques applied to requirements engineering and identify limitations in automated prioritization."
+      "evidence": "Students analyze official API requirements, sources, limitations, and LLM-generated suggestions."
     },
     {
       "clo": "CLO2",
       "plo": "PLO2",
       "contribution": "primary",
-      "evidence": "Students select an NLP threshold and supervised model, implement the evidence pipeline, and apply it to a constrained release-planning problem."
+      "evidence": "Students implement an API policy constraint, apply utility analysis, and justify a bounded release."
     },
     {
       "clo": "CLO3",
       "plo": "PLO7",
       "contribution": "primary",
-      "evidence": "Students interpret audited NLP accuracy, coverage, five-fold macro-F1, model feature importance, release probabilities, and counterfactual changes."
+      "evidence": "Students interpret ranked utilities, optimization outputs, budget sensitivity, and AI-versus-human disagreements."
     }
   ],
   "tasks": [
     {
       "id": "l2-t1",
-      "title": "Run the Operational Baseline",
-      "description": "Use support-ticket pressure and the 75-day constraint to generate a non-ML release. Inspect the live product and identify what the baseline ignores.",
+      "title": "Read the real Spotify specification",
+      "description": "Open the official Playlists concept and Change Playlist Details pages. Identify at least two API rules and cite their source links. The project is a hypothetical client, not Spotify itself.",
       "category": "analysis",
-      "action": "code"
+      "action": "theory"
     },
     {
       "id": "l2-t2",
-      "title": "Inspect the Raw Datasets",
-      "description": "Examine the current backlog, customer-feedback corpus, and historical release decisions. Identify which fields are observed, estimated, NLP-derived, or historical labels.",
+      "title": "Run a flawed human-only baseline",
+      "description": "Open Code and Run Python. Observe why a high-scoring but prohibited requirement can appear in the release.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t3",
-      "title": "Tune the NLP Matching Threshold",
-      "description": "Run ANALYZE mode, inspect audited TF-IDF/cosine matching accuracy versus coverage, and select a defensible threshold.",
-      "category": "analysis",
-      "action": "code"
-    },
-    {
-      "id": "l2-t4",
-      "title": "Compare Prioritization Models",
-      "description": "Compare Logistic Regression and Random Forest using five-fold macro-F1 and accuracy, then choose the model you will deploy.",
-      "category": "analysis",
-      "action": "code"
-    },
-    {
-      "id": "l2-t5",
-      "title": "Implement the Current Feature Pipeline",
-      "description": "Join NLP-derived feedback evidence with telemetry, support data, engineering estimates, dependencies, and risk fields using the same schema as historical releases.",
+      "title": "Implement the playlist policy",
+      "description": "Fix playlist_policy_ok(public, collaborative) using Spotify's documented public/collaborative rule.",
       "category": "code",
       "action": "code"
     },
     {
+      "id": "l2-t4",
+      "title": "Calculate weighted stakeholder utility",
+      "description": "Replace the listener-only score with the weighted sum across listeners, product, and engineering stakeholder ratings.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l2-t5",
+      "title": "Request a real AI recommendation",
+      "description": "Use the grounded prompt from the Lab Sheet with ChatGPT or another live LLM. Paste only the returned ranked ID list into AI_SUGGESTED_ORDER, then run Python.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
       "id": "l2-t6",
-      "title": "Generate the AI-Assisted Release",
-      "description": "Run the chosen model, inspect P(SHIPPED_NEXT), feature importance and matched customer evidence, then inspect the dependency-aware product release.",
+      "title": "Compare, challenge and revise",
+      "description": "Check AI suggestions against the official document and policy tests. Try a budget of 6 instead of 8 engineer-days, then restore 8.",
       "category": "analysis",
       "action": "code"
     },
     {
       "id": "l2-t7",
-      "title": "Run a Counterfactual or Feature Ablation",
-      "description": "Change one realistic input assumption or remove one feature, retrain/re-run, and explain whether the ranking or release changes.",
-      "category": "analysis",
-      "action": "code"
+      "title": "Verify the engineering requirements",
+      "description": "Click Verify Requirements. The checks must reject public+collaborative, calculate weighted utilities, and enforce budget and dependency constraints.",
+      "category": "test",
+      "action": "verify"
     },
     {
       "id": "l2-t8",
-      "title": "Verify and Defend the Release",
-      "description": "Run engineering verification, then submit a report that distinguishes AI evidence from the final release decision.",
+      "title": "Submit your case-study analysis",
+      "description": "Report the source evidence, human and AI decisions, selected release, test results, remaining uncertainties, and conclusion.",
       "category": "report",
       "action": "report"
     }
