@@ -1,545 +1,150 @@
-"""
-MAI5124 AI in Software Engineering
-Lab 02: Data-Driven AI for Software Requirements Prioritization
+"""MAI5124 Lab 02 | Spotify playlist requirements prioritization case study.
 
-This lab uses:
-- 958 synthetic customer-feedback records,
-- 360 synthetic historical release decisions,
-- 12 current candidate requirements,
-- TF-IDF + cosine similarity for feedback-to-requirement NLP matching,
-- Logistic Regression and Random Forest for supervised release prioritization,
-- a dependency-aware release optimizer with a 75 engineer-day budget.
+Only the documented API rules are factual Spotify claims. Candidate feature
+requirements, stakeholder ratings and development-day estimates are fictional
+classroom scenario data for a hypothetical Spotify-compatible interface.
 
-The datasets are realistic teaching data. They are NOT Spotify internal data.
+No Spotify credentials, API calls, third-party Python packages, or trained AI
+model are required. Students use a live LLM separately and audit its output.
 """
 
-import itertools
-import json
+# SOURCE DOCUMENTATION (accessed October 2026):
+# D1 https://developer.spotify.com/documentation/web-api/concepts/playlists
+# D2 https://developer.spotify.com/documentation/web-api/reference/change-playlist-details
+# D3 https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist
+# D4 https://developer.spotify.com/documentation/web-api/reference/remove-playlist-items
 
-from data_pipeline import (
-    FeedbackRequirementMatcher,
-    aggregate_feedback,
-    evaluate_audited_matches,
-    load_candidates,
-    load_feedback,
-    load_historical,
-    threshold_sweep,
-    top_feedback_examples,
-)
-from priority_model import (
-    DEFAULT_FEATURES,
-    benchmark_models,
-    feature_importance,
-    shipped_probability,
-    train_model,
-    training_fit_metrics,
-)
+BUDGET_DAYS = 8
 
+# Fictional stakeholder inputs, not Spotify survey results. Weights sum to 1.
+STAKEHOLDER_WEIGHTS = {"listeners": 0.50, "product": 0.30, "engineering": 0.20}
 
-# ---------------------------------------------------------------------------
-# STUDENT DECISIONS
-# ---------------------------------------------------------------------------
+# PASTE AN AI-PROPOSED ORDER HERE AFTER USING THE GROUNDED PROMPT.
+# Example: ["FR-03", "FR-01", "FR-06", "FR-04", "FR-02", "FR-05"]
+AI_SUGGESTED_ORDER = []
 
-# Start with BASELINE.
-# Then use ANALYZE to evaluate the NLP threshold and compare ML models.
-# Finally use AI_ASSISTED after completing the decisions and feature pipeline.
-MODE = "BASELINE"
-
-# STUDENT DECISION 1:
-# Choose this after inspecting the audited NLP threshold sweep.
-# Typical useful values are between 0.10 and 0.42, but do not guess.
-NLP_SIMILARITY_THRESHOLD = None
-
-# STUDENT DECISION 2:
-# Choose after comparing 5-fold macro-F1 and considering interpretability.
-# Allowed: "LOGISTIC_REGRESSION" or "RANDOM_FOREST"
-MODEL_KIND = None
-
-# You may later remove one or more features for an ablation experiment.
-MODEL_FEATURES = DEFAULT_FEATURES.copy()
-
-MAX_RELEASE_DAYS = 75
-
-# Optional what-if experiment.
-# Example:
-# COUNTERFACTUAL_OVERRIDES = {
-#     "REQ-304": {"engineering_days": 25}
-# }
-COUNTERFACTUAL_OVERRIDES = {}
+# Classroom scope: build a new interface to existing Spotify Web API features.
+# These are NOT Spotify's internal development priorities or workload estimates.
+REQUIREMENTS = [
+    {"id": "FR-01", "title": "Edit playlist title and description", "days": 2,
+     "ratings": {"listeners": 3, "product": 4, "engineering": 5},
+     "requires": [], "public": False, "collaborative": False, "source": "D2"},
+    {"id": "FR-02", "title": "Publish a playlist on its owner's profile", "days": 2,
+     "ratings": {"listeners": 4, "product": 5, "engineering": 4},
+     "requires": [], "public": True, "collaborative": False, "source": "D1"},
+    {"id": "FR-03", "title": "Enable private collaborative playlist editing", "days": 4,
+     "ratings": {"listeners": 5, "product": 4, "engineering": 3},
+     "requires": [], "public": False, "collaborative": True, "source": "D1"},
+    {"id": "FR-04", "title": "Add an item to an owned playlist", "days": 2,
+     "ratings": {"listeners": 5, "product": 4, "engineering": 5},
+     "requires": [], "public": False, "collaborative": False, "source": "D3"},
+    {"id": "FR-05", "title": "Remove an item with snapshot awareness", "days": 4,
+     "ratings": {"listeners": 3, "product": 3, "engineering": 4},
+     "requires": ["FR-04"], "public": False, "collaborative": False, "source": "D1/D4"},
+    {"id": "FR-06", "title": "Allow public AND collaborative status together", "days": 2,
+     "ratings": {"listeners": 5, "product": 5, "engineering": 5},
+     "requires": [], "public": True, "collaborative": True, "source": "D1"},
+]
 
 
-CANDIDATES = load_candidates()
-FEEDBACK = load_feedback()
-HISTORICAL = load_historical()
-MATCHER = FeedbackRequirementMatcher(CANDIDATES, FEEDBACK)
+def playlist_policy_ok(public, collaborative):
+    """STUDENT TASK 1: enforce Spotify's documented playlist-status rule.
 
-
-def apply_counterfactual_overrides(candidates):
-    rows = [dict(row) for row in candidates]
-
-    for row in rows:
-        updates = COUNTERFACTUAL_OVERRIDES.get(row["id"], {})
-        for field, value in updates.items():
-            if field not in row:
-                raise KeyError(
-                    f"Unknown field {field!r} for {row['id']}."
-                )
-            row[field] = value
-
-    return rows
-
-
-def baseline_release_value(requirement):
+    The current placeholder accepts invalid configurations. Replace it with
+    one Boolean expression. Source D1 says both attributes cannot be true.
     """
-    Transparent non-ML baseline:
-    prioritize support pressure, measured by support tickets in the last 90 days.
+    return True  # TODO: fix this rule, then run Verify Requirements
+
+
+def requirement_utility(row):
+    """STUDENT TASK 2: combine THREE stakeholder ratings with their weights.
+
+    The current placeholder only considers listeners. Use the supplied
+    STAKEHOLDER_WEIGHTS dictionary and row['ratings'] dictionary.
     """
-    return float(requirement["support_tickets_90d"])
+    return float(row["ratings"]["listeners"])  # TODO: weighted utility
 
 
-def validate_student_choices():
-    if NLP_SIMILARITY_THRESHOLD is None:
-        raise ValueError(
-            "Choose NLP_SIMILARITY_THRESHOLD after running MODE = 'ANALYZE'."
-        )
-
-    if not (0.08 <= NLP_SIMILARITY_THRESHOLD <= 0.50):
-        raise ValueError(
-            "NLP_SIMILARITY_THRESHOLD must be between 0.08 and 0.50."
-        )
-
-    if MODEL_KIND not in {
-        "LOGISTIC_REGRESSION",
-        "RANDOM_FOREST",
-    }:
-        raise ValueError(
-            "Choose MODEL_KIND after comparing the two models in ANALYZE mode."
-        )
-
-    if len(MODEL_FEATURES) < 6:
-        raise ValueError(
-            "Use at least six evidence features for the deployed model."
-        )
-
-    unknown = [
-        feature
-        for feature in MODEL_FEATURES
-        if feature not in DEFAULT_FEATURES
-    ]
-    if unknown:
-        raise ValueError(
-            "Unknown model feature(s): " + ", ".join(unknown)
-        )
+def feasible_release(selected, budget=BUDGET_DAYS):
+    """Hard constraints apply irrespective of what an LLM recommends."""
+    if sum(row["days"] for row in selected) > budget:
+        return False
+    ids = {row["id"] for row in selected}
+    for row in selected:
+        if not playlist_policy_ok(row["public"], row["collaborative"]):
+            return False
+        if not set(row["requires"]).issubset(ids):
+            return False
+    return True
 
 
-def build_current_feature_rows(candidates, feedback_evidence):
-    """
-    STUDENT TASK: construct the feature table for current requirements.
-
-    Historical release decisions use the columns in DEFAULT_FEATURES.
-    Your current requirements must be transformed into the SAME feature schema.
-
-    The first two features come from the NLP-matched customer feedback:
-        feedback_mentions_90d
-        mean_feedback_severity
-
-    The remaining fields come from current product telemetry and engineering
-    estimates in candidate_backlog.csv.
-
-    Return a list of dictionaries. Each row must include:
-        id, title, description, visual_feature, prerequisite,
-        every feature in DEFAULT_FEATURES
-
-    Do not invent scores such as business_value=9 or strategic_fit=8.
-    """
-
-    # TODO: implement the feature-engineering join.
-    #
-    # Hints:
-    #   evidence = feedback_evidence[requirement["id"]]
-    #   evidence["feedback_mentions_90d"]
-    #   evidence["mean_feedback_severity"]
-    #
-    # Copy measurable fields such as affected_mau, support_tickets_90d,
-    # engineering_days, dependency_count, premium_share, churn_risk_share,
-    # accessibility_or_compliance, incident_linked_count, prerequisite_ready.
-    raise NotImplementedError(
-        "Build the current feature table from NLP evidence + telemetry."
-    )
-
-
-def _dependency_valid(selected_ids, requirement):
-    prerequisite = requirement.get("prerequisite", "")
-    prerequisite_ready = int(requirement.get("prerequisite_ready", 0))
-
-    if not prerequisite:
-        return prerequisite_ready == 1
-
-    return prerequisite_ready == 1 or prerequisite in selected_ids
-
-
-def optimize_release(requirements, value_by_id, budget=MAX_RELEASE_DAYS):
-    """
-    Exhaustively search all 2^N subsets.
-
-    N=12 in this lab, so exhaustive search is small (4096 subsets) and makes
-    the release decision reproducible. A subset is valid when:
-    - total engineering days <= budget
-    - every unmet prerequisite is included in the same release
-    """
-    best = None
-
-    for mask in range(1 << len(requirements)):
-        selected = [
-            requirements[index]
-            for index in range(len(requirements))
-            if mask & (1 << index)
-        ]
-
-        total_days = sum(row["engineering_days"] for row in selected)
-        if total_days > budget:
+def select_release(budget=BUDGET_DAYS):
+    """Find the best feasible subset, enumerating 2^6 = 64 combinations."""
+    best = []
+    best_key = (-1.0, 0)
+    for mask in range(1 << len(REQUIREMENTS)):
+        selected = [row for i, row in enumerate(REQUIREMENTS) if mask & (1 << i)]
+        if not feasible_release(selected, budget):
             continue
-
-        selected_ids = {row["id"] for row in selected}
-
-        if any(
-            not _dependency_valid(selected_ids, row)
-            for row in selected
-        ):
-            continue
-
-        total_value = sum(
-            float(value_by_id[row["id"]])
-            for row in selected
-        )
-
-        candidate = {
-            "selected": selected,
-            "days_used": total_days,
-            "objective_value": total_value,
-        }
-
-        if best is None:
-            best = candidate
-            continue
-
-        if total_value > best["objective_value"]:
-            best = candidate
-        elif (
-            abs(total_value - best["objective_value"]) < 1e-12
-            and total_days < best["days_used"]
-        ):
-            best = candidate
-
-    return best or {
-        "selected": [],
-        "days_used": 0,
-        "objective_value": 0.0,
-    }
+        total_utility = sum(requirement_utility(row) for row in selected)
+        total_days = sum(row["days"] for row in selected)
+        candidate_key = (round(total_utility, 9), -total_days)
+        if candidate_key > best_key:
+            best, best_key = selected, candidate_key
+    return best
 
 
-def analyze_mode():
-    print("=" * 78)
-    print("LAB 02 | DATA + NLP + MODEL ANALYSIS")
-    print("=" * 78)
-    print(
-        f"Dataset: {len(FEEDBACK)} feedback records | "
-        f"{len(HISTORICAL)} historical release decisions | "
-        f"{len(CANDIDATES)} current requirements"
-    )
+def audit_ai_order(order):
+    """Check whether an LLM's ranked IDs contain unsupported feature requests.
 
-    print()
-    print("NLP THRESHOLD SWEEP")
-    print("-" * 78)
-
-    sweep = threshold_sweep(MATCHER)
-    for row in sweep:
-        print(
-            f"threshold={row['threshold']:.2f} | "
-            f"audited accuracy={row['accuracy']:.3f} | "
-            f"coverage={row['coverage']:.3f} | "
-            f"assigned={row['assigned_count']}"
-        )
-
-    print()
-    print("MODEL COMPARISON | 5-FOLD CROSS-VALIDATION")
-    print("-" * 78)
-
-    benchmark = benchmark_models(
-        HISTORICAL,
-        DEFAULT_FEATURES,
-    )
-
-    for kind, metrics in benchmark.items():
-        print(
-            f"{kind:<20} | "
-            f"macro-F1={metrics['macro_f1_mean']:.3f} "
-            f"(+/- {metrics['macro_f1_std']:.3f}) | "
-            f"accuracy={metrics['accuracy_mean']:.3f}"
-        )
-
-    payload = {
-        "mode": "ANALYZE",
-        "data": {
-            "feedback_rows": len(FEEDBACK),
-            "historical_rows": len(HISTORICAL),
-            "candidate_rows": len(CANDIDATES),
-        },
-        "threshold_sweep": sweep,
-        "benchmarks": benchmark,
-    }
-
-    print("__AISE_ANALYSIS__ " + json.dumps(payload, separators=(",", ":")))
-    print()
-    print(
-        "Next: choose an NLP threshold and model kind, then implement "
-        "build_current_feature_rows()."
-    )
+    This checks IDs and a documented hard rule, not the factual correctness
+    of every possible natural-language claim made by the LLM.
+    """
+    known = {row["id"]: row for row in REQUIREMENTS}
+    issues = []
+    seen = set()
+    for feature_id in order:
+        if feature_id in seen:
+            issues.append(f"Repeated requirement: {feature_id}")
+        seen.add(feature_id)
+        if feature_id not in known:
+            issues.append(f"Unknown requirement: {feature_id}")
+        else:
+            row = known[feature_id]
+            if not playlist_policy_ok(row["public"], row["collaborative"]):
+                issues.append(f"{feature_id} conflicts with D1: public and collaborative cannot both be true")
+    return issues
 
 
-def baseline_mode():
-    candidates = apply_counterfactual_overrides(CANDIDATES)
-
-    value_by_id = {
-        row["id"]: baseline_release_value(row)
-        for row in candidates
-    }
-
-    plan = optimize_release(
-        candidates,
-        value_by_id,
-        budget=MAX_RELEASE_DAYS,
-    )
-
-    ranking = sorted(
-        candidates,
-        key=lambda row: (
-            -value_by_id[row["id"]],
-            row["engineering_days"],
-            row["id"],
-        ),
-    )
-
-    print("=" * 78)
-    print("LAB 02 | SUPPORT-PRESSURE BASELINE")
-    print("=" * 78)
-    print(
-        f"Release budget: {plan['days_used']}/{MAX_RELEASE_DAYS} engineer-days"
-    )
-    print()
-    for index, row in enumerate(ranking, start=1):
-        print(
-            f"{index:>2}. {row['id']} | {row['title']:<28} | "
-            f"tickets={row['support_tickets_90d']:<4} | "
-            f"days={row['engineering_days']}"
-        )
-
-    payload = {
-        "mode": "BASELINE",
-        "budget": MAX_RELEASE_DAYS,
-        "budget_used": plan["days_used"],
-        "data": {
-            "feedback_rows": len(FEEDBACK),
-            "historical_rows": len(HISTORICAL),
-            "candidate_rows": len(CANDIDATES),
-        },
-        "selected": [
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "visual_feature": row["visual_feature"],
-                "engineering_days": row["engineering_days"],
-                "score": value_by_id[row["id"]],
-            }
-            for row in plan["selected"]
-        ],
-        "ranking": [
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "description": row["description"],
-                "engineering_days": row["engineering_days"],
-                "support_tickets_90d": row["support_tickets_90d"],
-                "affected_mau": row["affected_mau"],
-                "visual_feature": row["visual_feature"],
-                "baseline_value": value_by_id[row["id"]],
-            }
-            for row in ranking
-        ],
-    }
-
-    print("__AISE_PREVIEW__ " + json.dumps(payload, separators=(",", ":")))
-
-
-def ai_assisted_mode():
-    validate_student_choices()
-
-    candidates = apply_counterfactual_overrides(CANDIDATES)
-    matches = MATCHER.match_all(NLP_SIMILARITY_THRESHOLD)
-    audit = evaluate_audited_matches(matches)
-    evidence = aggregate_feedback(matches, candidates)
-
-    current_rows = build_current_feature_rows(
-        candidates,
-        evidence,
-    )
-
-    model_benchmarks = benchmark_models(
-        HISTORICAL,
-        MODEL_FEATURES,
-    )
-    model = train_model(
-        HISTORICAL,
-        MODEL_FEATURES,
-        MODEL_KIND,
-    )
-    probabilities = shipped_probability(
-        model,
-        current_rows,
-        MODEL_FEATURES,
-    )
-    fit_metrics = training_fit_metrics(
-        model,
-        HISTORICAL,
-        MODEL_FEATURES,
-    )
-
-    value_by_id = {
-        row["id"]: float(probability)
-        for row, probability in zip(current_rows, probabilities)
-    }
-
-    plan = optimize_release(
-        current_rows,
-        value_by_id,
-        budget=MAX_RELEASE_DAYS,
-    )
-
-    ranking = sorted(
-        current_rows,
-        key=lambda row: (
-            -value_by_id[row["id"]],
-            row["engineering_days"],
-            row["id"],
-        ),
-    )
-
-    print("=" * 78)
-    print("LAB 02 | AI-ASSISTED REQUIREMENTS PRIORITIZATION")
-    print("=" * 78)
-    print(
-        f"NLP threshold={NLP_SIMILARITY_THRESHOLD:.2f} | "
-        f"audited match accuracy={audit['accuracy']:.3f} "
-        f"on {audit['audited_count']} audited records"
-    )
-    print(
-        f"Model={MODEL_KIND} | "
-        f"5-fold macro-F1="
-        f"{model_benchmarks[MODEL_KIND]['macro_f1_mean']:.3f}"
-    )
-    print(
-        f"Release budget: {plan['days_used']}/{MAX_RELEASE_DAYS} engineer-days"
-    )
-    print()
-    print("CURRENT BACKLOG RANKING")
-    print("-" * 78)
-
-    for index, row in enumerate(ranking, start=1):
-        probability = value_by_id[row["id"]]
-        matched = evidence[row["id"]]
-        print(
-            f"{index:>2}. {row['id']} | {row['title']:<28} | "
-            f"P(ship_next)={probability:.3f} | "
-            f"feedback={matched['feedback_mentions_90d']:<3} | "
-            f"days={row['engineering_days']}"
-        )
-
-    importance = feature_importance(
-        model,
-        MODEL_FEATURES,
-    )
-
-    payload = {
-        "mode": "AI_ASSISTED",
-        "budget": MAX_RELEASE_DAYS,
-        "budget_used": plan["days_used"],
-        "data": {
-            "feedback_rows": len(FEEDBACK),
-            "historical_rows": len(HISTORICAL),
-            "candidate_rows": len(CANDIDATES),
-            "audited_feedback_rows": audit["audited_count"],
-        },
-        "nlp": {
-            "method": "TF-IDF (1-2 grams) + cosine similarity",
-            "threshold": NLP_SIMILARITY_THRESHOLD,
-            "audited_accuracy": audit["accuracy"],
-        },
-        "model": {
-            "kind": MODEL_KIND,
-            "features": MODEL_FEATURES,
-            "benchmarks": model_benchmarks,
-            "training_fit": fit_metrics,
-            "feature_importance": importance,
-        },
-        "selected": [
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "visual_feature": row["visual_feature"],
-                "engineering_days": row["engineering_days"],
-                "score": value_by_id[row["id"]],
-            }
-            for row in plan["selected"]
-        ],
-        "ranking": [
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "description": row["description"],
-                "visual_feature": row["visual_feature"],
-                "engineering_days": row["engineering_days"],
-                "affected_mau": row["affected_mau"],
-                "support_tickets_90d": row["support_tickets_90d"],
-                "feedback_mentions_90d": row["feedback_mentions_90d"],
-                "mean_feedback_severity": round(
-                    row["mean_feedback_severity"],
-                    3,
-                ),
-                "ship_probability": round(
-                    value_by_id[row["id"]],
-                    5,
-                ),
-                "prerequisite": row.get("prerequisite", ""),
-                "feedback_examples": top_feedback_examples(
-                    matches,
-                    row["id"],
-                    limit=4,
-                ),
-            }
-            for row in ranking
-        ],
-    }
-
-    print("__AISE_PREVIEW__ " + json.dumps(payload, separators=(",", ":")))
-    print()
-    print(
-        "Now inspect the AI Evidence tab and the live product. "
-        "Then run a counterfactual or feature-ablation experiment."
-    )
-
-
-def main():
-    if MODE == "BASELINE":
-        baseline_mode()
-    elif MODE == "ANALYZE":
-        analyze_mode()
-    elif MODE == "AI_ASSISTED":
-        ai_assisted_mode()
+def show_results():
+    print("LAB 02 | REAL SPOTIFY API RULES + CLASSROOM RELEASE DECISION")
+    print("Sources: D1 Spotify Playlists | D2 Change Details | D3 Add Items | D4 Remove Items")
+    print("Fictional classroom inputs: stakeholder ratings, development days and budget.")
+    print(f"Budget: {BUDGET_DAYS} engineer-days")
+    print("\nPRIORITY RANKING")
+    ranked = sorted(REQUIREMENTS, key=lambda r: -requirement_utility(r))
+    for index, row in enumerate(ranked, 1):
+        rule_ok = playlist_policy_ok(row["public"], row["collaborative"])
+        print(f"{index}. {row['id']} | utility={requirement_utility(row):.2f} | "
+              f"{row['days']} days | policy={'OK' if rule_ok else 'BLOCKED'} | {row['title']}")
+    selected = select_release()
+    chosen = [row["id"] for row in selected]
+    print("\nRELEASE SELECTION")
+    print("Included:", ", ".join(chosen) if chosen else "(none)")
+    print("Effort:", sum(row["days"] for row in selected), "/", BUDGET_DAYS, "engineer-days")
+    print("Total utility:", round(sum(requirement_utility(r) for r in selected), 2))
+    print("All hard constraints met:", feasible_release(selected))
+    print("\nAI REVIEW")
+    if AI_SUGGESTED_ORDER:
+        print("LLM ranking:", ", ".join(AI_SUGGESTED_ORDER))
+        issues = audit_ai_order(AI_SUGGESTED_ORDER)
+        print("Automated issues:", issues or "None found by these limited checks")
+        print("Compare this ranking with the verified release; explain differences in your report.")
     else:
-        raise ValueError(
-            "MODE must be 'BASELINE', 'ANALYZE', or 'AI_ASSISTED'."
-        )
+        print("No LLM proposal pasted yet. Use the prompt from the lab sheet.")
+    print("\nStudent edits: fix playlist_policy_ok(), implement requirement_utility(),")
+    print("then obtain an AI ranking, paste it, vary BUDGET_DAYS and interpret results.")
 
 
 if __name__ == "__main__":
-    main()
+    show_results()
