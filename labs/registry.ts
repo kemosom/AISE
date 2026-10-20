@@ -18,11 +18,6 @@ import lab02Metadata from './lab02-requirement-prioritization/manifest.json';
 import lab02Theory from './lab02-requirement-prioritization/theory.md?raw';
 import lab02LabSheet from './lab02-requirement-prioritization/lab-sheet.md?raw';
 import lab02MainPy from './lab02-requirement-prioritization/starter/main.py?raw';
-import lab02DataPipelinePy from './lab02-requirement-prioritization/starter/data_pipeline.py?raw';
-import lab02PriorityModelPy from './lab02-requirement-prioritization/starter/priority_model.py?raw';
-import lab02CandidateBacklogCsv from './lab02-requirement-prioritization/data/candidate_backlog.csv?raw';
-import lab02CustomerFeedbackCsv from './lab02-requirement-prioritization/data/customer_feedback.csv?raw';
-import lab02HistoricalReleasesCsv from './lab02-requirement-prioritization/data/historical_releases.csv?raw';
 import lab02Tests from './lab02-requirement-prioritization/tests/public-tests.json';
 import lab02ReportTemplate from './lab02-requirement-prioritization/report-template.json';
 
@@ -217,16 +212,11 @@ labRegistryMap.set('lab01-behavioral-programming', {
   instructionsMarkdown: `${lab01Theory}\n\n---\n\n${lab01LabSheet}`,
 });
 
-// Lab 02 - Content-driven requirements-prioritization module.
+// Lab 02 - Evidence-grounded Spotify playlist requirements case study.
 labRegistryMap.set('lab02-requirement-prioritization', {
   ...(lab02Metadata as any),
   starterFiles: [
     { name: 'main.py', language: 'python', content: lab02MainPy },
-    { name: 'data_pipeline.py', language: 'python', content: lab02DataPipelinePy },
-    { name: 'priority_model.py', language: 'python', content: lab02PriorityModelPy },
-    { name: 'candidate_backlog.csv', language: 'text', content: lab02CandidateBacklogCsv },
-    { name: 'customer_feedback.csv', language: 'text', content: lab02CustomerFeedbackCsv },
-    { name: 'historical_releases.csv', language: 'text', content: lab02HistoricalReleasesCsv },
   ],
   reportTemplate: lab02ReportTemplate as any,
   snippets: [],
