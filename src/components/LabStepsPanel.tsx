@@ -67,7 +67,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
         <div className="mb-6">
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-blue-900">
             <ListChecks className="w-4 h-4" />
-            Lab 01 workflow
+            Lab {String(manifest.labNumber).padStart(2, '0')} workflow
           </div>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
             Do these steps in order
