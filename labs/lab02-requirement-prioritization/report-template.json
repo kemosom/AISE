@@ -1,41 +1,41 @@
 {
-  "title": "Lab 02 Report: Data-Driven AI for Requirements Prioritization",
+  "title": "Lab 02 Report: AI-Assisted Spotify Playlist Requirements Prioritization",
   "sections": [
     {
-      "id": "decision",
-      "title": "1. Baseline Diagnosis",
+      "id": "source",
+      "title": "1. Spotify Source Evidence",
       "required": true,
-      "placeholder": "Document the support-pressure baseline, selected release, engineer-day usage, and one limitation you observed before using NLP or supervised ML."
+      "placeholder": "Document at least two actual playlist API rules, D1-D4 URLs, and which claims remain assumptions."
     },
     {
-      "id": "baseline",
-      "title": "2. NLP Evidence Extraction",
+      "id": "human",
+      "title": "2. Human Baseline and Corrected Utility",
       "required": true,
-      "placeholder": "Report the TF-IDF/cosine-similarity threshold you selected, audited matching accuracy, coverage, examples of correct/ambiguous matches, and why the threshold is defensible."
+      "placeholder": "Explain why the starter was incorrect. Show weighted utility, stakeholder weights, and the new ranking."
     },
     {
-      "id": "ai-method",
-      "title": "3. Model Selection and Feature Engineering",
+      "id": "ai",
+      "title": "3. Live AI Recommendation and Critical Audit",
       "required": true,
-      "placeholder": "Explain how raw telemetry and NLP-derived feedback were joined into the historical feature schema. Compare Logistic Regression and Random Forest using 5-fold macro-F1 and justify the model you deployed."
+      "placeholder": "Name the real AI tool/model and prompt date. Include its recommendation, cited evidence, errors or missing evidence, and human corrections."
     },
     {
-      "id": "comparison",
-      "title": "4. AI-Assisted Release and Product Impact",
+      "id": "release",
+      "title": "4. Verified Release Selection",
       "required": true,
-      "placeholder": "Present P(SHIPPED_NEXT) for the leading requirements, the dependency-aware 75-day release plan, visible changes in the live product, and verification evidence."
+      "placeholder": "Report selected IDs, total utility, engineer-days, dependencies, playlist-state policy, and tests."
     },
     {
-      "id": "analysis",
-      "title": "5. Counterfactual / Ablation Analysis",
+      "id": "counterfactual",
+      "title": "5. Budget Sensitivity and Stakeholder Review",
       "required": true,
-      "placeholder": "Change one realistic assumption or remove one model feature. Re-run the model and release plan. Explain which priorities changed, why, and what this says about robustness and historical bias."
+      "placeholder": "Compare the 8-day and 6-day release; describe one uncertainty and select a suitable stakeholder to validate it."
     },
     {
       "id": "conclusion",
-      "title": "6. Release Recommendation",
+      "title": "6. Conclusion",
       "required": true,
-      "placeholder": "State what you would ship and what additional evidence you would request before committing engineering resources. Distinguish model evidence from the final engineering decision."
+      "placeholder": "What should the hypothetical team implement first? Distinguish sourced API facts, scenario estimates, and AI recommendations."
     }
   ]
 }
