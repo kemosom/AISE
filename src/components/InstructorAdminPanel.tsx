@@ -83,8 +83,8 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
             {currentLab?.title || 'Lab 02: Spotify Requirements Prioritization'}
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Review the latest two-hour Spotify playlist API case study without
-            releasing it to students. The student lab remains locked.
+            Use the same Theory, Steps, Code, Tests and Report workspace students
+            will use. You can test Lab 02 now while student access stays locked.
           </p>
 
           <section className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-5">
@@ -96,14 +96,14 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
               the retired TF-IDF and model-training exercise. Its old answers
               are hidden here to prevent confusion. The current theory,
               lab sheet, starter code, report template and tests are available
-              through the live instructor preview below.
+              through the actual student workspace using the button below.
             </p>
           </section>
 
           <div className="mt-6 flex flex-wrap gap-3">
             <button type="button" onClick={onPreviewLab}
               className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
-              Open Lab 02 Instructor Preview
+              Open Lab 02 as a Student
             </button>
             <a href="https://developer.spotify.com/documentation/web-api/concepts/playlists"
               target="_blank" rel="noreferrer"
@@ -163,7 +163,7 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
               onClick={onPreviewLab}
               className="ml-2 inline-flex items-center rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
             >
-              Preview current lab
+              View lab as a student
             </button>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
               <ShieldCheck className="w-4 h-4" />
