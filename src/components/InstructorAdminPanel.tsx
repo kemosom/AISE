@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LabRegistry } from '../../labs/registry';
 import {
   ArrowLeft,
   BookOpenCheck,
@@ -14,6 +15,8 @@ import {
 interface InstructorAdminPanelProps {
   data: any;
   onExit: () => void;
+  onSwitchLab: () => void;
+  onPreviewLab: () => void;
 }
 
 type AdminTab = 'guide' | 'alignment' | 'solution' | 'results' | 'report' | 'masters';
@@ -21,6 +24,8 @@ type AdminTab = 'guide' | 'alignment' | 'solution' | 'results' | 'report' | 'mas
 export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
   data,
   onExit,
+  onSwitchLab,
+  onPreviewLab,
 }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('guide');
   const [copied, setCopied] = useState(false);
@@ -52,6 +57,87 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
     strategyC: 'C: Separated',
   };
 
+  // The earlier encrypted Lab 02 instructor payload belongs to the retired
+  // model-training lab. Until it is re-encrypted for the current case study,
+  // never display its obsolete answers as if they describe the new lab.
+  if (data.labId === 'lab02-requirement-prioritization') {
+    const currentLab = LabRegistry.getLab(data.labId);
+
+    return (
+      <div className="min-h-[calc(100vh-3.5rem)] bg-slate-100">
+        <div className="max-w-5xl mx-auto px-5 sm:px-8 py-7">
+          <div className="flex flex-wrap items-center gap-3 mb-7">
+            <button type="button" onClick={onExit}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-600 hover:text-slate-900">
+              <ArrowLeft className="w-4 h-4" /> Exit and lock instructor admin
+            </button>
+            <button type="button" onClick={onSwitchLab}
+              className="rounded border border-slate-300 bg-white px-3 py-2 text-xs font-medium hover:bg-slate-50">
+              Switch laboratory
+            </button>
+          </div>
+          <div className="text-xs font-semibold uppercase tracking-widest text-amber-700">
+            Instructor only · Lab 02
+          </div>
+          <h1 className="mt-2 text-2xl font-semibold text-slate-950">
+            {currentLab?.title || 'Lab 02: Spotify Requirements Prioritization'}
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            Review the latest two-hour Spotify playlist API case study without
+            releasing it to students. The student lab remains locked.
+          </p>
+
+          <section className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-5">
+            <h2 className="font-semibold text-sm text-amber-950">
+              Instructor guide revision pending
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-amber-900">
+              The previous encrypted Lab 02 complete-answer guide describes
+              the retired TF-IDF and model-training exercise. Its old answers
+              are hidden here to prevent confusion. The current theory,
+              lab sheet, starter code, report template and tests are available
+              through the live instructor preview below.
+            </p>
+          </section>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={onPreviewLab}
+              className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-800">
+              Open Lab 02 Instructor Preview
+            </button>
+            <a href="https://developer.spotify.com/documentation/web-api/concepts/playlists"
+              target="_blank" rel="noreferrer"
+              className="rounded-md border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+              Spotify official playlist documentation
+            </a>
+          </div>
+
+          <section className="mt-7 overflow-hidden rounded-lg border border-slate-200 bg-white">
+            <div className="border-b border-slate-200 p-5">
+              <h2 className="text-sm font-semibold text-slate-900">Current Lab 02 teaching sequence</h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Read from the current course manifest, not from the obsolete answer guide.
+              </p>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {(currentLab?.tasks || []).map((task, index) => (
+                <div key={task.id} className="flex gap-4 p-5">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-950 text-xs font-semibold text-white">
+                    {index + 1}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-900">{task.title}</h3>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">{task.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[calc(100vh-3.5rem)] bg-slate-100">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 py-7">
@@ -64,6 +150,20 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Exit and lock instructor admin
+            </button>
+            <button
+              type="button"
+              onClick={onSwitchLab}
+              className="ml-3 inline-flex items-center rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Switch laboratory
+            </button>
+            <button
+              type="button"
+              onClick={onPreviewLab}
+              className="ml-2 inline-flex items-center rounded border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Preview current lab
             </button>
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">
               <ShieldCheck className="w-4 h-4" />
