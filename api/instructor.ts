@@ -1,4 +1,4 @@
-import { createDecipheriv, timingSafeEqual } from 'node:crypto';
+import { createDecipheriv, createHmac, timingSafeEqual } from 'node:crypto';
 
 // Keep the encrypted instructor payload in this serverless module itself.
 // This avoids Vercel runtime/module-resolution failures caused by importing
@@ -111,8 +111,20 @@ export default function handler(req: any, res: any) {
       // The older encrypted Lab 02 guide covers a retired ML exercise.
       // Verify the same server-side instructor code, then authorize review
       // of the current bundled case study without serving obsolete answers.
+      // Short-lived signed instructor capability for optional HF chatbot.
+      // The server-only encryption key signs a Lab 02 scoped authorization.
+      // Never send the instructor password or HF provider key to the client.
+      const claims = Buffer.from(JSON.stringify({
+        lab: requestedLabId,
+        exp: Date.now() + 2 * 60 * 60 * 1000,
+      })).toString('base64url');
+      const signature = createHmac('sha256', Buffer.from(contentKey, 'base64url'))
+        .update('aise-lab02-chat-v1:' + claims)
+        .digest('base64url');
+
       return res.status(200).json({
         ok: true,
+        chatAccessToken: claims + '.' + signature,
         data: {
           labId: requestedLabId,
           labNumber: 2,
