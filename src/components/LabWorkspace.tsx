@@ -8,6 +8,7 @@ import {
   ListChecks,
   BookOpen,
   RotateCcw,
+  MessageSquare,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
@@ -18,6 +19,7 @@ import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
+import { Lab02AIAssistant } from './Lab02AIAssistant';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -28,6 +30,7 @@ interface LabWorkspaceProps {
   user: AuthUserPublic;
   onBack: () => void;
   isInstructorPreview?: boolean;
+  instructorChatToken?: string | null;
 }
 
 export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
@@ -35,6 +38,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   user,
   onBack,
   isInstructorPreview,
+  instructorChatToken,
 }) => {
   const [manifest, setManifest] = useState<LabManifest | null>(null);
   const [labMeta, setLabMeta] = useState<any>(null);
@@ -44,10 +48,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Keep the student workflow explicit: theory, steps, code, and report.
   // Session persistence prevents a browser refresh from throwing the student
   // out of the page they were actively using.
-  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>(() => {
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'assistant' | 'report'>(() => {
     if (typeof window === 'undefined') return 'theory';
     const saved = window.sessionStorage.getItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`);
-    return saved === 'steps' || saved === 'code' || saved === 'report'
+    return saved === 'steps' || saved === 'code' || saved === 'report' ||
+      (labId === 'lab02-requirement-prioritization' && saved === 'assistant')
       ? saved
       : 'theory';
   });
@@ -549,6 +554,19 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <Code className="w-3.5 h-3.5" />
             Code
           </button>
+          {labId === 'lab02-requirement-prioritization' && (
+            <button
+              onClick={() => setViewMode('assistant')}
+              className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                viewMode === 'assistant'
+                  ? 'bg-white text-slate-950 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              AI Assistant
+            </button>
+          )}
           <button
             onClick={() => setViewMode('report')}
             className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
@@ -656,7 +674,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </div>
         )}
 
-        {/* VIEW 3: LAB REPORT WORKSPACE */}
+        {/* VIEW 3: REAL, GROUNDED LLM CHAT (LAB 02 ONLY) */}
+        {viewMode === 'assistant' && labId === 'lab02-requirement-prioritization' && (
+          <Lab02AIAssistant instructorChatToken={instructorChatToken} />
+        )}
+
+                {/* VIEW 3: LAB REPORT WORKSPACE */}
         {viewMode === 'report' && (
           <div className="h-full">
             <ReportWorkspace
