@@ -8,7 +8,7 @@ import {
   ListChecks,
   BookOpen,
   RotateCcw,
-  MessageSquare,
+  Music2,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
@@ -19,7 +19,7 @@ import { TestRunnerPanel } from './TestRunnerPanel';
 import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
-import { Lab02AIAssistant } from './Lab02AIAssistant';
+import { Lab02SpotifyCasePanel } from './Lab02SpotifyCasePanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -30,7 +30,6 @@ interface LabWorkspaceProps {
   user: AuthUserPublic;
   onBack: () => void;
   isInstructorPreview?: boolean;
-  instructorChatToken?: string | null;
 }
 
 export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
@@ -38,7 +37,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   user,
   onBack,
   isInstructorPreview,
-  instructorChatToken,
 }) => {
   const [manifest, setManifest] = useState<LabManifest | null>(null);
   const [labMeta, setLabMeta] = useState<any>(null);
@@ -48,12 +46,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Keep the student workflow explicit: theory, steps, code, and report.
   // Session persistence prevents a browser refresh from throwing the student
   // out of the page they were actively using.
-  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'assistant' | 'report'>(() => {
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'spotify' | 'report'>(() => {
     if (typeof window === 'undefined') return 'theory';
     const saved = window.sessionStorage.getItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`);
     return saved === 'steps' || saved === 'code' || saved === 'report' ||
-      (labId === 'lab02-requirement-prioritization' && saved === 'assistant')
-      ? saved
+      (labId === 'lab02-requirement-prioritization' && (saved === 'spotify' || saved === 'assistant'))
+      ? saved === 'assistant' ? 'spotify' : saved
       : 'theory';
   });
 
@@ -556,15 +554,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </button>
           {labId === 'lab02-requirement-prioritization' && (
             <button
-              onClick={() => setViewMode('assistant')}
+              onClick={() => setViewMode('spotify')}
               className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
-                viewMode === 'assistant'
+                viewMode === 'spotify'
                   ? 'bg-white text-slate-950 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <MessageSquare className="w-3.5 h-3.5" />
-              AI Assistant
+              <Music2 className="w-3.5 h-3.5" />
+              Spotify Case
             </button>
           )}
           <button
@@ -643,7 +641,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             onOpenCode={() => setViewMode('code')}
             onOpenReport={() => setViewMode('report')}
             onOpenVerification={handleOpenVerification}
-            onOpenAssistant={() => setViewMode('assistant')}
+            onOpenSpotify={() => setViewMode('spotify')}
           />
         )}
 
@@ -675,12 +673,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           </div>
         )}
 
-        {/* VIEW 3: REAL, GROUNDED LLM CHAT (LAB 02 ONLY) */}
-        {viewMode === 'assistant' && labId === 'lab02-requirement-prioritization' && (
-          <Lab02AIAssistant instructorChatToken={instructorChatToken} />
+        {/* VIEW 3: INTERACTIVE SPOTIFY REQUIREMENTS CASE (LAB 02 ONLY) */}
+        {viewMode === 'spotify' && labId === 'lab02-requirement-prioritization' && (
+          <Lab02SpotifyCasePanel result={execResult} onOpenCode={() => setViewMode('code')} />
         )}
 
-                {/* VIEW 3: LAB REPORT WORKSPACE */}
+        {/* VIEW 4: LAB REPORT WORKSPACE */}
         {viewMode === 'report' && (
           <div className="h-full">
             <ReportWorkspace
