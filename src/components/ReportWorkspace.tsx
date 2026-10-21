@@ -45,6 +45,7 @@ interface ReportWorkspaceProps {
   codeFiles?: Array<{ name: string; language: string; content: string }>;
   testStats?: { passed: number; total: number } | null;
   previewMode?: boolean;
+  sectionPrompts?: Record<string, string>;
 }
 
 export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
@@ -59,6 +60,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   codeFiles = [],
   testStats = null,
   previewMode = false,
+  sectionPrompts,
 }) => {
   const [activeSectionId, setActiveSectionId] = useState(
     reportState.sections[0]?.id || 'objective'
@@ -432,14 +434,19 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           <div className="bg-white border border-slate-200 rounded-lg p-6 shadow-xs">
             <div className="flex items-center justify-between border-b border-slate-200 pb-3 mb-4">
               <h3 className="text-sm font-bold text-slate-900">{activeSection.title}</h3>
-              <span className="text-[11px] text-slate-400 font-mono">Academic Text Box</span>
+              <span className="text-[11px] text-slate-400 font-mono">Your Answer</span>
             </div>
 
+            {sectionPrompts?.[activeSection.id] && (
+              <p className="mb-4 text-sm leading-6 text-slate-700">
+                {sectionPrompts[activeSection.id]}
+              </p>
+            )}
             <textarea
               rows={8}
               value={activeSection.content}
               onChange={(e) => handleContentChange(e.target.value)}
-              placeholder="Enter your technical analysis, experimental procedure, and conclusions for this section..."
+              placeholder="Write your answer here..."
               className="w-full text-xs text-slate-800 leading-relaxed outline-none resize-y font-sans p-1 border-0"
             />
           </div>
