@@ -73,10 +73,10 @@
     },
     {
       "id": "l2-t5",
-      "title": "Request a real AI recommendation",
-      "description": "Use the grounded prompt from the Lab Sheet with ChatGPT or another live LLM. Paste only the returned ranked ID list into AI_SUGGESTED_ORDER, then run Python.",
+      "title": "Use the in-lab AI Requirements Assistant",
+      "description": "Open the AI Assistant tab. Ask a real grounded LLM to audit FR-06 and propose a release, compare its evidence with Spotify D1/D2, then paste its ranked IDs into AI_SUGGESTED_ORDER and run Python.",
       "category": "analysis",
-      "action": "code"
+      "action": "assistant"
     },
     {
       "id": "l2-t6",
