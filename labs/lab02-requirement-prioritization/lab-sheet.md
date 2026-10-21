@@ -1,117 +1,116 @@
-# Laboratory Sheet | 2 hours
+# Lab 02 | Spotify Playlist Requirements Case Study (2 hours)
 
 **Course:** MAI5124 AI in Software Engineering  
-**Topic:** AI Techniques for Software Requirements Prioritization  
-**Real-world evidence:** Spotify's public developer documentation  
-**Scenario:** A fictional team is building a Spotify-compatible playlist-management interface.
+**Lecture 2 topic:** AI Techniques for Software Requirements Prioritization  
+**Scenario:** Your team is designing a hypothetical playlist-management client using Spotify's documented Web API. The app in this lab is a **working local simulation**, not Spotify's real application.
 
-## Step 1 (15 min): Study the real source
+**No installation or Spotify account is needed.** Python runs inside the course website. Use ChatGPT or Gemini in a separate browser tab for the AI activity.
 
-Open [D1: Spotify Playlists](https://developer.spotify.com/documentation/web-api/concepts/playlists) and [D2: Change Playlist Details](https://developer.spotify.com/documentation/web-api/reference/change-playlist-details).
+## Step 1 (15 min): Explore the Spotify Case and real evidence
 
-Answer in your report:
+1. Click **Spotify Case** in the lab navigation. You will see a Spotify-style application.
+2. On the right, click **D1**, **D2**, **D3**, and **D4**. Read the short source summaries and use **Open official documentation** for the full specifications.
+3. D1: [Playlists](https://developer.spotify.com/documentation/web-api/concepts/playlists).
+   D2: [Change Playlist Details](https://developer.spotify.com/documentation/web-api/reference/change-playlist-details).
+   D3: [Add Playlist Items](https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist).
+   D4: [Remove Playlist Items](https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist).
+4. Note two API constraints in your report, each with its official D1-D4 URL.
 
-1. Does setting public=true mean the playlist is access-controlled? Cite D1.
-2. Can a playlist be public and collaborative at the same time? Cite D1.
-3. Who must own the playlist to change its details? Cite D2.
+**Important:** The documentation is genuine. The six feature proposals, ratings, eight-day budget, and demo playlist are **fictional teaching inputs**. Do not attribute them to Spotify.
 
-**Important:** Spotify's API documentation is the authoritative source, **not an internal Spotify SRS**. The feature ratings below are fictional classroom assumptions.
+## Step 2 (10 min): Interact with the product and find a conflict
 
-## Step 2 (10 min): Run and investigate the flawed baseline
+Inside **Spotify Case**:
 
-Click **Code**, open **main.py**, and click **Run Python** without making changes.
+1. Change the playlist title, click **Save**. Which requirement does this represent?
+2. Click **Add track**, then remove a track. Identify the matching source for each action.
+3. Try **Publish playlist** and **Collaborative**, then click **Try invalid FR-06**.
+4. Write down the observed issue. According to D1, should one playlist be both public and collaborative?
 
-The intentionally incomplete starter uses only listener preferences and permits every playlist state. Notice that requirement **FR-06**, a public-and-collaborative playlist, can enter the selected release.
+The simulator deliberately lets you explore an unsafe baseline. It does not send requests to Spotify's servers. Playing a demo track uses locally generated synthetic sound.
 
-Write down why that is a software engineering defect.
+## Step 3 (10 min): Run the deliberately flawed Python baseline
 
-## Step 3 (15 min): Enforce the official playlist rule
+1. Click **Code** and open `main.py`.
+2. Click **Run Python** without changing the starter code.
+3. Return to **Spotify Case**. Look at **AI-assisted release comparison** and the policy message.
+4. Record whether the release includes **FR-06**. Explain why a high utility value alone cannot make it valid.
 
-Locate:
+## Step 4 (15 min): Fix the documented Spotify constraint
+
+In `main.py`, find:
 
 ```python
 def playlist_policy_ok(public, collaborative):
     return True  # TODO
 ```
 
-Replace the placeholder with a Boolean expression that implements the D1 rule. Confirm that the release excludes **FR-06**.
+Replace `return True` with a Boolean rule that rejects the case where **both parameters are True**.
 
-Check these cases:
-
-| public | collaborative | Valid? |
+| public | collaborative | Correct result |
 |---|---|---|
-| False | False | Yes |
-| True | False | Yes |
-| False | True | Yes |
-| True | True | **No** |
+| False | False | Allowed |
+| True | False | Allowed |
+| False | True | Allowed |
+| True | True | Rejected |
 
-**Do not reject FR-02 and FR-03 merely because the app supports both features**. They are mutually exclusive *states of one playlist*, not mutually exclusive app features.
+Run Python, return to **Spotify Case**, then try **Try invalid FR-06** again. Your new Python policy should now prevent it.
 
-## Step 4 (15 min): Implement Lecture 2 utility analysis
+**Distinction:** The app may support both FR-02 (publish) and FR-03 (collaboration). What Spotify disallows is having *both statuses on the same playlist*.
 
-The supplied stakeholder evaluations are scenario assumptions.
+## Step 5 (15 min): Implement stakeholder utility
 
-Edit `requirement_utility(row)` so that it computes:
+In `main.py`, replace the listener-only placeholder in `requirement_utility(row)` with:
 
 ```text
-utility = 0.50 * listeners
-        + 0.30 * product
-        + 0.20 * engineering
+utility = 0.50 * listener_rating
+        + 0.30 * product_rating
+        + 0.20 * engineering_rating
 ```
 
-Do not use the provided listener-only placeholder. For FR-01, the correct result is **3.70**.
+These weights and ratings are classroom assumptions. For **FR-01**, the expected utility is **3.70**.
 
-Run Python. Record the ranked requirements and the feasible release under the **8 engineer-day** budget.
+Run Python and return to **Spotify Case**. Observe the feasible release selected under **8 engineer-days**, then note the selected IDs, total effort, and utility.
 
-## Step 5 (25 min): Chat with a real LLM inside the lab
+## Step 6 (20 min): Use ChatGPT or Gemini to challenge the decision
 
-1. Click the **AI Assistant** tab in the laboratory. It connects to a real open-weight conversational model using the instructor's server-side Hugging Face Inference Providers account. Students do **not** need API tokens or software installations.
-2. Open the links to **D1: Spotify Playlists** and **D2: Change Playlist Details** shown above the chat. The assistant has short verified course excerpts as context; it does **not** browse those web pages live.
-3. Click **Audit FR-06**, read the model's explanation, and compare its claims with D1 and D2. Identify the invalid requirement.
-4. Click **Propose a release**, then press **Send**. Ask the model for:
-   - `ranked_ids`: all six feature IDs in priority order;
-   - `infeasible_ids`: proposed features that violate the API;
-   - `release_ids` and `total_engineer_days`: a feasible release within the budget;
-   - `evidence` and `uncertainties`: sources and unsupported claims.
-5. Inspect its answer. The model is expected to reason from provided documents and scenario data, but it can still make errors. Note whether it respected the Spotify rules, budget, and FR-05 dependency. **Do not treat its proposed rankings as the verified engineering decision.**
-6. Record the model name, the date, the exact recommendation, at least one relevant citation, and one limitation in your report.
+1. Go to **Spotify Case → External AI review**.
+2. Click **Copy grounded case prompt**.
+3. Open **ChatGPT** or **Gemini** using the buttons in the panel, and paste the prompt.
+4. Ask the AI to rank the requirements and suggest a feasible release, including source references.
+5. Compare the model's recommendation with D1-D4. Do not accept unsourced claims.
+6. Record the model, its proposed requirement IDs, and one error, limitation or uncertainty.
 
-**If the AI Assistant says "Model not yet configured" or reports exhausted inference credits**, notify your lecturer. Continue the independent Python and reporting steps; the chatbot must not silently substitute hard-coded answers.
+The model may not be able to open URLs. If it cannot read the official sources, check them yourself and give the model the short excerpts. Never claim that the model retrieved sources when it did not.
 
-**Source note:** The model receives static course-prepared source excerpts plus fictional stakeholder ratings. It does not fetch the current Spotify documents itself. Verify any API claim by opening D1-D4.
+## Step 7 (15 min): Verify AI ranking and engineering constraints
 
-## Step 6 (15 min): Audit the AI, not just its answer
-
-From the **AI Assistant** response, copy *only the ordered IDs* into the list at the top of `main.py`:
+1. Return to **Code**, and enter the IDs suggested by the model:
 
 ```python
 AI_SUGGESTED_ORDER = ["FR-03", "FR-04", "FR-02", "FR-01", "FR-05", "FR-06"]
 ```
 
-(The order above is an **illustration**, not a supplied AI answer.) Run Python.
+This is an **illustrative order**, not the correct AI answer.
 
-The program can flag unknown IDs, repeated IDs, and the documented state conflict. It cannot verify every natural-language claim in the model's explanation. You must inspect those against D1-D4 yourself.
+2. Click **Run Python**. Read the **AI REVIEW** section of the output.
+3. Temporarily change `BUDGET_DAYS = 6`, rerun, and observe which features are selected. Check **Spotify Case**.
+4. Restore `BUDGET_DAYS = 8`.
+5. Click **Verify Requirements** and resolve any failed checks.
 
-Explain whether the LLM suggested FR-06 or otherwise overlooked a rule or dependency.
+The Python tests, not the LLM, must enforce documented rules, effort limits, and dependencies.
 
-## Step 7 (15 min): Test one what-if scenario
-
-Temporarily set `BUDGET_DAYS = 6`, rerun, and record whether the chosen release changes.
-
-Restore `BUDGET_DAYS = 8` before testing. Click **Verify Requirements**. Fix any failed checks.
-
-## Step 8 (10 min): Submit the case-study report
+## Step 8 (20 min): Prepare and submit your report
 
 Use the **Report** tab. Include:
 
-- Two documented Spotify rules, each with a source link.
-- Before/after results of repairing the policy rule and utility function.
-- Stakeholder ranking versus AI-proposed ranking, with at least one reason for disagreement.
-- The selected release, total utility and engineering days.
-- Evidence that FR-06 is prohibited, plus a budget/dependency check.
-- An explanation of one uncertainty and the stakeholder who should validate it.
-- Final decision: what should be implemented first, and why?
+- Two real Spotify API constraints and their D1-D4 URLs.
+- The actions you tested in the Spotify-style simulator and the FR-06 failure.
+- Your corrected Boolean policy and weighted utility calculation.
+- The 8-day release selection and the 6-day comparison.
+- ChatGPT/Gemini model used, its recommendation, and your critical assessment.
+- Evidence from the verification tests and a conclusion stating which features you recommend.
 
-Do not report fictional estimates as Spotify measurements.
+You can use the integrated Word export. **Submit only after completing the report.** Instructor preview uses a dry-run submission and does not consume a student ID.
 
-**Deliverable:** A short evidence-based requirements-prioritization case study, working Python guardrails, passed tests, and the integrated report.
+**Learning outcome:** Analyze real API requirements, inspect software behavior, use an LLM for a recommendation, and independently verify a feasible release.
