@@ -108,16 +108,12 @@ export default function handler(req: any, res: any) {
 
   try {
     if (requestedLabId === 'lab02-requirement-prioritization') {
-      const lab02 = decryptPayload(
-        contentKey,
-        LAB02_INSTRUCTOR_NONCE,
-        LAB02_INSTRUCTOR_CIPHERTEXT
-      );
-
+      // The older encrypted Lab 02 guide covers a retired ML exercise.
+      // Verify the same server-side instructor code, then authorize review
+      // of the current bundled case study without serving obsolete answers.
       return res.status(200).json({
         ok: true,
         data: {
-          ...lab02,
           labId: requestedLabId,
           labNumber: 2,
         },
