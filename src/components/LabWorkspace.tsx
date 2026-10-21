@@ -46,7 +46,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // out of the page they were actively using.
   const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'report'>(() => {
     if (typeof window === 'undefined') return 'theory';
-    const saved = window.sessionStorage.getItem(`aise:${labId}:view-mode`);
+    const saved = window.sessionStorage.getItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`);
     return saved === 'steps' || saved === 'code' || saved === 'report'
       ? saved
       : 'theory';
@@ -143,8 +143,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    window.sessionStorage.setItem(`aise:${labId}:view-mode`, viewMode);
-  }, [labId, viewMode]);
+    window.sessionStorage.setItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`, viewMode);
+  }, [labId, viewMode, isInstructorPreview]);
 
   const loadLabWorkspace = async () => {
     setLoading(true);
@@ -506,9 +506,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <h1 className="text-xs font-bold text-slate-900 truncate max-w-sm sm:max-w-md">
               {manifest.title}
             </h1>
-            {isInstructorPreview && (
-              <span className="rounded bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-900">INSTRUCTOR PREVIEW · NOT RELEASED</span>
-            )}
+
           </div>
 
           <div className="hidden lg:flex items-center space-x-2 border-l border-slate-200 pl-3">
