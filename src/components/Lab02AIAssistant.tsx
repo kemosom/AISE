@@ -30,6 +30,7 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
+  const [billingBlocked, setBillingBlocked] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -52,6 +53,7 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
     setMessages(updated);
     setDraft('');
     setError('');
+    setBillingBlocked(false);
     setSending(true);
 
     try {
@@ -65,6 +67,7 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) {
+        if (response.status === 402) setBillingBlocked(true);
         throw new Error(payload.error || 'The language model did not return a response.');
       }
       if (typeof payload.answer !== 'string') throw new Error('Invalid model response.');
@@ -127,7 +130,7 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
                 ? 'Model: ' + status.model
                 : statusError || 'Model not yet configured'}
             </span>
-            <button type="button" onClick={() => { setMessages([]); setError(''); }}
+            <button type="button" onClick={() => { setMessages([]); setError(''); setBillingBlocked(false); }}
               className="rounded border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50">
               Clear conversation
             </button>
@@ -175,7 +178,19 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
             {sending && <p className="text-xs text-slate-500">Contacting model...</p>}
           </div>
 
-          {error && <p role="alert" className="mt-3 rounded border border-red-200 bg-red-50 p-3 text-xs text-red-700">{error}</p>}
+          {error && (
+            <div role="alert" className="mt-3 rounded border border-red-200 bg-red-50 p-3 text-xs leading-6 text-red-800">
+              <p>{error}</p>
+              {billingBlocked && (
+                <p className="mt-2">
+                  <a href="https://huggingface.co/settings/billing" target="_blank" rel="noreferrer"
+                    className="font-semibold underline">Review Hugging Face billing and credits</a>
+                  {' '}using the account that created the HF_TOKEN stored in Vercel.
+                  Changing the model does not restore exhausted account credits.
+                </p>
+              )}
+            </div>
+          )
 
           <div className="mt-3 flex flex-wrap gap-2">
             {prompts.map((p) => (
