@@ -77,8 +77,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Only Lab 01 is released. Lab 02 remains visible but locked during revision.
-        const isUnlocked = manifest.labNumber === 1;
+        // Lab 01 and Lab 02 are released to students.
+        const isUnlocked = manifest.labNumber <= 2;
 
         return {
           id: manifest.id,
