@@ -1,41 +1,41 @@
 {
-  "title": "Lab 02 Report: AI-Assisted Spotify Playlist Requirements Prioritization",
+  "title": "Lab 02 Report: Spotify Playlist Requirements Prioritization",
   "sections": [
     {
-      "id": "source",
-      "title": "1. Spotify Source Evidence",
+      "id": "spotify_requirements",
+      "title": "1. Spotify Requirements",
       "required": true,
-      "placeholder": "Document at least two actual playlist API rules, D1-D4 URLs, and which claims remain assumptions."
+      "placeholder": "What two Spotify API rules did you find? Explain each rule briefly and give its document label (D1, D2, D3, or D4)."
     },
     {
-      "id": "human",
-      "title": "2. Human Baseline and Corrected Utility",
+      "id": "playlist_testing",
+      "title": "2. Playlist Testing",
       "required": true,
-      "placeholder": "Explain why the starter was incorrect. Show weighted utility, stakeholder weights, and the new ranking."
+      "placeholder": "Which playlist actions did you test? What happened when you tried FR-06 before and after fixing the Python code?"
     },
     {
-      "id": "ai",
-      "title": "3. Live AI Recommendation and Critical Audit",
+      "id": "python_changes",
+      "title": "3. Python Changes",
       "required": true,
-      "placeholder": "Name the real AI tool/model and prompt date. Include its recommendation, cited evidence, errors or missing evidence, and human corrections."
+      "placeholder": "What did you change in playlist_policy_ok() and requirement_utility()? Show how you calculated FR-01's utility of 3.70."
     },
     {
-      "id": "release",
-      "title": "4. Verified Release Selection",
+      "id": "release_plans",
+      "title": "4. Release Planning",
       "required": true,
-      "placeholder": "Report selected IDs, total utility, engineer-days, dependencies, playlist-state policy, and tests."
+      "placeholder": "Which features were selected with an 8-day budget and a 6-day budget? Give the selected IDs, total engineer-days, and total utility for each case."
     },
     {
-      "id": "counterfactual",
-      "title": "5. Budget Sensitivity and Stakeholder Review",
+      "id": "ai_checks",
+      "title": "5. AI and Verification",
       "required": true,
-      "placeholder": "Compare the 8-day and 6-day release; describe one uncertainty and select a suitable stakeholder to validate it."
+      "placeholder": "Which AI tool did you use and what did it recommend? Compare its recommended features with Python. Did it follow the rules? How many of the five tests passed?"
     },
     {
-      "id": "conclusion",
-      "title": "6. Conclusion",
+      "id": "recommendation",
+      "title": "6. Final Recommendation",
       "required": true,
-      "placeholder": "What should the hypothetical team implement first? Distinguish sourced API facts, scenario estimates, and AI recommendations."
+      "placeholder": "Which features would you develop first, and why? Base your answer on the stakeholder scores, budget, and Spotify requirements."
     }
   ]
 }
