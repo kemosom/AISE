@@ -269,43 +269,25 @@ The anon/publishable key is designed for browser use. Do not expose a Supabase s
 
 The generated Word document is stored in **Supabase Storage**, while PostgreSQL stores the submission record and file metadata. This is preferable to putting DOCX binary data directly into a database row.
 
-## Lab 02: Optional embedded Hugging Face AI Assistant
+## Lab 02: Interactive Spotify requirements case
 
-Lab 02 includes a dedicated AI Assistant tab backed by a real open-weight LLM
-through Hugging Face Inference Providers. The student's browser never receives
-the Hugging Face credential.
+Lab 02 has a **Spotify Case** tab. It is a local teaching simulator with
+playlist metadata editing, public/collaborative flags, track addition/removal,
+a source-evidence explorer linked to Spotify developer documents D1-D4, and
+a copyable case-study prompt for ChatGPT or Gemini in a separate browser tab.
 
-Configure these **server-only** Vercel environment variables and redeploy:
+The simulator uses the student's actual `main.py` output marker
+`__AISE_PLAYLIST__` to display their release selection and policy enforcement.
+After editing the two student functions, learners must run Python again to
+refresh the release and its guardrail state. It makes no requests to Spotify
+and uses synthesized sound for its sample track preview.
 
-```text
-HF_TOKEN=hf_...                       # fine-grained token, "Make calls to Inference Providers"
-HF_MODEL=Qwen/Qwen3-14B:cheapest     # optional model override
-LAB02_AI_PUBLIC_ENABLED=false       # keep false until lab is approved and released
-```
+The earlier Hugging Face API-backed AI Assistant and serverless inference
+endpoint have been removed. No HF_TOKEN, inference credits or instructor LLM
+configuration is required. Students may use ChatGPT or Gemini externally.
 
-The Vercel function is `api/lab02-chat.ts`; it uses
-`https://router.huggingface.co/v1/chat/completions`. Get a fine-grained token at
-https://huggingface.co/settings/tokens. Check current inference credits and
-provider model availability in Hugging Face before teaching.
-
-**While Lab 02 is locked:** the chatbot only accepts an instructor capability
-issued after server-side validation of the existing instructor code. The student
-lab and public chat remain closed. A successful instructor unlock creates an
-in-memory, lab-scoped, two-hour signed chat capability. The instructor may
-try the actual student interface without needing to expose the key.
-
-**Before enabling public chat:** the included per-IP limiter is only
-best-effort *within each warm serverless instance* and is not a global quota.
-Enable a durable shared usage counter/limiter and a provider-side cost/spend
-limit before setting `LAB02_AI_PUBLIC_ENABLED=true`. The open-access student
-site has no login, so unrestricted public usage would risk quota exhaustion
-and unexpected billing. Do not put `HF_TOKEN` in `VITE_*` or source code.
-
-The chatbot is *not* live retrieval-augmented generation: its server-side
-system context contains verified, concise excerpts from official Spotify
-documentation, with direct source links. Students must still inspect the
-real documentation and verify model claims. Fictional classroom priorities
-are labeled as assumptions, not actual Spotify requirements research.
+Only Lab 01 is available publicly. Lab 02 is accessible to the lecturer
+through the code-protected instructor view while its activities are reviewed.
 
 ## Instructor-only answer material
 
