@@ -53,17 +53,19 @@ subject to total implementation effort no greater than 8 engineer-days, prerequi
 
 The Python starter enumerates 64 possible combinations. You only need to complete **two small functions** to make the result trustworthy.
 
-## 5. Where the AI actually appears
+## 5. Where the software and AI appear
 
-Click the **AI Assistant** tab in the lab. When configured by the instructor, it connects to a **real open-weight LLM** through the Hugging Face Inference Providers API. The model receives short course-prepared Spotify source excerpts and the six fictional case-study requirements as grounding context. It does not browse Spotify's live website.
+Use the **Spotify Case** tab to interact with a local Spotify-style playlist application. You can change metadata (FR-01), switch public/collaborative settings (FR-02 and FR-03), add items (FR-04), remove items (FR-05), and try an invalid combination (FR-06). The **Official API Evidence** panel links each action to real documentation D1-D4. Spotify does not operate this simulator; no live account or Spotify Web API call is made.
 
-Ask for a release recommendation with sources and structured output, and then **audit** the result against the real Spotify documentation and the independent Python constraint checks. The Python program remains the deterministic engineering verifier, rather than pretending that its scoring formula is a generative AI model. The chatbot may generate inaccurate suggestions; the engineer is responsible for verification.
+The simulator also displays the release IDs and policy-check result from your **actual Python run**. This is how the product behavior is linked to the software engineering requirements and code.
 
-This is a deliberately lightweight example of **grounded LLM-assisted requirements engineering, structured outputs, evidence traceability, and human-in-the-loop verification**.
+For the AI part, click **Copy grounded case prompt** in the Spotify Case panel, then use **ChatGPT or Gemini in a separate browser tab**. The AI generates a proposed ranking. Students review the explanation against D1-D4 and paste the suggested IDs into Python for independent auditing. There is no embedded LLM, token configuration or Hugging Face inference service.
+
+This lab demonstrates **LLM-assisted requirements analysis, source traceability, structured recommendations, deterministic policy checks, and human review**. An AI recommendation is evidence for a release discussion, not permission to violate a documented API rule.
 
 ## 6. What the lab does NOT require
 
-No Spotify account, Spotify Premium, Spotify API credentials, student-provided AI API key, or Python installation. The AI tab requires the lecturer to configure server-side Hugging Face credentials and inference credits. The rest of the lab works without that connection.
+No Spotify account, Spotify Premium, Spotify API credentials, paid AI API key, Python installation, or student software installation. External AI services may require students to sign in and are subject to the provider's own availability and limits.
 
 **Caution:** Spotify's 2026 Development Mode imposes premium-owner and user limits. We therefore study genuine API requirements and validate a *local design*, without making live authenticated Spotify API calls.
 
