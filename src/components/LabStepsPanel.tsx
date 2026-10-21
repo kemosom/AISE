@@ -5,6 +5,7 @@ import {
   Code2,
   FileText,
   ListChecks,
+  MessageSquare,
   Play,
   ShieldCheck,
 } from 'lucide-react';
@@ -17,6 +18,7 @@ interface LabStepsPanelProps {
   onOpenCode: () => void;
   onOpenReport: () => void;
   onOpenVerification: () => void;
+  onOpenAssistant?: () => void;
 }
 
 export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
@@ -26,6 +28,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
   onOpenCode,
   onOpenReport,
   onOpenVerification,
+  onOpenAssistant,
 }) => {
   const tasks = manifest.tasks || [];
 
@@ -43,6 +46,14 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
         label: 'Open Code + Verify',
         icon: <ShieldCheck className="w-3.5 h-3.5" />,
         onClick: onOpenVerification,
+      };
+    }
+
+    if (task.action === 'assistant' && onOpenAssistant) {
+      return {
+        label: 'Open AI Assistant',
+        icon: <MessageSquare className="w-3.5 h-3.5" />,
+        onClick: onOpenAssistant,
       };
     }
 
