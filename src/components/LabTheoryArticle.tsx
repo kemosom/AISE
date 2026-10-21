@@ -895,9 +895,13 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-900">Ready for the practical</p>
-              <h3 className="mt-1 text-xl font-semibold text-slate-950">Continue to the coding workspace</h3>
+              <h3 className="mt-1 text-xl font-semibold text-slate-950">
+                {manifest.labNumber === 2 ? 'Start the Spotify case study' : 'Continue to the coding workspace'}
+              </h3>
               <p className="mt-2 text-sm leading-6 text-slate-600 max-w-xl">
-                Run the baseline, complete one safety function, run the tests, then document the result.
+                {manifest.labNumber === 2
+                  ? 'Follow the steps to explore the playlist, update the Python code, compare an AI recommendation, and complete your report.'
+                  : 'Run the baseline, complete one safety function, run the tests, then document the result.'}
               </p>
             </div>
             <button
