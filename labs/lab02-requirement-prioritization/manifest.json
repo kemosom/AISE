@@ -3,7 +3,7 @@
   "labNumber": 2,
   "week": 3,
   "title": "AI-Assisted Requirements Prioritization: Spotify Playlist Case Study",
-  "shortDescription": "Use real Spotify Web API documentation, stakeholder ratings, a live generative-AI recommendation, and automated Python policy checks to select a feasible playlist-feature release. No Spotify login required.",
+  "shortDescription": "Explore a hands-on Spotify-style playlist simulator, inspect real Spotify API documentation, use ChatGPT or Gemini for a proposed release, and verify the decision with Python.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
@@ -17,10 +17,10 @@
     "webPreview": false
   },
   "learningOutcomes": [
-    "Extract traceable software requirements and hard constraints from official Spotify API documentation.",
-    "Use stakeholder utility analysis and a small engineering budget to prioritize a proposed software release.",
-    "Use a live generative AI assistant to propose and explain a requirements ranking, then audit its claims against authoritative documentation.",
-    "Implement and test a deterministic guardrail so invalid AI recommendations cannot enter a release plan."
+    "Read and cite real Spotify Web API requirements using linked official D1-D4 documentation.",
+    "Test playlist actions in a local simulator and identify invalid public/collaborative configurations.",
+    "Use weighted stakeholder ratings and budget constraints to select a feasible software release.",
+    "Evaluate an external generative AI recommendation against official API rules and independently verified Python results."
   ],
   "courseAlignment": [
     {
@@ -45,57 +45,57 @@
   "tasks": [
     {
       "id": "l2-t1",
-      "title": "Read the real Spotify specification",
-      "description": "Open the official Playlists concept and Change Playlist Details pages. Identify at least two API rules and cite their source links. The project is a hypothetical client, not Spotify itself.",
+      "title": "Explore the Spotify case and official documentation",
+      "description": "Open Spotify Case, explore the playlist, and inspect D1-D4 evidence. Record two documented API constraints.",
       "category": "analysis",
-      "action": "theory"
+      "action": "spotify"
     },
     {
       "id": "l2-t2",
-      "title": "Run a flawed human-only baseline",
-      "description": "Open Code and Run Python. Observe why a high-scoring but prohibited requirement can appear in the release.",
+      "title": "Interact with playlist actions and reproduce FR-06",
+      "description": "Rename the playlist, add and remove sample tracks, and test invalid public + collaborative settings.",
       "category": "analysis",
-      "action": "code"
+      "action": "spotify"
     },
     {
       "id": "l2-t3",
-      "title": "Implement the playlist policy",
-      "description": "Fix playlist_policy_ok(public, collaborative) using Spotify's documented public/collaborative rule.",
+      "title": "Run the flawed release baseline",
+      "description": "Run main.py, then view the selected features and policy status in Spotify Case.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l2-t4",
-      "title": "Calculate weighted stakeholder utility",
-      "description": "Replace the listener-only score with the weighted sum across listeners, product, and engineering stakeholder ratings.",
+      "title": "Fix the Spotify playlist rule",
+      "description": "Implement playlist_policy_ok(public, collaborative) and retest FR-06.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l2-t5",
-      "title": "Use the in-lab AI Requirements Assistant",
-      "description": "Open the AI Assistant tab. Ask a real grounded LLM to audit FR-06 and propose a release, compare its evidence with Spotify D1/D2, then paste its ranked IDs into AI_SUGGESTED_ORDER and run Python.",
-      "category": "analysis",
-      "action": "assistant"
-    },
-    {
-      "id": "l2-t6",
-      "title": "Compare, challenge and revise",
-      "description": "Check AI suggestions against the official document and policy tests. Try a budget of 6 instead of 8 engineer-days, then restore 8.",
-      "category": "analysis",
+      "title": "Compute stakeholder-weighted utility",
+      "description": "Correct requirement_utility(row), run Python, and inspect the 8-day release in Spotify Case.",
+      "category": "code",
       "action": "code"
     },
     {
+      "id": "l2-t6",
+      "title": "Use ChatGPT or Gemini as a requirements reviewer",
+      "description": "In Spotify Case, copy the grounded prompt, open an external AI assistant, and record its source-backed recommendation.",
+      "category": "analysis",
+      "action": "spotify"
+    },
+    {
       "id": "l2-t7",
-      "title": "Verify the engineering requirements",
-      "description": "Click Verify Requirements. The checks must reject public+collaborative, calculate weighted utilities, and enforce budget and dependency constraints.",
+      "title": "Audit the AI ranking and budget",
+      "description": "Paste the AI's ranked IDs into main.py, try the 6-day budget, restore 8 days, and Verify Requirements.",
       "category": "test",
       "action": "verify"
     },
     {
       "id": "l2-t8",
-      "title": "Submit your case-study analysis",
-      "description": "Report the source evidence, human and AI decisions, selected release, test results, remaining uncertainties, and conclusion.",
+      "title": "Submit the case-study report",
+      "description": "Summarize evidence, observed behavior, corrected Python, AI recommendation, constraints and test results.",
       "category": "report",
       "action": "report"
     }
