@@ -1,74 +1,78 @@
 # Lab 02 | AI-Assisted Requirements Prioritization: Spotify Playlist Case Study
 
-**Case:** You are a requirements engineer designing a *new playlist-management interface that uses Spotify's Web API*. You are **not** modifying Spotify's proprietary application.
+**Case:** Your team is developing a playlist-management application using Spotify's Web API. You have six proposed features and a limited development budget.
 
-**Teaching question:** Can an AI recommend which software features to build first, and how do we prevent the recommendation from violating documented technical requirements?
+**Question:** Which features should your team develop first, and how can AI help you make that decision?
 
-## 1. How this connects to Lecture 2
+## 1. Spotify Software Requirements
 
-- **Early Requirements Engineering (2.2):** identify and assess requirements.
-- **MVP selection (2.3):** choose valuable features when development time is limited.
-- **Basic and Integrated Release Planning (2.4-2.5):** turn stakeholder preferences into a feasible release; enforce dependencies and hard constraints.
-- **Stakeholder Recommendation (2.6):** explain who should validate ambiguous API requirements.
-- **Research Issues (2.7):** investigate AI-generated unsupported claims and decision bias.
+Before developing a feature, a software engineer needs to understand what it should do. Spotify provides documentation describing how its playlist API works. We will use four documents:
 
-## 2. Our real primary source: Spotify developer documentation
+- **D1: Playlists.** Playlist settings, including public and collaborative playlists.
+- **D2: Change Playlist Details.** Updating a playlist title, description, and settings.
+- **D3: Add Playlist Items.** Adding songs to a playlist.
+- **D4: Remove Playlist Items.** Removing songs from a playlist.
 
-Open these *public, official* references:
+D1–D4 are the document labels used in this lab. You can read their summaries and open the official Spotify pages from **Spotify Case → Official API Evidence**.
 
-- **D1: [Spotify Playlists, including public/private/collaborative status and snapshots](https://developer.spotify.com/documentation/web-api/concepts/playlists)**
-- **D2: [Change Playlist Details](https://developer.spotify.com/documentation/web-api/reference/change-playlist-details)**
-- **D3: [Add Items to Playlist](https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist)**
-- **D4: [Remove Playlist Items](https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist)**
+A **functional requirement (FR)** describes something an application should do. For example, FR-01 means the user should be able to edit a playlist title. We assign each requirement an ID so we can discuss, implement, and test it.
 
-### What D1 actually says
+## 2. Proposed Features
 
-A playlist can be public OR collaborative, **but not both at the same time**. The Web API's public setting means appearance on the user's profile and in search; it is **not the same as access control**. Managing individual collaborators is not supported through that API. Playlist changes have version snapshots.
+Your team has received six feature requests:
 
-These are documented product/API facts. **They are not customer-preference scores.**
+- **FR-01:** Edit a playlist title and description.
+- **FR-02:** Publish a playlist on the owner's profile.
+- **FR-03:** Create a private collaborative playlist.
+- **FR-04:** Add a song to a playlist.
+- **FR-05:** Remove a song from a playlist.
+- **FR-06:** Make the same playlist both public and collaborative.
 
-## 3. Case assumptions, not Spotify facts
+Use the Spotify documents to check these requests. In particular, compare FR-06 with the playlist settings described in D1.
 
-The lab gives you six candidate requirements, three fictional stakeholder rating columns (1 to 5), and fictional engineering-day estimates. The scenario has **8 available engineer-days**.
+The Spotify-style application in **Spotify Case** lets you try these actions. It is a classroom version of a playlist application.
 
-Do not present these numbers as Spotify research, telemetry, implementation costs, or survey results. They are classroom assumptions to demonstrate the Lecture 2 optimization concepts.
+## 3. Choosing Features for the Next Release
 
-## 4. Utility analysis and optimization
+The team has **8 engineer-days** available for its next release. Each proposed feature requires some development time, so you cannot build everything at once.
 
-We combine the given stakeholder ratings using a transparent, normalized weighted utility:
+We will use example ratings from three groups: listeners, product stakeholders, and engineers. Each group gives a score from 1 to 5. Their contributions to the overall score are:
+
+- **Listeners:** 50%
+- **Product stakeholders:** 30%
+- **Engineers:** 20%
+
+The utility score of a requirement is:
 
 \[
-U(r)=0.50 L(r)+0.30 P(r)+0.20 E(r).
+U(r) = 0.50L(r) + 0.30P(r) + 0.20E(r)
 \]
 
-The stakeholder weights sum to 1. Different legitimate weight choices may produce different rankings; weights are decision-policy assumptions, not AI discoveries.
-
-For each feasible release subset S:
+Here, L, P, and E are the three ratings. For example, if FR-01 receives ratings of 3, 4, and 5:
 
 \[
-\max \sum_{r \in S} U(r)
+U(\mathrm{FR\text{-}01}) = 0.50(3) + 0.30(4) + 0.20(5) = 3.70
 \]
 
-subject to total implementation effort no greater than 8 engineer-days, prerequisites being selected first or together, and the documented public/collaborative rule never being violated.
+These ratings, effort estimates, and the eight-day budget are example values for this case study.
 
-The Python starter enumerates 64 possible combinations. You only need to complete **two small functions** to make the result trustworthy.
+A **release plan** is the group of features we choose to develop next. The Python program selects the combination with the highest total utility while checking the development budget and technical rules.
 
-## 5. Where the software and AI appear
+There is also a project dependency: **FR-05 requires FR-04**. For this exercise, the team will not plan the remove-song feature without first including the add-song feature.
 
-Use the **Spotify Case** tab to interact with a local Spotify-style playlist application. You can change metadata (FR-01), switch public/collaborative settings (FR-02 and FR-03), add items (FR-04), remove items (FR-05), and try an invalid combination (FR-06). The **Official API Evidence** panel links each action to real documentation D1-D4. Spotify does not operate this simulator; no live account or Spotify Web API call is made.
+## 4. Checking the Requirements
 
-The simulator also displays the release IDs and policy-check result from your **actual Python run**. This is how the product behavior is linked to the software engineering requirements and code.
+You will first test the playlist features in **Spotify Case**. Then you will run Python and correct two functions:
 
-For the AI part, click **Copy grounded case prompt** in the Spotify Case panel, then use **ChatGPT or Gemini in a separate browser tab**. The AI generates a proposed ranking. Students review the explanation against D1-D4 and paste the suggested IDs into Python for independent auditing. There is no embedded LLM, token configuration or Hugging Face inference service.
+- **playlist_policy_ok():** Checks whether public and collaborative settings are allowed together.
+- **requirement_utility():** Calculates a requirement's score using all three stakeholder ratings.
 
-This lab demonstrates **LLM-assisted requirements analysis, source traceability, structured recommendations, deterministic policy checks, and human review**. An AI recommendation is evidence for a release discussion, not permission to violate a documented API rule.
+After each change, run the code again and return to **Spotify Case** to see the effect on the release plan.
 
-## 6. What the lab does NOT require
+## 5. Comparing Your Decision with AI
 
-No Spotify account, Spotify Premium, Spotify API credentials, paid AI API key, Python installation, or student software installation. External AI services may require students to sign in and are subject to the provider's own availability and limits.
+Use **Copy grounded case prompt** in Spotify Case and paste it into ChatGPT or Gemini. Ask the model which features it recommends for the next release.
 
-**Caution:** Spotify's 2026 Development Mode imposes premium-owner and user limits. We therefore study genuine API requirements and validate a *local design*, without making live authenticated Spotify API calls.
+Compare its recommendation with your Python results. Check whether it follows Spotify's playlist rules, the eight-day budget, and the FR-04/FR-05 dependency.
 
-## Your outcome
-
-A justified feature release, tested hard constraints, and a short report demonstrating where the AI helped, where it was wrong or uncertain, and why a software engineer must still make the final decision.
+You will finish by submitting a short report describing your tests, Python changes, release selection, and AI comparison.
