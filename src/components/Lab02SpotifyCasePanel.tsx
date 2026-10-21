@@ -105,22 +105,45 @@ open a page. Explain why the selected release meets all constraints.`;
 
 const time = (n: number) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 
-interface Props { result: ExecutionResult | null; onOpenCode: () => void; }
+interface Props { result: ExecutionResult | null; onOpenCode: () => void; storageKey: string; }
 
-export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode }) => {
+export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode, storageKey }) => {
   const release = useMemo(() => readRelease(result), [result]);
-  const [title, setTitle] = useState('Software Engineering Mix');
-  const [description, setDescription] = useState('A requirements engineering playlist sandbox');
+  // Preserve experiments when switching between Spotify Case and Code tabs.
+  // Student and instructor work use different browser-local keys.
+  const saved = useMemo(() => {
+    try {
+      const value = window.sessionStorage.getItem(storageKey);
+      return value ? JSON.parse(value) : null;
+    } catch { return null; }
+  }, [storageKey]);
+  const [title, setTitle] = useState<string>(() => typeof saved?.title === 'string' ? saved.title : 'Software Engineering Mix');
+  const [description, setDescription] = useState<string>(() => typeof saved?.description === 'string' ? saved.description : 'A requirements engineering playlist sandbox');
   const [draftTitle, setDraftTitle] = useState(title);
-  const [publicState, setPublicState] = useState(false);
-  const [collaborative, setCollaborative] = useState(false);
-  const [tracks, setTracks] = useState(INITIAL_TRACKS);
+  const [publicState, setPublicState] = useState<boolean>(() => saved?.publicState === true);
+  const [collaborative, setCollaborative] = useState<boolean>(() => saved?.collaborative === true);
+  const [tracks, setTracks] = useState<typeof INITIAL_TRACKS>(() =>
+    Array.isArray(saved?.trackIds)
+      ? [...INITIAL_TRACKS, ...EXTRA_TRACKS].filter((t) => saved.trackIds.includes(t.id))
+      : INITIAL_TRACKS
+  );
   const [currentId, setCurrentId] = useState<number | null>(null);
   const [playing, setPlaying] = useState(false);
   const [activeSource, setActiveSource] = useState('D1');
   const [info, setInfo] = useState('Select a playlist action to inspect its requirements.');
   const [copied, setCopied] = useState(false);
   const audioRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    try {
+      window.sessionStorage.setItem(storageKey, JSON.stringify({
+        title, description, publicState, collaborative,
+        trackIds: tracks.map((track) => track.id),
+      }));
+    } catch {
+      // Continue the lab if browser storage is unavailable.
+    }
+  }, [storageKey, title, description, publicState, collaborative, tracks]);
 
   // A short synthesized tone is a local preview, NOT copyrighted Spotify audio.
   useEffect(() => {
@@ -157,6 +180,13 @@ export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode }) =
   useEffect(() => () => { void audioRef.current?.close(); }, []);
   const enforced = release?.policy_enforced ?? false;
   const conflict = publicState && collaborative;
+
+  useEffect(() => {
+    if (enforced && conflict) {
+      setCollaborative(false);
+      setInfo('The corrected Python guardrail is active. Invalid public + collaborative status has been cleared.');
+    }
+  }, [enforced, conflict]);
   const selected = new Set(release?.selected_ids ?? []);
   const source = SOURCES.find((item) => item.id === activeSource) || SOURCES[0];
 
