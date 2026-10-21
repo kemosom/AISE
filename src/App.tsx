@@ -42,6 +42,9 @@ export default function App() {
   const [instructorUnlockLoading, setInstructorUnlockLoading] = useState(false);
   const [instructorUnlockError, setInstructorUnlockError] = useState<string | null>(null);
   const [instructorData, setInstructorData] = useState<any | null>(null);
+  const [instructorSelectedLabId, setInstructorSelectedLabId] = useState(
+    'lab01-behavioral-programming'
+  );
 
   useEffect(() => {
     // Current teaching mode is deliberately open access. Student identity is
@@ -110,15 +113,29 @@ export default function App() {
   };
 
   const handleInstructorTrigger = () => {
-    const requestedLabId = activeLabId || 'lab01-behavioral-programming';
+    const requestedLabId = instructorData?.labId || activeLabId || 'lab01-behavioral-programming';
 
     if (instructorData?.labId === requestedLabId) {
       setActiveView('instructor');
       return;
     }
 
+    setInstructorSelectedLabId(requestedLabId);
     setInstructorUnlockError(null);
     setShowInstructorAccess(true);
+  };
+
+  const handleSwitchInstructorLab = () => {
+    setInstructorSelectedLabId(instructorData?.labId || 'lab01-behavioral-programming');
+    setInstructorUnlockError(null);
+    setShowInstructorAccess(true);
+  };
+
+  const handleReviewInstructorLab = () => {
+    if (!instructorData?.labId) return;
+    setActiveLabId(instructorData.labId);
+    setIsInstructorPreview(true);
+    setActiveView('lab');
   };
 
   const handleInstructorUnlock = async (code: string) => {
@@ -133,7 +150,7 @@ export default function App() {
         },
         body: JSON.stringify({
           code,
-          labId: activeLabId || 'lab01-behavioral-programming',
+          labId: instructorSelectedLabId,
         }),
       });
 
@@ -154,6 +171,8 @@ export default function App() {
       }
 
       setInstructorData(payload.data);
+      setActiveLabId(instructorSelectedLabId);
+      setIsInstructorPreview(false);
       setShowInstructorAccess(false);
       setActiveView('instructor');
     } catch (err: any) {
@@ -169,6 +188,8 @@ export default function App() {
     setInstructorData(null);
     setInstructorUnlockError(null);
     setShowInstructorAccess(false);
+    setIsInstructorPreview(false);
+    setActiveLabId(null);
     setActiveView('dashboard');
     fetchLabs();
   };
@@ -228,7 +249,7 @@ export default function App() {
         isInstructorPreview={isInstructorPreview}
         onExitPreview={() => {
           setIsInstructorPreview(false);
-          setActiveView('dashboard');
+          setActiveView(instructorData ? 'instructor' : 'dashboard');
           fetchLabs();
         }}
         onInstructorAccess={handleInstructorTrigger}
@@ -240,6 +261,8 @@ export default function App() {
           <InstructorAdminPanel
             data={instructorData}
             onExit={handleExitInstructor}
+            onSwitchLab={handleSwitchInstructorLab}
+            onPreviewLab={handleReviewInstructorLab}
           />
         )}
         {/* VIEW: LAB WORKSPACE (STUDENT OR PREVIEW) */}
@@ -248,8 +271,8 @@ export default function App() {
             labId={activeLabId}
             user={user}
             onBack={() => {
-              setActiveView('dashboard');
-              setActiveLabId(null);
+              setActiveView(isInstructorPreview && instructorData ? 'instructor' : 'dashboard');
+              if (!isInstructorPreview) setActiveLabId(null);
               setIsInstructorPreview(false);
               fetchLabs();
             }}
@@ -340,6 +363,8 @@ export default function App() {
           }}
           onUnlock={handleInstructorUnlock}
           isLoading={instructorUnlockLoading}
+          selectedLabId={instructorSelectedLabId}
+          onSelectLab={setInstructorSelectedLabId}
           error={instructorUnlockError}
         />
       )}
