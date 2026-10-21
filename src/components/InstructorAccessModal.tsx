@@ -5,6 +5,8 @@ interface InstructorAccessModalProps {
   onClose: () => void;
   onUnlock: (code: string) => Promise<void>;
   isLoading: boolean;
+  selectedLabId: string;
+  onSelectLab: (labId: string) => void;
   error?: string | null;
 }
 
@@ -12,6 +14,8 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
   onClose,
   onUnlock,
   isLoading,
+  selectedLabId,
+  onSelectLab,
   error,
 }) => {
   const [code, setCode] = useState('');
@@ -46,6 +50,19 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-5">
+          <label htmlFor="instructor-lab" className="block text-xs font-medium text-slate-700 mb-2">
+            Select laboratory
+          </label>
+          <select
+            id="instructor-lab"
+            value={selectedLabId}
+            onChange={(event) => onSelectLab(event.target.value)}
+            disabled={isLoading}
+            className="mb-4 w-full rounded-md border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-slate-700"
+          >
+            <option value="lab01-behavioral-programming">Lab 01: Safe AI-Assisted Software Release</option>
+            <option value="lab02-requirement-prioritization">Lab 02: Spotify Requirements Prioritization</option>
+          </select>
           <label className="block text-xs font-medium text-slate-700 mb-2">
             Instructor code
           </label>
