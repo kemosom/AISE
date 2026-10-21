@@ -39,18 +39,19 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="border-b border-slate-200 bg-white sticky top-0 z-40">
       {isInstructorPreview && (
-        <div className="bg-amber-50 border-b border-amber-200 text-amber-900 text-xs px-5 py-2 flex items-center justify-between">
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-950 text-xs px-5 py-2 flex flex-wrap items-center justify-between gap-2">
           <span className="inline-flex items-center gap-2">
             <Eye className="w-3.5 h-3.5" />
-            Instructor preview
+            <strong>Instructor: viewing the actual student laboratory</strong>
+            <span className="text-amber-800">Student submissions are disabled in this session.</span>
           </span>
           {onExitPreview && (
             <button
               type="button"
               onClick={onExitPreview}
-              className="font-semibold hover:underline"
+              className="font-semibold underline underline-offset-2 hover:text-amber-700"
             >
-              Exit preview
+              Return to Instructor Guide
             </button>
           )}
         </div>
