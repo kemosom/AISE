@@ -42,7 +42,6 @@ export default function App() {
   const [instructorUnlockLoading, setInstructorUnlockLoading] = useState(false);
   const [instructorUnlockError, setInstructorUnlockError] = useState<string | null>(null);
   const [instructorData, setInstructorData] = useState<any | null>(null);
-  const [instructorChatToken, setInstructorChatToken] = useState<string | null>(null);
   const [instructorSelectedLabId, setInstructorSelectedLabId] = useState(
     'lab01-behavioral-programming'
   );
@@ -172,7 +171,6 @@ export default function App() {
       }
 
       setInstructorData(payload.data);
-      setInstructorChatToken(typeof payload.chatAccessToken === 'string' ? payload.chatAccessToken : null);
       setActiveLabId(instructorSelectedLabId);
       // Lab 02 opens its actual student workspace immediately after instructor
       // authentication. Preserve Lab 01's established answer-guide landing.
@@ -191,7 +189,6 @@ export default function App() {
   };
 
   const handleExitInstructor = () => {
-    setInstructorChatToken(null);
     setInstructorData(null);
     setInstructorUnlockError(null);
     setShowInstructorAccess(false);
@@ -284,7 +281,6 @@ export default function App() {
               fetchLabs();
             }}
             isInstructorPreview={isInstructorPreview}
-            instructorChatToken={isInstructorPreview ? instructorChatToken : null}
           />
         )}
 
