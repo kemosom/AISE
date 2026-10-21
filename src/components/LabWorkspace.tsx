@@ -391,7 +391,6 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const handleAddOutputToReport = (output: string) => {
     const targetSection =
       reportState.sections.find((s) => s.id === 'release_plans') ||
-      reportState.sections.find((s) => s.id === 'release_plans') ||
       reportState.sections.find((s) => s.id === 'results') ||
       reportState.sections.find((s) => s.id === 'comparison') ||
       reportState.sections.find((s) => s.id === 'baseline') ||
@@ -410,6 +409,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   const handleAddPlotToReport = (plotBase64: string, caption?: string) => {
     const targetSection =
+      reportState.sections.find((s) => s.id === 'release_plans') ||
       reportState.sections.find((s) => s.id === 'results') ||
       reportState.sections.find((s) => s.id === 'comparison') ||
       reportState.sections[0];
