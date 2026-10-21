@@ -188,14 +188,39 @@ export default async function handler(req: any, res: any) {
     }
 
     if (!response.ok) {
+      // Preserve provider error categories instead of collapsing everything into
+      // a generic 502 that misleadingly suggests an invalid token or model.
+      // Do not expose the provider's raw response: it may contain sensitive data.
+      if (response.status === 402) {
+        return res.status(402).json({
+          code: 'HF_BILLING_REQUIRED',
+          error: 'Hugging Face returned HTTP 402 (Payment Required). Check the inference credits and billing settings of the account that created HF_TOKEN. No model response was generated.',
+          helpUrl: 'https://huggingface.co/settings/billing',
+        });
+      }
+      if (response.status === 401 || response.status === 403) {
+        return res.status(response.status).json({
+          code: 'HF_AUTHORIZATION_FAILED',
+          error: 'Hugging Face rejected the API credentials or permission. Check the HF_TOKEN secret and Inference Providers permission in Vercel.',
+        });
+      }
       if (response.status === 429) {
         return res.status(429).json({
-          error: 'Hugging Face is rate-limiting the model or its credits are exhausted.',
+          code: 'HF_RATE_LIMIT',
+          error: 'The Hugging Face inference provider is rate-limiting requests. Wait and retry, or check account quota.',
+        });
+      }
+      if (response.status === 400 || response.status === 404 || response.status === 422) {
+        return res.status(502).json({
+          code: 'HF_MODEL_REQUEST_ERROR',
+          error: 'Hugging Face rejected the model request (HTTP ' + response.status +
+            '). Check that HF_MODEL is available for chat-completions on Inference Providers.',
         });
       }
       return res.status(502).json({
-        error: 'The Hugging Face provider rejected the request (HTTP ' + response.status +
-          '). Check model availability, token permissions and remaining credits.',
+        code: 'HF_UPSTREAM_ERROR',
+        error: 'The Hugging Face inference provider returned HTTP ' + response.status +
+          '. This is an upstream service error, not a successful AI response.',
       });
     }
 
