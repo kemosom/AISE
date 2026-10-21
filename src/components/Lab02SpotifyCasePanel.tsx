@@ -204,6 +204,18 @@ export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode, sto
       : 'Playlist attributes changed in the local sandbox. Check their real API semantics in D1 and D2.');
   }
 
+  function resetSimulator() {
+    setTitle('Software Engineering Mix');
+    setDraftTitle('Software Engineering Mix');
+    setDescription('A requirements engineering playlist sandbox');
+    setPublicState(false);
+    setCollaborative(false);
+    setTracks(INITIAL_TRACKS);
+    setCurrentId(null);
+    setPlaying(false);
+    setInfo('The playlist simulator has been reset. The Python release plan remains unchanged.');
+  }
+
   function addTrack() {
     const extra = EXTRA_TRACKS.find((track) => !tracks.some((x) => x.id === track.id));
     if (!extra) { setInfo('All sample tracks have been added.'); return; }
@@ -235,9 +247,14 @@ export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode, sto
             <span className="font-semibold">Spotify-style Playlist Case Studio</span>
             <span className="rounded bg-amber-300/15 px-2 py-1 text-[10px] text-amber-200">LOCAL CLASSROOM SIMULATOR</span>
           </div>
-          <button onClick={onOpenCode} className="rounded-md bg-[#1ed760] px-4 py-2 text-xs font-bold text-black hover:bg-[#46f783]">
-            Open Python & Verify Requirements
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button onClick={resetSimulator} className="rounded-md border border-white/25 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10">
+              Reset playlist demo
+            </button>
+            <button onClick={onOpenCode} className="rounded-md bg-[#1ed760] px-4 py-2 text-xs font-bold text-black hover:bg-[#46f783]">
+              Open Python & Verify Requirements
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[210px_minmax(0,1fr)_320px]">
@@ -360,7 +377,7 @@ export const Lab02SpotifyCasePanel: React.FC<Props> = ({ result, onOpenCode, sto
             </div>
 
             <div className="mt-4 rounded-lg border border-white/10 bg-black/25 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><Heart className="h-4 w-4 text-[#1ed760]" /> AI-assisted release comparison</div>
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold"><Heart className="h-4 w-4 text-[#1ed760]" /> Python release planning results</div>
               {!release ? (
                 <p className="text-xs leading-5 text-white/65">No Python release result yet. Run the starter from the Code tab, then return to see which requirements were selected and whether FR-06 passes the student's actual guardrail.</p>
               ) : (
