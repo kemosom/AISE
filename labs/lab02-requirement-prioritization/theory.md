@@ -55,15 +55,15 @@ The Python starter enumerates 64 possible combinations. You only need to complet
 
 ## 5. Where the AI actually appears
 
-Use a *real generative AI model in another browser tab*. Give it the source evidence and six candidate requirements, ask for a proposed ranking with citations and a structured result, then **audit** the returned recommendation.
+Click the **AI Assistant** tab in the lab. When configured by the instructor, it connects to a **real open-weight LLM** through the Hugging Face Inference Providers API. The model receives short course-prepared Spotify source excerpts and the six fictional case-study requirements as grounding context. It does not browse Spotify's live website.
 
-The browser lab does not pretend that a rule-based priority score is itself an LLM. The Python program is a deterministic engineering verifier; the external model provides a live, potentially fallible recommendation.
+Ask for a release recommendation with sources and structured output, and then **audit** the result against the real Spotify documentation and the independent Python constraint checks. The Python program remains the deterministic engineering verifier, rather than pretending that its scoring formula is a generative AI model. The chatbot may generate inaccurate suggestions; the engineer is responsible for verification.
 
 This is a deliberately lightweight example of **grounded LLM-assisted requirements engineering, structured outputs, evidence traceability, and human-in-the-loop verification**.
 
 ## 6. What the lab does NOT require
 
-No Spotify account, Spotify Premium, Spotify API credentials, paid AI API key, or Python installation. Everything except the student-chosen public AI assistant runs inside the course website.
+No Spotify account, Spotify Premium, Spotify API credentials, student-provided AI API key, or Python installation. The AI tab requires the lecturer to configure server-side Hugging Face credentials and inference credits. The rest of the lab works without that connection.
 
 **Caution:** Spotify's 2026 Development Mode imposes premium-owner and user limits. We therefore study genuine API requirements and validate a *local design*, without making live authenticated Spotify API calls.
 
