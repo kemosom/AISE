@@ -3,7 +3,7 @@
   "labNumber": 2,
   "week": 3,
   "title": "AI-Assisted Requirements Prioritization: Spotify Playlist Case Study",
-  "shortDescription": "Explore a hands-on Spotify-style playlist simulator, inspect real Spotify API documentation, use ChatGPT or Gemini for a proposed release, and verify the decision with Python.",
+  "shortDescription": "Explore Spotify playlist features, correct two Python functions, compare release plans, and review an AI recommendation.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
@@ -17,10 +17,10 @@
     "webPreview": false
   },
   "learningOutcomes": [
-    "Read and cite real Spotify Web API requirements using linked official D1-D4 documentation.",
-    "Test playlist actions in a local simulator and identify invalid public/collaborative configurations.",
-    "Use weighted stakeholder ratings and budget constraints to select a feasible software release.",
-    "Evaluate an external generative AI recommendation against official API rules and independently verified Python results."
+    "Find software requirements in Spotify's playlist documentation.",
+    "Test playlist features and identify a setting that needs to be corrected.",
+    "Calculate requirement priorities and choose features within a development budget.",
+    "Compare an AI recommendation with the Python results and Spotify's API rules."
   ],
   "courseAlignment": [
     {
@@ -45,57 +45,57 @@
   "tasks": [
     {
       "id": "l2-t1",
-      "title": "Explore the Spotify case and official documentation",
-      "description": "Open Spotify Case, explore the playlist, and inspect D1-D4 evidence. Record two documented API constraints.",
+      "title": "Read the Spotify requirements",
+      "description": "Open Spotify Case, read D1–D4, and record two rules in Report section 1.",
       "category": "analysis",
       "action": "spotify"
     },
     {
       "id": "l2-t2",
-      "title": "Interact with playlist actions and reproduce FR-06",
-      "description": "Rename the playlist, add and remove sample tracks, and test invalid public + collaborative settings.",
+      "title": "Test the playlist features",
+      "description": "Rename a playlist, add and remove songs, and try FR-06. Write what happened in Report section 2.",
       "category": "analysis",
       "action": "spotify"
     },
     {
       "id": "l2-t3",
-      "title": "Run the flawed release baseline",
-      "description": "Run main.py, then view the selected features and policy status in Spotify Case.",
+      "title": "Run the starting code",
+      "description": "Run main.py and check which features were selected in Spotify Case.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l2-t4",
-      "title": "Fix the Spotify playlist rule",
-      "description": "Implement playlist_policy_ok(public, collaborative) and retest FR-06.",
+      "title": "Fix the playlist rule",
+      "description": "Update playlist_policy_ok() so public and collaborative cannot both be true. Run the code again.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l2-t5",
-      "title": "Compute stakeholder-weighted utility",
-      "description": "Correct requirement_utility(row), run Python, and inspect the 8-day release in Spotify Case.",
+      "title": "Calculate feature priority",
+      "description": "Update requirement_utility() using the three stakeholder ratings. Check FR-01 and the 8-day release.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l2-t6",
-      "title": "Use ChatGPT or Gemini as a requirements reviewer",
-      "description": "In Spotify Case, copy the grounded prompt, open an external AI assistant, and record its source-backed recommendation.",
+      "title": "Ask ChatGPT or Gemini",
+      "description": "Copy the case prompt from Spotify Case and compare the AI recommendation with Python.",
       "category": "analysis",
       "action": "spotify"
     },
     {
       "id": "l2-t7",
-      "title": "Audit the AI ranking and budget",
-      "description": "Paste the AI's ranked IDs into main.py, try the 6-day budget, restore 8 days, and Verify Requirements.",
+      "title": "Check your results",
+      "description": "Enter the AI ranking, test a 6-day budget, restore 8 days, and run Verify Requirements.",
       "category": "test",
       "action": "verify"
     },
     {
       "id": "l2-t8",
-      "title": "Submit the case-study report",
-      "description": "Summarize evidence, observed behavior, corrected Python, AI recommendation, constraints and test results.",
+      "title": "Complete your report",
+      "description": "Answer the six report questions, enter your name and student ID, and submit.",
       "category": "report",
       "action": "report"
     }
