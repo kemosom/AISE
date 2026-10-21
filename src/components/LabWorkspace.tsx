@@ -675,7 +675,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
         {/* VIEW 3: INTERACTIVE SPOTIFY REQUIREMENTS CASE (LAB 02 ONLY) */}
         {viewMode === 'spotify' && labId === 'lab02-requirement-prioritization' && (
-          <Lab02SpotifyCasePanel result={execResult} onOpenCode={() => setViewMode('code')} />
+          <Lab02SpotifyCasePanel
+            result={execResult}
+            onOpenCode={() => setViewMode('code')}
+            storageKey={`aise:${isInstructorPreview ? 'instructor:' : 'student:'}lab02:spotify-simulator:v1`}
+          />
         )}
 
         {/* VIEW 4: LAB REPORT WORKSPACE */}
