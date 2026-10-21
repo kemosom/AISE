@@ -190,7 +190,7 @@ export const Lab02AIAssistant: React.FC<Props> = ({ instructorChatToken }) => {
                 </p>
               )}
             </div>
-          )
+          )}
 
           <div className="mt-3 flex flex-wrap gap-2">
             {prompts.map((p) => (
