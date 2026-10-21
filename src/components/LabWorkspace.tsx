@@ -643,6 +643,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             onOpenCode={() => setViewMode('code')}
             onOpenReport={() => setViewMode('report')}
             onOpenVerification={handleOpenVerification}
+            onOpenAssistant={() => setViewMode('assistant')}
           />
         )}
 
