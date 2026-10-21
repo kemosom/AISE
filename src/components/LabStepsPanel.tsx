@@ -5,7 +5,7 @@ import {
   Code2,
   FileText,
   ListChecks,
-  MessageSquare,
+  Music2,
   Play,
   ShieldCheck,
 } from 'lucide-react';
@@ -18,7 +18,7 @@ interface LabStepsPanelProps {
   onOpenCode: () => void;
   onOpenReport: () => void;
   onOpenVerification: () => void;
-  onOpenAssistant?: () => void;
+  onOpenSpotify?: () => void;
 }
 
 export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
@@ -28,7 +28,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
   onOpenCode,
   onOpenReport,
   onOpenVerification,
-  onOpenAssistant,
+  onOpenSpotify,
 }) => {
   const tasks = manifest.tasks || [];
 
@@ -49,11 +49,11 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
       };
     }
 
-    if (task.action === 'assistant' && onOpenAssistant) {
+    if (task.action === 'spotify' && onOpenSpotify) {
       return {
-        label: 'Open AI Assistant',
-        icon: <MessageSquare className="w-3.5 h-3.5" />,
-        onClick: onOpenAssistant,
+        label: 'Explore Spotify Case',
+        icon: <Music2 className="w-3.5 h-3.5" />,
+        onClick: onOpenSpotify,
       };
     }
 
