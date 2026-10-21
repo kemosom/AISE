@@ -85,7 +85,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const useLocalPersistence = user.id === 'open-student';
   // A versioned Lab 02 store avoids restoring files from its retired ML activity.
   const localKey = (kind: string) =>
-    `aise:${isInstructorPreview ? 'instructor-preview:' : ''}${labId === 'lab02-requirement-prioritization' ? 'v3' : 'v2'}:${labId}:${kind}`;
+    `aise:${isInstructorPreview ? 'instructor-preview:' : ''}${labId === 'lab02-requirement-prioritization' ? 'v4' : 'v2'}:${labId}:${kind}`;
 
   const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
@@ -164,7 +164,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           throw new Error('Laboratory module not found.');
         }
 
-        if (loadedManifest.labNumber > 1 && !isInstructorPreview) {
+        if (loadedManifest.labNumber > 2 && !isInstructorPreview) {
           throw new Error('This laboratory is not released yet.');
         }
 
@@ -371,6 +371,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Evidence Insertion Handlers
   const handleAddCodeSnapshotToReport = (snapshot: { title: string; code: string }) => {
     const targetSection =
+      reportState.sections.find((s) => s.id === 'python_changes') ||
       reportState.sections.find((s) => s.id === 'guardrail') ||
       reportState.sections.find((s) => s.id === 'implementation') ||
       reportState.sections.find((s) => s.id === 'ai-method') ||
@@ -389,6 +390,8 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   const handleAddOutputToReport = (output: string) => {
     const targetSection =
+      reportState.sections.find((s) => s.id === 'release_plans') ||
+      reportState.sections.find((s) => s.id === 'release_plans') ||
       reportState.sections.find((s) => s.id === 'results') ||
       reportState.sections.find((s) => s.id === 'comparison') ||
       reportState.sections.find((s) => s.id === 'baseline') ||
@@ -424,6 +427,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   const handleAddTestResultsToReport = (testSummary: string) => {
     const targetSection =
+      reportState.sections.find((s) => s.id === 'ai_checks') ||
       reportState.sections.find((s) => s.id === 'results') ||
       reportState.sections.find((s) => s.id === 'comparison') ||
       reportState.sections[0];
@@ -697,6 +701,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               codeFiles={files}
               testStats={testStats}
               previewMode={Boolean(isInstructorPreview)}
+              sectionPrompts={Object.fromEntries(
+                manifest.reportTemplate.sections.map((section) => [
+                  section.id,
+                  section.placeholder || '',
+                ])
+              )}
             />
           </div>
         )}
