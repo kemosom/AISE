@@ -44,6 +44,7 @@ interface ReportWorkspaceProps {
   saveStatus: string;
   codeFiles?: Array<{ name: string; language: string; content: string }>;
   testStats?: { passed: number; total: number } | null;
+  previewMode?: boolean;
 }
 
 export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
@@ -57,6 +58,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   saveStatus,
   codeFiles = [],
   testStats = null,
+  previewMode = false,
 }) => {
   const [activeSectionId, setActiveSectionId] = useState(
     reportState.sections[0]?.id || 'objective'
@@ -192,6 +194,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   };
 
   const handleSubmitReport = async () => {
+    if (previewMode) return; // Instructor review must not create a real submission.
     setSubmissionError(null);
 
     const studentName = reportState.studentName?.trim();
@@ -296,7 +299,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
 
           <button
             onClick={handleSubmitReport}
-            disabled={isSubmitting || Boolean(submissionReceipt)}
+            disabled={previewMode || isSubmitting || Boolean(submissionReceipt)}
             className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-3.5 h-3.5" />
@@ -305,6 +308,8 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                 ? 'Submitted'
                 : isSubmitting
                 ? 'Submitting...'
+                : previewMode
+                ? 'Preview only'
                 : 'Submit'}
             </span>
           </button>
