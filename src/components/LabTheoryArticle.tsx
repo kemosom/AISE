@@ -745,8 +745,12 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
             const trimmed = block.trim();
             if (!trimmed) return null;
 
-            // Display math block
-            if (trimmed.startsWith('$$') && trimmed.endsWith('$$')) {
+            // Display math: accept both $...$ and LaTeX \\[...\\] delimiters.
+            // Lab 02 uses \\[...\\], which previously appeared as raw text.
+            if (
+              (trimmed.startsWith('$') && trimmed.endsWith('$')) ||
+              (trimmed.startsWith('\\[') && trimmed.endsWith('\\]'))
+            ) {
               const expression = trimmed.slice(2, -2).trim();
               const html = katex.renderToString(expression, {
                 displayMode: true,
