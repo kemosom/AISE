@@ -63,60 +63,26 @@ Do not use the provided listener-only placeholder. For FR-01, the correct result
 
 Run Python. Record the ranked requirements and the feasible release under the **8 engineer-day** budget.
 
-## Step 5 (25 min): Obtain a real, evidence-grounded AI recommendation
+## Step 5 (25 min): Chat with a real LLM inside the lab
 
-Open a free-access general-purpose LLM that you can use in your browser (e.g., ChatGPT). No API key is required for this exercise.
+1. Click the **AI Assistant** tab in the laboratory. It connects to a real open-weight conversational model using the instructor's server-side Hugging Face Inference Providers account. Students do **not** need API tokens or software installations.
+2. Open the links to **D1: Spotify Playlists** and **D2: Change Playlist Details** shown above the chat. The assistant has short verified course excerpts as context; it does **not** browse those web pages live.
+3. Click **Audit FR-06**, read the model's explanation, and compare its claims with D1 and D2. Identify the invalid requirement.
+4. Click **Propose a release**, then press **Send**. Ask the model for:
+   - `ranked_ids`: all six feature IDs in priority order;
+   - `infeasible_ids`: proposed features that violate the API;
+   - `release_ids` and `total_engineer_days`: a feasible release within the budget;
+   - `evidence` and `uncertainties`: sources and unsupported claims.
+5. Inspect its answer. The model is expected to reason from provided documents and scenario data, but it can still make errors. Note whether it respected the Spotify rules, budget, and FR-05 dependency. **Do not treat its proposed rankings as the verified engineering decision.**
+6. Record the model name, the date, the exact recommendation, at least one relevant citation, and one limitation in your report.
 
-Open the official documentation links **D1** and **D2** first, then copy the prompt below into your AI assistant.
+**If the AI Assistant says "Model not yet configured" or reports exhausted inference credits**, notify your lecturer. Continue the independent Python and reporting steps; the chatbot must not silently substitute hard-coded answers.
 
-### Prompt to copy into the AI assistant
-
-```text
-Act as a software requirements engineer. We are building a hypothetical
-client for Spotify's playlist Web API. Our authoritative source is:
-D1 https://developer.spotify.com/documentation/web-api/concepts/playlists
-D2 https://developer.spotify.com/documentation/web-api/reference/change-playlist-details
-D3 https://developer.spotify.com/documentation/web-api/reference/add-items-to-playlist
-D4 https://developer.spotify.com/documentation/web-api/reference/remove-items-playlist
-
-Real documented constraints to verify:
-- Spotify playlist public=true and collaborative=true cannot coexist.
-- Public visibility on a Spotify profile is not the same as access control.
-- Playlist updates require appropriate ownership/authorization.
-- Playlist item changes use version/snapshot mechanisms.
-
-These candidates and their estimates are fictional teaching assumptions:
-FR-01 edit playlist title/description, 2 days; stakeholder ratings L=3, P=4, E=5.
-FR-02 publish playlist to owner's profile, 2 days; L=4, P=5, E=4.
-FR-03 private collaborative playlist, 4 days; L=5, P=4, E=3.
-FR-04 add playlist item, 2 days; L=5, P=4, E=5.
-FR-05 remove playlist item with snapshot awareness, 4 days; L=3, P=3, E=4;
-      this scenario requires FR-04 to be implemented with or before it.
-FR-06 enable public AND collaborative on the same playlist, 2 days; L=5, P=5, E=5.
-
-Our total budget is 8 engineer-days. The stakeholder weights are
-L=0.50, P=0.30, E=0.20. Do not invent Spotify usage data or developer costs.
-
-Return a single JSON object with exactly these keys:
-"ranked_ids": all six requirement IDs in your preferred order;
-"infeasible_ids": IDs that violate API requirements, with reasons;
-"release_ids": your feasible recommended subset of IDs;
-"total_engineer_days": total effort for the selected subset;
-"evidence": short API claims with source IDs D1-D4 and their URLs;
-"uncertainties": claims that cannot be supported from those documents;
-"recommended_reviewer": who should validate the most important uncertainty.
-Use JSON arrays and objects, not Markdown prose. Explain key decisions inside
-the JSON values. If you cannot inspect a source, explicitly mark it unverified.
-Do not assume that being ranked highly makes an invalid requirement shippable.
-```
-
-**No response is guaranteed to be correct.** If your model cannot access URLs, provide it with the short verified excerpts from the lab theory. Do not claim it independently retrieved the pages.
-
-Record the exact AI model/tool used, the date, and its suggested subset in your report. Preserve its explanation.
+**Source note:** The model receives static course-prepared source excerpts plus fictional stakeholder ratings. It does not fetch the current Spotify documents itself. Verify any API claim by opening D1-D4.
 
 ## Step 6 (15 min): Audit the AI, not just its answer
 
-From the model's ranking, copy *only the ordered IDs* into the list at the top of `main.py`:
+From the **AI Assistant** response, copy *only the ordered IDs* into the list at the top of `main.py`:
 
 ```python
 AI_SUGGESTED_ORDER = ["FR-03", "FR-04", "FR-02", "FR-01", "FR-05", "FR-06"]
