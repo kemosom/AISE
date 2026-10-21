@@ -77,10 +77,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Open-access students share no server identity. Persist their personal
   // workspace in this browser so one learner can never overwrite another
   // learner's code/report through the synthetic "open-student" account.
-  const useLocalPersistence = user.id === 'open-student' && !isInstructorPreview;
+  // Instructor preview uses bundled lab assets but writes to a separate browser
+  // workspace. It never uses the student workspace or authenticated API routes.
+  const useLocalPersistence = user.id === 'open-student';
   // A versioned Lab 02 store avoids restoring files from its retired ML activity.
   const localKey = (kind: string) =>
-    `aise:${labId === 'lab02-requirement-prioritization' ? 'v3' : 'v2'}:${labId}:${kind}`;
+    `aise:${isInstructorPreview ? 'instructor-preview:' : ''}${labId === 'lab02-requirement-prioritization' ? 'v3' : 'v2'}:${labId}:${kind}`;
 
   const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
@@ -159,7 +161,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           throw new Error('Laboratory module not found.');
         }
 
-        if (loadedManifest.labNumber > 1) {
+        if (loadedManifest.labNumber > 1 && !isInstructorPreview) {
           throw new Error('This laboratory is not released yet.');
         }
 
@@ -504,6 +506,9 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <h1 className="text-xs font-bold text-slate-900 truncate max-w-sm sm:max-w-md">
               {manifest.title}
             </h1>
+            {isInstructorPreview && (
+              <span className="rounded bg-amber-100 px-2 py-1 text-[10px] font-semibold text-amber-900">INSTRUCTOR PREVIEW · NOT RELEASED</span>
+            )}
           </div>
 
           <div className="hidden lg:flex items-center space-x-2 border-l border-slate-200 pl-3">
@@ -667,6 +672,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               saveStatus={reportSaveStatus}
               codeFiles={files}
               testStats={testStats}
+              previewMode={Boolean(isInstructorPreview)}
             />
           </div>
         )}
