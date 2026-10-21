@@ -69,6 +69,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   const [submissionReceipt, setSubmissionReceipt] =
     useState<LabSubmissionReceipt | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [testSubmissionPassed, setTestSubmissionPassed] = useState(false);
 
   // Image Upload input
   const [imageCaption, setImageCaption] = useState('');
@@ -82,6 +83,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
       s.id === activeSectionId ? { ...s, content: newContent } : s
     );
     const updated = { ...reportState, sections: updatedSections };
+    setTestSubmissionPassed(false);
     onUpdateReportState(updated);
   };
 
@@ -194,8 +196,8 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
   };
 
   const handleSubmitReport = async () => {
-    if (previewMode) return; // Instructor review must not create a real submission.
     setSubmissionError(null);
+    setTestSubmissionPassed(false);
 
     const studentName = reportState.studentName?.trim();
     const studentId = reportState.studentId?.trim();
@@ -217,6 +219,13 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
           .map((section) => section.title)
           .join(', ')}`
       );
+      return;
+    }
+
+    if (previewMode) {
+      // Exercise the SAME client-side validation as students, without
+      // generating a Supabase submission or consuming a student ID.
+      setTestSubmissionPassed(true);
       return;
     }
 
@@ -299,7 +308,7 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
 
           <button
             onClick={handleSubmitReport}
-            disabled={previewMode || isSubmitting || Boolean(submissionReceipt)}
+            disabled={isSubmitting || Boolean(submissionReceipt)}
             className="inline-flex items-center space-x-1.5 px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white rounded text-xs font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-3.5 h-3.5" />
@@ -308,26 +317,27 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                 ? 'Submitted'
                 : isSubmitting
                 ? 'Submitting...'
-                : previewMode
-                ? 'Preview only'
                 : 'Submit'}
             </span>
           </button>
         </div>
       </div>
 
-      {(submissionError || submissionReceipt) && (
+      {(submissionError || submissionReceipt || testSubmissionPassed) && (
         <div
           className={`mx-6 mt-3 rounded-md border px-4 py-2 text-xs ${
-            submissionReceipt
+            submissionReceipt || testSubmissionPassed
               ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
               : 'border-red-200 bg-red-50 text-red-700'
           }`}
         >
-          {submissionReceipt ? (
+          {testSubmissionPassed ? (
             <span>
-              Report submitted successfully.
+              Instructor test passed: all required student details and report sections are present.
+              This is a dry run; nothing was sent to Supabase and no student ID was consumed.
             </span>
+          ) : submissionReceipt ? (
+            <span>Report submitted successfully.</span>
           ) : (
             submissionError
           )}
@@ -392,9 +402,10 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                 <input
                   type="text"
                   value={reportState.studentName || ''}
-                  onChange={(e) =>
-                    onUpdateReportState({ ...reportState, studentName: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setTestSubmissionPassed(false);
+                    onUpdateReportState({ ...reportState, studentName: e.target.value });
+                  }}
                   placeholder="Enter your full name (e.g. John Doe)"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
@@ -407,9 +418,10 @@ export const ReportWorkspace: React.FC<ReportWorkspaceProps> = ({
                 <input
                   type="text"
                   value={reportState.studentId || ''}
-                  onChange={(e) =>
-                    onUpdateReportState({ ...reportState, studentId: e.target.value })
-                  }
+                  onChange={(e) => {
+                    setTestSubmissionPassed(false);
+                    onUpdateReportState({ ...reportState, studentId: e.target.value });
+                  }}
                   placeholder="Enter student ID (e.g. 24012345)"
                   className="w-full px-3 py-2 text-xs border border-slate-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none font-mono"
                 />
