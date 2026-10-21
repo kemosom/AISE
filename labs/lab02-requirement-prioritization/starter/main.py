@@ -117,6 +117,7 @@ def audit_ai_order(order):
 
 
 def show_results():
+    import json
     print("LAB 02 | REAL SPOTIFY API RULES + CLASSROOM RELEASE DECISION")
     print("Sources: D1 Spotify Playlists | D2 Change Details | D3 Add Items | D4 Remove Items")
     print("Fictional classroom inputs: stakeholder ratings, development days and budget.")
@@ -144,6 +145,19 @@ def show_results():
         print("No LLM proposal pasted yet. Use the prompt from the lab sheet.")
     print("\nStudent edits: fix playlist_policy_ok(), implement requirement_utility(),")
     print("then obtain an AI ranking, paste it, vary BUDGET_DAYS and interpret results.")
+
+    # Machine-readable event consumed only by the local Spotify case interface.
+    # All values reflect the actual student's current Python implementation.
+    # The music UI is a simulator; this is not a live Spotify API response.
+    payload = {
+        "budget": BUDGET_DAYS,
+        "days_used": sum(row["days"] for row in selected),
+        "selected_ids": chosen,
+        "policy_enforced": not playlist_policy_ok(True, True),
+        "utility_example": requirement_utility(REQUIREMENTS[0]),
+        "total_utility": round(sum(requirement_utility(r) for r in selected), 2),
+    }
+    print("__AISE_PLAYLIST__ " + json.dumps(payload, separators=(",", ":")))
 
 
 if __name__ == "__main__":
