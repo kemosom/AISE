@@ -41,3 +41,6 @@ jobs:
 
       - name: Validate Lab 02 data and ML pipeline
         run: python scripts/validate_lab02.py
+
+      - name: Validate Lab 03 starter and locked instructor preview
+        run: python scripts/validate_lab03.py
