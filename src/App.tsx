@@ -175,10 +175,11 @@ export default function App() {
       // Lab 02 opens its actual student workspace immediately after instructor
       // authentication. Preserve Lab 01's established answer-guide landing.
       // The Lab 02 student access lock remains in force.
-      const openLab02 = instructorSelectedLabId === 'lab02-requirement-prioritization';
-      setIsInstructorPreview(openLab02);
+      const openCasePreview = instructorSelectedLabId === 'lab02-requirement-prioritization' ||
+        instructorSelectedLabId === 'lab03-social-commitment-agents';
+      setIsInstructorPreview(openCasePreview);
       setShowInstructorAccess(false);
-      setActiveView(openLab02 ? 'lab' : 'instructor');
+      setActiveView(openCasePreview ? 'lab' : 'instructor');
     } catch (err: any) {
       setInstructorUnlockError(
         err.message || 'Unable to unlock instructor materials.'

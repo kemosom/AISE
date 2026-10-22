@@ -6,6 +6,7 @@ import {
   FileText,
   ListChecks,
   Music2,
+  Clapperboard,
   Play,
   ShieldCheck,
 } from 'lucide-react';
@@ -19,6 +20,7 @@ interface LabStepsPanelProps {
   onOpenReport: () => void;
   onOpenVerification: () => void;
   onOpenSpotify?: () => void;
+  onOpenTikTok?: () => void;
 }
 
 export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
@@ -29,6 +31,7 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
   onOpenReport,
   onOpenVerification,
   onOpenSpotify,
+  onOpenTikTok,
 }) => {
   const tasks = manifest.tasks || [];
 
@@ -54,6 +57,14 @@ export const LabStepsPanel: React.FC<LabStepsPanelProps> = ({
         label: 'Explore Spotify Case',
         icon: <Music2 className="w-3.5 h-3.5" />,
         onClick: onOpenSpotify,
+      };
+    }
+
+    if (task.action === 'tiktok' && onOpenTikTok) {
+      return {
+        label: 'Explore TikTok Case',
+        icon: <Clapperboard className="w-3.5 h-3.5" />,
+        onClick: onOpenTikTok,
       };
     }
 

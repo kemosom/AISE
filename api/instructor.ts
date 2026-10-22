@@ -107,6 +107,15 @@ export default function handler(req: any, res: any) {
     normalizeSecret(body.labId) || 'lab01-behavioral-programming';
 
   try {
+    if (requestedLabId === 'lab03-social-commitment-agents') {
+      // Unlock instructor preview after verifying the existing server-side code.
+      // Student navigation and normal lab loading remain locked.
+      return res.status(200).json({
+        ok: true,
+        data: { labId: requestedLabId, labNumber: 3 },
+      });
+    }
+
     if (requestedLabId === 'lab02-requirement-prioritization') {
       // The older encrypted Lab 02 guide covers a retired ML exercise.
       // Verify the same server-side instructor code, then authorize review

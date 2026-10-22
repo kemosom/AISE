@@ -62,6 +62,7 @@ export const InstructorAccessModal: React.FC<InstructorAccessModalProps> = ({
           >
             <option value="lab01-behavioral-programming">Lab 01: Safe AI-Assisted Software Release</option>
             <option value="lab02-requirement-prioritization">Lab 02: Spotify Requirements Prioritization</option>
+            <option value="lab03-social-commitment-agents">Lab 03: TikTok Social Commitments (Instructor Preview)</option>
           </select>
           <label className="block text-xs font-medium text-slate-700 mb-2">
             Instructor code

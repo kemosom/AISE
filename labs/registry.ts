@@ -21,6 +21,14 @@ import lab02MainPy from './lab02-requirement-prioritization/starter/main.py?raw'
 import lab02Tests from './lab02-requirement-prioritization/tests/public-tests.json';
 import lab02ReportTemplate from './lab02-requirement-prioritization/report-template.json';
 
+
+import lab03Metadata from './lab03-social-commitment-agents/manifest.json';
+import lab03Theory from './lab03-social-commitment-agents/theory.md?raw';
+import lab03LabSheet from './lab03-social-commitment-agents/lab-sheet.md?raw';
+import lab03MainPy from './lab03-social-commitment-agents/starter/main.py?raw';
+import lab03Tests from './lab03-social-commitment-agents/tests/public-tests.json';
+import lab03ReportTemplate from './lab03-social-commitment-agents/report-template.json';
+
 // Curriculum-aligned task catalog mapping for all MAI5124 laboratories
 export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
   'lab03-social-commitment-agents': [
@@ -226,23 +234,19 @@ labRegistryMap.set('lab02-requirement-prioritization', {
   instructionsMarkdown: `${lab02Theory}\n\n---\n\n${lab02LabSheet}`,
 });
 
-// Lab 03
-labRegistryMap.set(
-  'lab03-social-commitment-agents',
-  createLabShell(
-    'lab03-social-commitment-agents',
-    3,
-    3,
-    'Agent-Based Software Programming: Social Commitments',
-    'Model multi-agent negotiation, conditional commitments, and communicative speech-acts in software ecosystems.',
-    [
-      'Define social commitment states: Create, Fulfill, Cancel, Release, Discharge.',
-      'Implement commitment-driven interaction protocols between buyer, supplier, and escrow agents.',
-      'Formulate verification rules for commitment compliance and violation tracking.',
-    ],
-    `# Lab 03: Social Commitments & Speech-Acts\n\nclass SocialCommitment:\n    def __init__(self, debtor, creditor, antecedent, consequent):\n        self.debtor = debtor\n        self.creditor = creditor\n        self.antecedent = antecedent\n        self.consequent = consequent\n        self.state = "CONDITIONAL"\n\nprint("Initialized Multi-Agent Commitment Protocol.")\n`
-  )
-);
+// Lab 03 - TikTok creator campaign and Python social-commitment engine.
+labRegistryMap.set('lab03-social-commitment-agents', {
+  ...(lab03Metadata as any),
+  starterFiles: [
+    { name: 'main.py', language: 'python', content: lab03MainPy },
+  ],
+  reportTemplate: lab03ReportTemplate as any,
+  snippets: [],
+  tests: lab03Tests as any,
+  theoryMarkdown: lab03Theory,
+  labSheetMarkdown: lab03LabSheet,
+  instructionsMarkdown: lab03Theory + '\n\n---\n\n' + lab03LabSheet,
+});
 
 // Lab 04
 labRegistryMap.set(

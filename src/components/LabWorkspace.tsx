@@ -9,6 +9,7 @@ import {
   BookOpen,
   RotateCcw,
   Music2,
+  Clapperboard,
 } from 'lucide-react';
 import type { AuthUserPublic } from '../../lib/auth/types';
 import type { LabManifest } from '../../labs/types';
@@ -20,6 +21,7 @@ import { ReportWorkspace, type ReportState } from './ReportWorkspace';
 import { LabTheoryArticle } from './LabTheoryArticle';
 import { LabStepsPanel } from './LabStepsPanel';
 import { Lab02SpotifyCasePanel } from './Lab02SpotifyCasePanel';
+import { Lab03TikTokCasePanel } from './Lab03TikTokCasePanel';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -46,11 +48,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Keep the student workflow explicit: theory, steps, code, and report.
   // Session persistence prevents a browser refresh from throwing the student
   // out of the page they were actively using.
-  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'spotify' | 'report'>(() => {
+  const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'spotify' | 'tiktok' | 'report'>(() => {
     if (typeof window === 'undefined') return 'theory';
     const saved = window.sessionStorage.getItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`);
     return saved === 'steps' || saved === 'code' || saved === 'report' ||
-      (labId === 'lab02-requirement-prioritization' && (saved === 'spotify' || saved === 'assistant'))
+      (labId === 'lab02-requirement-prioritization' && (saved === 'spotify' || saved === 'assistant')) ||
+      (labId === 'lab03-social-commitment-agents' && saved === 'tiktok')
       ? saved === 'assistant' ? 'spotify' : saved
       : 'theory';
   });
@@ -569,6 +572,16 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
               Spotify Case
             </button>
           )}
+          {labId === 'lab03-social-commitment-agents' && (
+            <button
+              onClick={() => setViewMode('tiktok')}
+              className={'px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ' +
+                (viewMode === 'tiktok' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900')}
+            >
+              <Clapperboard className="w-3.5 h-3.5" />
+              TikTok Case
+            </button>
+          )}
           <button
             onClick={() => setViewMode('report')}
             className={`px-3 py-1 rounded font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
@@ -646,6 +659,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             onOpenReport={() => setViewMode('report')}
             onOpenVerification={handleOpenVerification}
             onOpenSpotify={() => setViewMode('spotify')}
+            onOpenTikTok={() => setViewMode('tiktok')}
           />
         )}
 
@@ -686,7 +700,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           />
         )}
 
-        {/* VIEW 4: LAB REPORT WORKSPACE */}
+        {/* VIEW 4: INTERACTIVE TIKTOK CREATOR CASE (LAB 03) */}
+        {viewMode === 'tiktok' && labId === 'lab03-social-commitment-agents' && (
+          <Lab03TikTokCasePanel
+            result={execResult}
+            onOpenCode={() => setViewMode('code')}
+          />
+        )}
+
+        {/* VIEW 5: LAB REPORT WORKSPACE */}
         {viewMode === 'report' && (
           <div className="h-full">
             <ReportWorkspace

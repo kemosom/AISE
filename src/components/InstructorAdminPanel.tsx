@@ -60,6 +60,36 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
   // The earlier encrypted Lab 02 instructor payload belongs to the retired
   // model-training lab. Until it is re-encrypted for the current case study,
   // never display its obsolete answers as if they describe the new lab.
+  if (data.labId === 'lab03-social-commitment-agents') {
+    const currentLab = LabRegistry.getLab(data.labId);
+    return (
+      <div className="min-h-[calc(100vh-3.5rem)] bg-slate-100">
+        <div className="mx-auto max-w-4xl px-6 py-10">
+          <button type="button" onClick={onExit}
+            className="inline-flex items-center gap-2 text-xs text-slate-600 hover:text-slate-900">
+            <ArrowLeft className="h-4 w-4" /> Exit instructor access
+          </button>
+          <h1 className="mt-7 text-2xl font-semibold">Lab 03 · Instructor Preview</h1>
+          <p className="mt-2 text-sm text-slate-600">{currentLab?.title}</p>
+          <p className="mt-3 text-sm text-slate-600">
+            Review the complete student theory, TikTok Case, Python starter, public tests,
+            and integrated report while student access stays locked.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={onPreviewLab}
+              className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
+              Open Lab 03 Workspace
+            </button>
+            <button type="button" onClick={onSwitchLab}
+              className="rounded-md border border-slate-300 bg-white px-5 py-3 text-sm">
+              Switch laboratory
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (data.labId === 'lab02-requirement-prioritization') {
     const currentLab = LabRegistry.getLab(data.labId);
 
