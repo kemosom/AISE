@@ -1,0 +1,104 @@
+{
+  "id": "lab03-social-commitment-agents",
+  "labNumber": 3,
+  "week": 4,
+  "title": "Social Commitments in Distributed Systems: TikTok Creator Campaign",
+  "shortDescription": "Manage a TikTok-style creator campaign, implement a Python commitment lifecycle, and test coordination failures.",
+  "estimatedDuration": "2 hours",
+  "language": "python",
+  "runner": "pyodide",
+  "packages": [],
+  "features": {
+    "visualDesigner": false,
+    "blockly": false,
+    "functionPalette": false,
+    "testRunner": true,
+    "reportEditor": true,
+    "webPreview": false
+  },
+  "learningOutcomes": [
+    "Identify independent agents, goals, and campaign data.",
+    "Define debtor, creditor, trigger, outcome, and deadline for conditional commitments.",
+    "Implement offer transitions, commitment states, and duplicate-event handling in Python.",
+    "Test successful, late, unpaid, withdrawn, and rejected campaigns.",
+    "Explain the difference between exchanging messages and fulfilling commitments."
+  ],
+  "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Analyze distributed coordination and commitment responsibilities."
+    },
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "primary",
+      "evidence": "Implement state transitions and test agent behavior."
+    },
+    {
+      "clo": "CLO3",
+      "plo": "PLO7",
+      "contribution": "secondary",
+      "evidence": "Interpret violation and verification results."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "l3-t1",
+      "title": "Explore the creator campaign",
+      "description": "Open TikTok Case. Examine the offer, video, agents, and event timeline.",
+      "category": "analysis",
+      "action": "tiktok"
+    },
+    {
+      "id": "l3-t2",
+      "title": "Identify the commitments",
+      "description": "Inspect debtor, creditor, conditions, and deadlines for K1–K5.",
+      "category": "analysis",
+      "action": "tiktok"
+    },
+    {
+      "id": "l3-t3",
+      "title": "Run the starter program",
+      "description": "Run main.py. Compare the initial SUCCESS and PAYOUT_MISSED results.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l3-t4",
+      "title": "Fix offer transitions",
+      "description": "Reject acceptance after withdrawal and withdrawal after acceptance.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l3-t5",
+      "title": "Implement commitment states",
+      "description": "Calculate conditional, active, fulfilled, and violated states from event dates.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l3-t6",
+      "title": "Handle duplicate events",
+      "description": "Process repeated event IDs once and reject conflicting duplicates.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l3-t7",
+      "title": "Compare six scenarios",
+      "description": "Use the TikTok Case ledger to interpret the success and failure scenarios.",
+      "category": "analysis",
+      "action": "tiktok"
+    },
+    {
+      "id": "l3-t8",
+      "title": "Verify and write your report",
+      "description": "Run verification, answer the five report questions, and submit once.",
+      "category": "report",
+      "action": "verify"
+    }
+  ]
+}

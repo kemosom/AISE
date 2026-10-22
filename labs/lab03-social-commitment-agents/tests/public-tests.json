@@ -1,0 +1,37 @@
+[
+  {
+    "id": "l3-offer",
+    "name": "Offer acceptance and withdrawal",
+    "description": "Reject illegal transitions before and after acceptance.",
+    "weight": 20,
+    "testCode": "import main\nassert main.transition_offer('NONE','offer_sent')=='OFFERED'\nassert main.transition_offer('OFFERED','offer_accepted')=='ACCEPTED'\nassert main.transition_offer('OFFERED','offer_declined')=='DECLINED'\nassert main.transition_offer('OFFERED','offer_withdrawn')=='WITHDRAWN'\nfor s,e in [('ACCEPTED','offer_withdrawn'),('WITHDRAWN','offer_accepted'),('NONE','offer_accepted'),('ACCEPTED','offer_accepted')]:\n    try: main.transition_offer(s,e)\n    except ValueError: pass\n    else: raise AssertionError(f'Illegal offer transition: {s}/{e}')"
+  },
+  {
+    "id": "l3-activation",
+    "name": "Conditional, active, and fulfilled",
+    "description": "Require all triggers and an outcome after activation.",
+    "weight": 20,
+    "testCode": "import main\nr={'when':['a','b'],'do':'c','within':2}\nassert main.commitment_state(r,{'a':[0]},8)=='CONDITIONAL'\nassert main.commitment_state(r,{'a':[0],'b':[3]},4)=='ACTIVE'\nassert main.commitment_state(r,{'a':[0],'b':[3],'c':[2]},4)=='ACTIVE'\nassert main.commitment_state(r,{'a':[0],'b':[3],'c':[5]},5)=='FULFILLED'"
+  },
+  {
+    "id": "l3-deadline",
+    "name": "Deadlines and late delivery",
+    "description": "An outcome on the deadline is timely, but one day later is a violation.",
+    "weight": 25,
+    "testCode": "import main\nr={'when':['a'],'do':'b','within':5}\nassert main.commitment_state(r,{'a':[1]},6)=='ACTIVE'\nassert main.commitment_state(r,{'a':[1]},7)=='VIOLATED'\nassert main.commitment_state(r,{'a':[1],'b':[6]},8)=='FULFILLED'\nassert main.commitment_state(r,{'a':[1],'b':[7]},8)=='VIOLATED'"
+  },
+  {
+    "id": "l3-duplicate",
+    "name": "Idempotent event processing",
+    "description": "Count exact repeats once and reject conflicting IDs.",
+    "weight": 15,
+    "testCode": "import main\nrs=[{'id':'a','day':1,'type':'x'},{'id':'a','day':1,'type':'x'},{'id':'b','day':2,'type':'y'}]\nassert main.unique_events(rs)==[rs[0],rs[2]]\ntry: main.unique_events([rs[0],{'id':'a','day':2,'type':'x'}])\nexcept ValueError: pass\nelse: raise AssertionError('Conflicting duplicate event accepted')"
+  },
+  {
+    "id": "l3-scenarios",
+    "name": "Six campaign scenarios",
+    "description": "Check the ledger states and deduplicated payment.",
+    "weight": 20,
+    "testCode": "import main\ns={n:main.run_case(n) for n in main.SCENARIOS}\nstatus=lambda n,k:next(c['status'] for c in s[n]['ledger'] if c['id']==k)\nassert all(status('SUCCESS',f'K{i}')=='FULFILLED' for i in range(1,6))\nassert status('LATE_DELIVERY','K2')=='VIOLATED'\nassert status('PAYOUT_MISSED','K5')=='VIOLATED'\nassert all(status('WITHDRAWN_OFFER',f'K{i}')=='CONDITIONAL' for i in range(1,6))\nassert status('COMPLIANCE_REJECTED','K4')=='CONDITIONAL'\nassert status('COMPLIANCE_REJECTED','K5')=='CONDITIONAL'\nassert s['DUPLICATE_PAYOUT']['event_count']==s['SUCCESS']['event_count']"
+  }
+]
