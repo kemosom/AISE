@@ -2,9 +2,12 @@
 Lab 03: TikTok creator campaign and social commitments.
 
 Complete:
-  1. transition_offer()
-  2. commitment_state()
-  3. unique_events()
+  1. transition_offer() - enforce legal contract negotiation
+  2. unique_events() - provide delivery safety
+  3. commitment_state() - evaluate triggered obligations and deadlines
+  4. agent_reactions() - implement event-driven agents
+
+Run five agent experiments in addition to the supplied traces.
 
 The simulation uses fictional events and makes no external requests.
 """
@@ -121,9 +124,112 @@ def commitment_state(rule, observed, as_of_day):
     return "CONDITIONAL"
 
 
+# AGENT EXPERIMENTS
+# Change these settings, run Python, and compare the ledger in TikTok Case.
+# All decisions are deterministic for reproducible verification.
+AGENT_POLICIES = {
+    "AGENT_NORMAL": {
+        "escrow_delay": 1, "delivery_delay": 3,
+        "compliance_passes": True, "payment_failures": 0,
+        "duplicate_payout": False,
+    },
+    "AGENT_CREATOR_LATE": {
+        "escrow_delay": 1, "delivery_delay": 8,
+        "compliance_passes": True, "payment_failures": 0,
+        "duplicate_payout": False,
+    },
+    "AGENT_PAYMENT_RETRY": {
+        "escrow_delay": 1, "delivery_delay": 3,
+        "compliance_passes": True, "payment_failures": 2,
+        "duplicate_payout": True,
+    },
+    "AGENT_PAYMENT_OUTAGE": {
+        "escrow_delay": 1, "delivery_delay": 3,
+        "compliance_passes": True, "payment_failures": 5,
+        "duplicate_payout": False,
+    },
+    "AGENT_REJECTED": {
+        "escrow_delay": 1, "delivery_delay": 3,
+        "compliance_passes": False, "payment_failures": 0,
+        "duplicate_payout": False,
+    },
+}
+
+
+def agent_reactions(message, policy):
+    """TODO 4: Implement agent decisions that generate new messages.
+
+    Return a list of event dictionaries; the event bus schedules them.
+    Never directly change the ledger. It must come from the event log.
+
+    Decision table (offsets are relative to the incoming event):
+      offer_accepted     -> escrow_funded after escrow_delay
+      escrow_funded      -> video_submitted after delivery_delay
+      video_submitted    -> compliance_passed/failed after 1 day
+      compliance_passed  -> brand_reviewed and brand_approved after 1 day
+      compliance_failed  -> brand_reviewed after 1 day
+      brand_approved     -> video_published after 1 day
+      video_published    -> payout_requested after 1 day (attempt=1)
+      payout_requested   -> if attempt <= payment_failures, retry at +1 day
+                            else payout_settled on that day. Optionally
+                            publish an identical repeated payout event.
+
+    Every retry has a new ID. A retransmitted confirmation must reuse
+    the same event ID and contents, so it will be deduplicated.
+
+    Worked example: an approved video is published one day later.
+    """
+    day = message["day"]
+    kind = message["type"]
+    if kind == "brand_approved":
+        return [event("post-live", day + 1, "video_published")]
+
+    # Implement all the other cases above.
+    return []
+
+
+def simulate_agents(policy):
+    """Provided infrastructure: deterministic asynchronous event dispatch.
+
+    Agent responses enter a time-ordered event queue. Duplicate IDs are
+    filtered before dispatch. Each independent agent decides what to emit.
+    """
+    import heapq
+    queue = []
+    sequence = 0
+
+    def publish(message):
+        nonlocal sequence
+        sequence += 1
+        heapq.heappush(queue, (message["day"], sequence, message))
+
+    publish(event("invitation-1", 0, "offer_sent"))
+    publish(event("acceptance-1", 0, "offer_accepted"))
+
+    delivered = []
+    while queue:
+        day, _, message = heapq.heappop(queue)
+        if day > 30:
+            break
+        candidate = unique_events(delivered + [message])
+        if len(candidate) == len(delivered):
+            continue
+        delivered = candidate
+        if len(delivered) > 80:
+            raise RuntimeError("Possible infinite retry loop (>80 messages)")
+        for response in agent_reactions(message, policy):
+            if not isinstance(response, dict) or response["day"] < day:
+                raise ValueError("An agent must publish a valid future event")
+            publish(response)
+    return delivered
+
+
 def run_case(name):
-    """Build a simulated campaign artifact and its commitment ledger."""
-    case = SCENARIOS[name]
+    """Build a campaign event log, artifact, and commitment ledger."""
+    case = SCENARIOS.get(name)
+    if case is None:
+        policy = AGENT_POLICIES[name]
+        case = {"events": simulate_agents(policy), "as_of_day": 20}
     events = unique_events(case["events"])
     ordered = sorted(events, key=lambda item: item["day"])
     offer_state = "NONE"
@@ -158,7 +264,8 @@ def run_case(name):
 
 
 def main():
-    cases = {name: run_case(name) for name in SCENARIOS}
+    names = list(SCENARIOS) + list(AGENT_POLICIES)
+    cases = {name: run_case(name) for name in names}
     for name, row in cases.items():
         violations = [c["id"] for c in row["ledger"] if c["status"] == "VIOLATED"]
         print(f"{name:21} | events={row['event_count']:2} | violated={violations}")
