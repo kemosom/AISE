@@ -1,7 +1,7 @@
 """Smoke tests for the unreleased TikTok Lab 03 teaching package.
 
 The starter intentionally fails public mastery tests. This script checks
-that the editor can run it, the six case payloads are structurally sound,
+that the editor can run it, the eleven case payloads are structurally sound,
 and the student release guard remains closed.
 """
 from pathlib import Path
@@ -19,6 +19,7 @@ assert MANIFEST["labNumber"] == 3
 assert MANIFEST["id"] == "lab03-social-commitment-agents"
 assert len(MANIFEST["tasks"]) == 8
 assert len(REPORT["sections"]) == 5
+assert len(TESTS) == 7
 assert sum(int(test["weight"]) for test in TESTS) == 100
 assert all(test["testCode"].strip() for test in TESTS)
 
@@ -32,6 +33,8 @@ cases = json.loads(lines[0].split("=", 1)[1])
 assert set(cases) == {
     "SUCCESS", "LATE_DELIVERY", "PAYOUT_MISSED",
     "WITHDRAWN_OFFER", "COMPLIANCE_REJECTED", "DUPLICATE_PAYOUT",
+    "AGENT_NORMAL", "AGENT_CREATOR_LATE", "AGENT_PAYMENT_RETRY",
+    "AGENT_PAYMENT_OUTAGE", "AGENT_REJECTED",
 }
 for key, item in cases.items():
     assert len(item["ledger"]) == 5, key
@@ -40,6 +43,9 @@ for key, item in cases.items():
     assert item["as_of_day"] >= max(event["day"] for event in item["events"])
 assert len(cases["SUCCESS"]["events"]) == 9
 assert cases["WITHDRAWN_OFFER"]["offer_state"] == "WITHDRAWN"
+assert cases["AGENT_NORMAL"]["offer_state"] == "ACCEPTED"
+assert cases["AGENT_NORMAL"]["event_count"] == 2
+assert all(item["id"].startswith("K") for item in cases["AGENT_PAYMENT_RETRY"]["ledger"])
 
 # Students should not get a completed answer in their starter.
 assert cases["PAYOUT_MISSED"]["ledger"][-1]["status"] != "VIOLATED"
