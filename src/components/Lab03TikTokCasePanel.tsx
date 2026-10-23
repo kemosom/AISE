@@ -9,6 +9,7 @@ import type { ExecutionResult } from '../../lib/runners/types';
 interface Props {
   result: ExecutionResult | null;
   onOpenCode: () => void;
+  onUpdatePolicy: (policyId: string, key: string, value: number) => void;
 }
 
 type CampaignEvent = { id: string; day: number; type: string };
@@ -316,11 +317,13 @@ function TikTokVideoFeed() {
   );
 }
 
-export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) => {
+export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode, onUpdatePolicy }) => {
   const [scenarioId, setScenarioId] = useState('SUCCESS');
   const [selectedRule, setSelectedRule] = useState('K2');
   const [selectedEvent, setSelectedEvent] = useState(0);
   const [detailsTab, setDetailsTab] = useState<'activity' | 'sources'>('activity');
+  const [deliveryDelay, setDeliveryDelay] = useState(8);
+  const [paymentFailures, setPaymentFailures] = useState(2);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const cases = useMemo(() => parsePythonCases(result), [result]);
@@ -440,6 +443,35 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
           </main>
 
           <aside className="min-w-0 space-y-4">
+            {isAgentExperiment && (
+              <section className="rounded-2xl border border-cyan-400/20 bg-[#121b25] p-4">
+                <div className="flex items-center gap-2"><Activity className="h-4 w-4 text-cyan-300" /><h2 className="text-sm font-bold">Fault injection</h2></div>
+                <p className="mt-2 text-[11px] leading-5 text-zinc-400">Change an agent policy in the real Python source. Run Python to generate a new event history and ledger.</p>
+                {(scenarioId === 'AGENT_CREATOR_LATE' || scenarioId === 'AGENT_NORMAL') && (
+                  <div className="mt-4">
+                    <label htmlFor="l3-delivery-delay" className="flex justify-between text-[11px] font-semibold"><span>Creator delivery delay</span><span className="text-cyan-300">{deliveryDelay} days</span></label>
+                    <input id="l3-delivery-delay" type="range" min="1" max="10" value={deliveryDelay}
+                      onChange={(event)=>setDeliveryDelay(Number(event.target.value))} className="mt-3 w-full accent-[#fe2c55]" />
+                    <button type="button" onClick={() => onUpdatePolicy(scenarioId, 'delivery_delay', deliveryDelay)}
+                      className="mt-3 w-full rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-[11px] font-semibold text-cyan-100 hover:bg-cyan-400/20">
+                      Apply to Python, then Run
+                    </button>
+                  </div>
+                )}
+                {(scenarioId === 'AGENT_PAYMENT_RETRY' || scenarioId === 'AGENT_PAYMENT_OUTAGE') && (
+                  <div className="mt-4">
+                    <label htmlFor="l3-payment-failures" className="flex justify-between text-[11px] font-semibold"><span>Failed payment attempts</span><span className="text-cyan-300">{paymentFailures}</span></label>
+                    <input id="l3-payment-failures" type="range" min="0" max="6" value={paymentFailures}
+                      onChange={(event)=>setPaymentFailures(Number(event.target.value))} className="mt-3 w-full accent-[#fe2c55]" />
+                    <button type="button" onClick={() => onUpdatePolicy(scenarioId, 'payment_failures', paymentFailures)}
+                      className="mt-3 w-full rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 py-2 text-[11px] font-semibold text-cyan-100 hover:bg-cyan-400/20">
+                      Apply to Python, then Run
+                    </button>
+                  </div>
+                )}
+                <div className="mt-3 text-[10px] leading-4 text-zinc-500">The ledger will update only after Python executes. Restore the starting values before verification.</div>
+              </section>
+            )}
             <section className="rounded-2xl border border-white/10 bg-[#12151d] p-4">
               <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-cyan-300" /><h2 className="text-sm font-bold">Commitment Ledger</h2></div>
               <p className="mt-1.5 text-[11px] leading-5 text-zinc-400">The Python engine evaluates obligations from the event history.</p>
