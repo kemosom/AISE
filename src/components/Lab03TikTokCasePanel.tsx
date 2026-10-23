@@ -40,6 +40,11 @@ const SCENARIOS: Array<{ id: string; title: string; brief: string; day: number; 
     events: [...completed.slice(0, 4), makeEvent('r05', 5, 'compliance_failed'), makeEvent('r06', 5, 'brand_reviewed')] },
   { id: 'DUPLICATE_PAYOUT', title: 'Duplicate payment event', brief: 'The payment confirmation arrives twice with one ID', day: 10,
     events: [...completed, { ...completed[completed.length - 1] }] },
+  { id: 'AGENT_NORMAL', title: 'Agents: normal delivery', brief: 'All four services generate events and settle on time', day: 20, events: [] },
+  { id: 'AGENT_CREATOR_LATE', title: 'Agents: late creator', brief: 'Change the creator delivery policy and examine K2', day: 20, events: [] },
+  { id: 'AGENT_PAYMENT_RETRY', title: 'Agents: payment retries', brief: 'Payout service retries requests before settlement', day: 20, events: [] },
+  { id: 'AGENT_PAYMENT_OUTAGE', title: 'Agents: payment outage', brief: 'Repeated retries exceed the contract deadline', day: 20, events: [] },
+  { id: 'AGENT_REJECTED', title: 'Agents: rejected video', brief: 'Compliance service refuses submitted content', day: 20, events: [] },
 ];
 const RULES = [
   { id: 'K1', debtor: 'Brand', creditor: 'Creator', when: ['offer_accepted'], do: 'escrow_funded', within: 1 },
@@ -61,6 +66,7 @@ const EVENT_NAMES: Record<string, string> = {
   payout_settled: 'Creator receives payout',
   offer_withdrawn: 'Brand withdraws offer',
   offer_declined: 'Creator declines offer',
+  payout_requested: 'Payment attempt sent',
 };
 const SOURCES = [
   { title: 'Creator marketing projects', url: 'https://ads.tiktok.com/help/article/how-to-create-a-new-creator-marketing-project-in-tiktok-one' },
@@ -323,9 +329,11 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
   const ledger = pythonCase?.ledger || [];
   const activeRule = ledger.find((r) => r.id === selectedRule) || RULES.find((r) => r.id === selectedRule) || RULES[1];
   const uniqueCount = pythonCase?.event_count;
+  const visibleEvents = pythonCase?.events || scenario.events;
+  const isAgentExperiment = scenario.id.startsWith('AGENT_');
   const violations = ledger.filter((row) => row.status === 'VIOLATED').length;
   const fulfilled = ledger.filter((row) => row.status === 'FULFILLED').length;
-  const chosenEvent = scenario.events[Math.min(selectedEvent, scenario.events.length - 1)];
+  const chosenEvent = visibleEvents[Math.min(selectedEvent, visibleEvents.length - 1)] || null;
 
   const chooseScenario = (id: string) => {
     setScenarioId(id);
@@ -352,12 +360,15 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
             <div className="mb-3 text-xs font-bold uppercase tracking-wider text-zinc-400">Campaign scenarios</div>
             <div className="space-y-1.5">
               {SCENARIOS.map((item, index) => (
+                <React.Fragment key={item.id}>
+                {index === 6 && <div className="mb-2 mt-5 border-t border-white/15 pt-4 text-[11px] font-bold uppercase tracking-wider text-cyan-200">Agent experiments</div>}
                 <button type="button" key={item.id} onClick={() => chooseScenario(item.id)}
                   className={'w-full rounded-xl border px-3 py-3 text-left transition ' +
                     (scenario.id === item.id ? 'border-[#fe2c55]/60 bg-[#fe2c55]/15 text-white' : 'border-transparent bg-white/[0.03] text-zinc-300 hover:border-white/10 hover:bg-white/[0.07]')}>
-                  <div className="flex items-center justify-between gap-1"><span className="text-xs font-bold">{index + 1}. {item.title}</span><ChevronRight className="h-3 w-3 shrink-0" /></div>
+                  <div className="flex items-center justify-between gap-1"><span className="text-xs font-bold">{index < 6 ? (index + 1) + '. ' : ''}{item.title}</span><ChevronRight className="h-3 w-3 shrink-0" /></div>
                   <div className="mt-1.5 text-[11px] leading-4 text-zinc-400">{item.brief}</div>
                 </button>
+                </React.Fragment>
               ))}
             </div>
             <div className="mt-5 border-t border-white/10 pt-4">
@@ -375,13 +386,13 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
 
           <main className="min-w-0 space-y-4">
             <section className="rounded-2xl border border-white/10 bg-[#12151d] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#20d5ec]">TikTok One • Creator marketing</div><span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold text-zinc-300">Day {scenario.day} review</span></div>
+              <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#20d5ec]">TikTok One • Creator marketing</div><span className="rounded-full bg-white/10 px-2 py-1 text-[10px] font-semibold text-zinc-300">Day {pythonCase?.as_of_day ?? scenario.day} review</span></div>
               <h1 className="mt-2 text-2xl font-black leading-tight">NovaSound x MayaTech</h1>
               <p className="mt-1 text-xs leading-5 text-zinc-400">One promotional video, brand approval, publication, and creator payout.</p>
               <div className="mt-4 grid grid-cols-3 gap-2">
                 <div className="rounded-xl bg-[#1b202b] p-3"><CircleDollarSign className="h-4 w-4 text-[#20d5ec]" /><div className="mt-2 text-lg font-black">RM 1,200</div><div className="text-[10px] text-zinc-400">Creator fee</div></div>
                 <div className="rounded-xl bg-[#1b202b] p-3"><FileVideo2 className="h-4 w-4 text-[#fe2c55]" /><div className="mt-2 text-lg font-black">1 video</div><div className="text-[10px] text-zinc-400">Deliverable</div></div>
-                <div className="rounded-xl bg-[#1b202b] p-3"><CalendarDays className="h-4 w-4 text-amber-400" /><div className="mt-2 text-lg font-black">{scenario.day}</div><div className="text-[10px] text-zinc-400">Evaluation day</div></div>
+                <div className="rounded-xl bg-[#1b202b] p-3"><CalendarDays className="h-4 w-4 text-amber-400" /><div className="mt-2 text-lg font-black">{pythonCase?.as_of_day ?? scenario.day}</div><div className="text-[10px] text-zinc-400">Evaluation day</div></div>
               </div>
               <div className="mt-4 rounded-xl border border-white/10 bg-black/25 p-3 text-[11px] leading-5 text-zinc-300"><span className="font-bold text-white">Project payment:</span> In the online-payment model, funding enters escrow before production. Payout follows publication. This case models both obligations separately.</div>
             </section>
@@ -391,20 +402,21 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
                 <div><h2 className="text-sm font-bold">Campaign activity</h2><p className="mt-0.5 text-[11px] text-zinc-400">{scenario.title}</p></div>
                 <div className="flex gap-1">
                   <button type="button" onClick={() => setSelectedEvent(0)} title="First event" className="rounded-md border border-white/15 p-2 text-zinc-300 hover:bg-white/10"><RotateCcw className="h-3.5 w-3.5" /></button>
-                  <button type="button" onClick={() => setSelectedEvent((v)=>Math.min(v+1,scenario.events.length-1))} title="Next event" className="rounded-md border border-white/15 p-2 text-zinc-300 hover:bg-white/10"><ChevronRight className="h-3.5 w-3.5" /></button>
+                  <button type="button" onClick={() => setSelectedEvent((v)=>Math.min(v+1,Math.max(0,visibleEvents.length-1)))} title="Next event" className="rounded-md border border-white/15 p-2 text-zinc-300 hover:bg-white/10"><ChevronRight className="h-3.5 w-3.5" /></button>
                 </div>
               </div>
+              {isAgentExperiment && !pythonCase && <div className="mt-3 rounded-lg border border-amber-400/20 bg-amber-400/10 p-3 text-[11px] text-amber-100">Run main.py first. This timeline is generated by Python agents, not predetermined events.</div>}
               <div className="mt-4 max-h-[260px] space-y-1 overflow-y-auto pr-1">
-                {scenario.events.map((item,index) => (
+                {visibleEvents.map((item,index) => (
                   <button type="button" key={item.id + ':' + index} onClick={() => setSelectedEvent(index)}
                     className={'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition ' + (index === selectedEvent ? 'bg-[#fe2c55]/15 ring-1 ring-[#fe2c55]/40' : 'hover:bg-white/5')}>
                     <span className={'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ' + (item.type.includes('failed') ? 'bg-rose-600/20 text-rose-300' : 'bg-cyan-500/10 text-cyan-200')}>D{item.day}</span>
-                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold">{EVENT_NAMES[item.type] || item.type}</div><div className="mt-0.5 text-[10px] text-zinc-500">Event {item.id}{scenario.id === 'DUPLICATE_PAYOUT' && index === scenario.events.length-1 ? ' · repeated ID' : ''}</div></div>
+                    <div className="min-w-0 flex-1"><div className="truncate text-xs font-semibold">{EVENT_NAMES[item.type] || item.type}</div><div className="mt-0.5 text-[10px] text-zinc-500">Event {item.id}{scenario.id === 'DUPLICATE_PAYOUT' && index === visibleEvents.length-1 ? ' · repeated ID' : ''}</div></div>
                     {index === selectedEvent ? <Activity className="h-4 w-4 text-[#fe2c55]" /> : null}
                   </button>
                 ))}
               </div>
-              <div className="mt-3 rounded-xl bg-[#222837] px-3 py-3 text-xs"><span className="font-semibold">Selected:</span> Day {chosenEvent.day}, {EVENT_NAMES[chosenEvent.type] || chosenEvent.type}<div className="mt-1 text-[10px] text-zinc-400">This event is part of the shared campaign history. Open the ledger to see its contractual consequence.</div></div>
+              {chosenEvent && <div className="mt-3 rounded-xl bg-[#222837] px-3 py-3 text-xs"><span className="font-semibold">Selected:</span> Day {chosenEvent.day}, {EVENT_NAMES[chosenEvent.type] || chosenEvent.type}<div className="mt-1 text-[10px] text-zinc-400">This event is part of the campaign history. The ledger determines whether its obligation was met.</div></div>}
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-[#12151d] p-5">
