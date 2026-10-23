@@ -315,6 +315,39 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   };
 
   // Run Code via Pyodide
+  const handleLab03PolicyChange = (policyId: string, key: string, value: number) => {
+    // The Case tab updates the real editable Python file, never a separate
+    // JavaScript copy of the results. Students must rerun Python to recompute.
+    const allowedPolicies = ['AGENT_CREATOR_LATE', 'AGENT_PAYMENT_RETRY', 'AGENT_PAYMENT_OUTAGE', 'AGENT_NORMAL'];
+    const allowedKeys = ['delivery_delay', 'payment_failures'];
+    if (labId !== 'lab03-social-commitment-agents' ||
+        !allowedPolicies.includes(policyId) || !allowedKeys.includes(key) ||
+        !Number.isInteger(value) || value < 0 || value > 20) return;
+    const mainIndex = files.findIndex((file) => file.name === 'main.py');
+    if (mainIndex < 0) return;
+    const original = files[mainIndex].content;
+    const start = original.indexOf('"' + policyId + '": {');
+    if (start < 0) return;
+    const end = original.indexOf('    },', start);
+    if (end < 0) return;
+    const block = original.slice(start, end);
+    const expression = new RegExp('("' + key + '"\\s*:\\s*)\\d+');
+    if (!expression.test(block)) return;
+    const replaced = block.replace(expression, (_match, prefix: string) => prefix + String(value));
+    const next = [...files];
+    next[mainIndex] = { ...next[mainIndex], content: original.slice(0, start) + replaced + original.slice(end) };
+    setFiles(next);
+    setExecResult(null);
+    setTestStats(null);
+    setCodeSaveStatus('Saving...');
+    if (useLocalPersistence) {
+      void writeLocal('files', next)
+        .then(() => setCodeSaveStatus('Saved'))
+        .catch(() => setCodeSaveStatus('Save failed'));
+    }
+    setViewMode('code');
+  };
+
   const handleRunCode = async () => {
     setIsRunningCode(true);
     try {
@@ -705,6 +738,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
           <Lab03TikTokCasePanel
             result={execResult}
             onOpenCode={() => setViewMode('code')}
+            onUpdatePolicy={handleLab03PolicyChange}
           />
         )}
 
