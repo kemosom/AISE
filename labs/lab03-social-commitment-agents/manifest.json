@@ -3,7 +3,7 @@
   "labNumber": 3,
   "week": 4,
   "title": "Social Commitments in Distributed Systems: TikTok Creator Campaign",
-  "shortDescription": "Manage a TikTok-style creator campaign, implement a Python commitment lifecycle, and test coordination failures.",
+  "shortDescription": "Explore a playable TikTok-style video feed and build an event-driven Python multi-agent simulator with delays, retries, and commitment verification.",
   "estimatedDuration": "2 hours",
   "language": "python",
   "runner": "pyodide",
@@ -17,11 +17,11 @@
     "webPreview": false
   },
   "learningOutcomes": [
-    "Identify independent agents, goals, and campaign data.",
-    "Define debtor, creditor, trigger, outcome, and deadline for conditional commitments.",
-    "Implement offer transitions, commitment states, and duplicate-event handling in Python.",
-    "Test successful, late, unpaid, withdrawn, and rejected campaigns.",
-    "Explain the difference between exchanging messages and fulfilling commitments."
+    "Analyze goals, social commitments, and dependencies among independent agents.",
+    "Implement event-driven handlers that emit new messages for creator, brand, compliance, and payment services.",
+    "Process at-least-once messages with event IDs, deterministic event order, and idempotency.",
+    "Implement conditional commitment lifecycles and deadline verification.",
+    "Inject faults and interpret delivery delays, compliance failures, payment retries, and missed obligations."
   ],
   "courseAlignment": [
     {
@@ -46,57 +46,57 @@
   "tasks": [
     {
       "id": "l3-t1",
-      "title": "Explore the creator campaign",
-      "description": "Open TikTok Case. Examine the offer, video, agents, and event timeline.",
+      "title": "Explore the video feed and campaign",
+      "description": "Scroll through the playable clips and identify the creator, brand, compliance, and payment agents.",
       "category": "analysis",
       "action": "tiktok"
     },
     {
       "id": "l3-t2",
-      "title": "Identify the commitments",
-      "description": "Inspect debtor, creditor, conditions, and deadlines for K1–K5.",
+      "title": "Trace the five commitments",
+      "description": "Inspect the trigger, debtor, creditor, promised outcome, and deadline for K1–K5.",
       "category": "analysis",
       "action": "tiktok"
     },
     {
       "id": "l3-t3",
-      "title": "Run the starter program",
-      "description": "Run main.py. Compare the initial SUCCESS and PAYOUT_MISSED results.",
+      "title": "Run the starting simulator",
+      "description": "Run main.py and inspect the six supplied scenarios and five agent-generated experiments.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l3-t4",
-      "title": "Fix offer transitions",
-      "description": "Reject acceptance after withdrawal and withdrawal after acceptance.",
+      "title": "Implement the commitment engine",
+      "description": "Enforce legal offers, deduplicate events, and evaluate conditional commitments from deadlines.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l3-t5",
-      "title": "Implement commitment states",
-      "description": "Calculate conditional, active, fulfilled, and violated states from event dates.",
+      "title": "Program autonomous agents",
+      "description": "Write agent_reactions() so the four services react to events and publish follow-up events.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l3-t6",
-      "title": "Handle duplicate events",
-      "description": "Process repeated event IDs once and reject conflicting duplicates.",
+      "title": "Generate agent campaigns",
+      "description": "Test normal delivery, late delivery, payment retries, outages, and compliance rejection.",
       "category": "code",
       "action": "code"
     },
     {
       "id": "l3-t7",
-      "title": "Compare six scenarios",
-      "description": "Use the TikTok Case ledger to interpret the success and failure scenarios.",
+      "title": "Inject faults and measure outcomes",
+      "description": "Change policy values, rerun Python, and explain what changed in the generated event log.",
       "category": "analysis",
       "action": "tiktok"
     },
     {
       "id": "l3-t8",
-      "title": "Verify and write your report",
-      "description": "Run verification, answer the five report questions, and submit once.",
+      "title": "Verify and report",
+      "description": "Run all seven behavior tests and complete the five evidence-based report questions.",
       "category": "report",
       "action": "verify"
     }

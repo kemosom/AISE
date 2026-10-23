@@ -5,31 +5,31 @@
       "id": "agents",
       "title": "1. Agents and Goals",
       "required": true,
-      "placeholder": "Identify the four agents. Explain two different goals and one dependency. Use the TikTok campaign to illustrate."
+      "placeholder": "Identify four agents. For two of them, specify the incoming event and outgoing event, and why another agent depends on the result."
     },
     {
       "id": "commitments",
-      "title": "2. The Campaign Contract",
+      "title": "2. Commitment Contract",
       "required": true,
-      "placeholder": "For K1, K2, and K5, state the debtor, creditor, trigger, outcome, and deadline. Calculate K2's deadline in SUCCESS."
+      "placeholder": "For K1, K2, and K5, identify the debtor, creditor, triggering event(s), promised outcome, and deadline. Calculate K2's due day for AGENT_NORMAL."
     },
     {
       "id": "implementation",
-      "title": "3. Python Changes",
+      "title": "3. Python Implementation",
       "required": true,
-      "placeholder": "What did you change in transition_offer(), commitment_state(), and unique_events()? Add a short code snapshot."
+      "placeholder": "Explain what you implemented in agent_reactions(), commitment_state(), and unique_events(). Show one short code snapshot and describe the role of the event queue."
     },
     {
       "id": "results",
-      "title": "4. Results and Tests",
+      "title": "4. Experiments and Verification",
       "required": true,
-      "placeholder": "Give your verification score. Compare K2 in SUCCESS and LATE_DELIVERY; K5 in PAYOUT_MISSED; K4 and K5 in COMPLIANCE_REJECTED. Include actual event days."
+      "placeholder": "Record your seven-test score. Compare K2 and K5 across AGENT_NORMAL, AGENT_CREATOR_LATE, AGENT_PAYMENT_RETRY, and AGENT_PAYMENT_OUTAGE. State exact days and explain how changed policy parameters affected the results."
     },
     {
       "id": "discussion",
       "title": "5. Engineering Decision",
       "required": true,
-      "placeholder": "Why does 'approved' not establish payment fulfillment? Explain how the engine handles a late withdrawal and a duplicate payout. Suggest one change needed for a production system."
+      "placeholder": "Why does receiving a review or payment message not always satisfy a commitment? Explain event-id deduplication and one change needed for a production asynchronous service."
     }
   ]
 }

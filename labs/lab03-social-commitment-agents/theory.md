@@ -73,3 +73,28 @@ Official references:
 3. What evidence proves that the video was delivered on time?
 4. Why is a message announcing a payout not sufficient to establish fulfillment?
 5. Why must withdrawal after acceptance be rejected?
+
+
+## 7. Programming agents through an event bus
+
+An event-driven application does not place all business logic in one long procedure. Each service receives events and decides which events to emit. The event queue delivers them in simulated time order.
+
+For example, the creator receives an escrow_funded event and decides when to submit the video. The compliance service receives video_submitted and produces a pass or fail event. The brand reviews passing work. The payment service processes a request only after publication.
+
+The supplied simulator uses a priority queue. Each queued item has an event day and a sequence number. This makes execution reproducible when multiple events share a day. The event log can then be replayed to reconstruct the campaign and its commitments.
+
+## 8. Distributed-system engineering skills
+
+**Idempotency.** Network delivery may repeat the same message. Identical event IDs represent the same event. The receiver should not process them twice. Conflicting payloads that reuse an ID must be rejected.
+
+**Retries.** A failed payout request can lead to another request with a new ID and an incremented attempt number. The original settlement obligation retains its deadline. A later retry does not extend that contract automatically.
+
+**Causal order.** An outcome must not be counted before the event that activates its obligation.
+
+**Separation of concerns.** Agents determine actions and publish events. The commitment monitor determines which obligations those actions satisfy. Neither component should substitute for the other.
+
+## 9. Compare actual generated behavior
+
+In the agent experiments, changing delivery_delay changes when the creator submits the video. Changing payment_failures changes the number and timing of settlement attempts. These settings generate different event logs, and the ledger evaluates those logs. The experiment therefore tests program behavior rather than relabeling a predetermined result.
+
+This is a deterministic multi-agent system. It does not claim that a learned AI model controls the agents.

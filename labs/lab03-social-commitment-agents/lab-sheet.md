@@ -1,64 +1,66 @@
-# Lab 03: TikTok Creator Campaign
+# Lab 03: TikTok Creator Campaign and Multi-Agent Simulation
 
 **Course:** MAI5124 AI in Software Engineering  
 **Duration:** 2 hours  
 **Tools:** TikTok Case, Python, Verify Requirements, Report
 
-## Campaign
+## Project brief
 
-NovaSound offers MayaTech RM 1,200 to promote wireless earbuds in a TikTok video.
+NovaSound offers MayaTech RM 1,200 to promote wireless earbuds on TikTok. You will implement the software agents that coordinate the invitation, funding, video submission, review, publication, and payout.
 
-The brand sends the invitation. The creator accepts it. The brand funds escrow. The creator submits a video. Compliance review and brand review follow. An approved video is published, and the payment service settles the payout.
+The TikTok Case includes a scrollable short-video feed, six supplied event histories, five agent-generated experiments, and a commitment ledger. The short videos are open-license demonstration clips. They are not real NovaSound content.
 
-The following deadlines belong to our fictional classroom contract. Days start with the invitation on Day 0.
+## The campaign contract
 
-| ID | Debtor → Creditor | Trigger | Required outcome | Days allowed |
+| ID | Debtor to creditor | Condition | Promised result | Days allowed |
 |---|---|---|---|---|
-| K1 | Brand → Creator | Offer accepted | Escrow funded | 1 |
-| K2 | Creator → Brand | Offer accepted AND escrow funded | Video submitted | 5 |
-| K3 | Brand → Creator | Video submitted | Brand review recorded | 2 |
-| K4 | Creator → Brand | Video approved | Video published | 2 |
-| K5 | Payment Service → Creator | Video published | Payout settled | 3 |
+| K1 | Brand to Creator | Offer accepted | Escrow funded | 1 |
+| K2 | Creator to Brand | Accepted offer and escrow funded | Video submitted | 5 |
+| K3 | Brand to Creator | Video submitted | Review recorded | 2 |
+| K4 | Creator to Brand | Video approved | Video published | 2 |
+| K5 | Payment Service to Creator | Video published | Payout settled | 3 |
 
-This lab uses one submission round. A compliance rejection prevents publication until a corrected submission is reviewed, but revision is outside this two-hour exercise.
+The identities, fee, day limits, and service policies are fictional lab data.
 
-## Part A: Explore the case (25 minutes)
+## Part A. Explore the system (15 minutes)
 
-1. Open TikTok Case and choose SUCCESS.
-2. Examine the simulated video, invitation, fee, and project history.
-3. Open the Commitment Ledger. For K1, K2, and K5, identify the debtor, creditor, trigger, outcome, and deadline.
-4. Calculate the K2 deadline from the activation day. Answer the first two report questions using these observations.
+1. Open TikTok Case. Scroll the video feed and try the playback, like, follow, and mute controls.
+2. Open the successful campaign history and examine the event timeline.
+3. Select K1, K2, and K5 in the Commitment Ledger. Identify each debtor, creditor, trigger, result, and deadline.
 
-## Part B: Complete Python (60 minutes)
+## Part B. Implement the commitment engine (30 minutes)
 
-5. Open Code and run main.py. Inspect the initial results in TikTok Case.
-6. Edit transition_offer(state, event_type). Only an OFFERED invitation can be accepted, withdrawn, or declined. Raise ValueError for an invalid transition.
-7. Edit commitment_state(rule, observed, as_of_day). Determine whether triggers have occurred; calculate activation and deadline; detect timely completion and violation.
-8. Edit unique_events(events). Ignore repeated identical IDs. Raise ValueError when the same ID has different contents.
-9. Run Python again and verify that SUCCESS has five FULFILLED commitments.
+4. Open Code and run main.py. The starting implementation deliberately contains incomplete logic.
+5. Complete transition_offer(state, event_type). Reject an attempt to withdraw an accepted agreement.
+6. Complete unique_events(events). Process identical retransmissions once. A reused ID with different content must raise ValueError.
+7. Complete commitment_state(rule, observed, as_of_day). Use the actual trigger day, deadline, and outcome event. Distinguish CONDITIONAL, ACTIVE, FULFILLED, and VIOLATED.
 
-## Part C: Investigate failures (20 minutes)
+## Part C. Program the agents (40 minutes)
 
-10. Compare LATE_DELIVERY with SUCCESS. Why is K2 violated?
-11. Open PAYOUT_MISSED. What evidence is missing for K5?
-12. Open WITHDRAWN_OFFER. Explain why all five commitments remain CONDITIONAL.
-13. Open COMPLIANCE_REJECTED. Why are publication and payout still CONDITIONAL?
-14. Compare DUPLICATE_PAYOUT and SUCCESS. Why should their unique event counts match?
+8. Locate agent_reactions(message, policy). One example is implemented: an approved video becomes published the following day.
+9. Implement the remaining event handlers from the code's decision table:
+   - Brand: fund accepted work, and record a review.
+   - Creator: submit a funded video, then publish approved content.
+   - Compliance: assess content and pass or fail it.
+   - Payment service: request payout, retry failed attempts, and issue a settlement event.
+10. Keep all agent responses as events. Do not directly set ledger states.
+11. Run Python. Compare AGENT_NORMAL, AGENT_CREATOR_LATE, AGENT_PAYMENT_RETRY, AGENT_PAYMENT_OUTAGE, and AGENT_REJECTED in TikTok Case.
 
-## Part D: Verify and report (15 minutes)
+## Part D. Fault injection (20 minutes)
 
-15. Run Verify Requirements and correct any failing tests.
-16. Complete the five short report questions. Use event days, statuses, and test results as evidence.
-17. Enter your student name and ID and submit once.
+12. Change AGENT_CREATOR_LATE delivery_delay from 8 to 4. Predict the effect on K2 and run Python.
+13. Change AGENT_PAYMENT_RETRY payment_failures from 2 to 4. Predict K5's result and run Python.
+14. Restore delivery_delay=8 and payment_failures=2. Run Verify Requirements and aim to pass all seven tests.
+15. Compare a repeated payment-confirmation event with a new payment transaction. Explain how the event queue treats each.
+
+## Part E. Report (15 minutes)
+
+Answer the five report questions. Quote event days and the measured commitment states. Add a code snapshot and your verification results. Enter your name and student ID and submit once.
 
 ## Course alignment
 
-**CLO1 / PLO1:** Explain roles, obligations, and limitations of message-only coordination.  
-**CLO2 / PLO2:** Implement and verify the commitment engine.  
-**CLO3 / PLO7 (supporting):** Interpret the scenario ledger and tests.
+**CLO1 / PLO1:** Analyze social commitments and coordination in a distributed software system.  
+**CLO2 / PLO2:** Implement agents, event processing, and commitment verification in Python.  
+**CLO3 / PLO7 (secondary):** Interpret simulated failure rates and unmet obligations.
 
-## Final question
-
-Suppose a real distributed payment service retransmits the same payout confirmation. Explain why event IDs matter and what additional evidence a real payment audit would need.
-
-The simulator does not access TikTok accounts, real videos, or payment systems.
+The practical uses deterministic policies, not a machine-learning recommendation engine. All operations are local simulations without TikTok accounts or real payments.
