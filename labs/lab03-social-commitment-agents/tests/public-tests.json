@@ -3,21 +3,21 @@
     "id": "l3-offer",
     "name": "Offer acceptance and withdrawal",
     "description": "Reject illegal transitions before and after acceptance.",
-    "weight": 20,
+    "weight": 10,
     "testCode": "import main\nassert main.transition_offer('NONE','offer_sent')=='OFFERED'\nassert main.transition_offer('OFFERED','offer_accepted')=='ACCEPTED'\nassert main.transition_offer('OFFERED','offer_declined')=='DECLINED'\nassert main.transition_offer('OFFERED','offer_withdrawn')=='WITHDRAWN'\nfor s,e in [('ACCEPTED','offer_withdrawn'),('WITHDRAWN','offer_accepted'),('NONE','offer_accepted'),('ACCEPTED','offer_accepted')]:\n    try: main.transition_offer(s,e)\n    except ValueError: pass\n    else: raise AssertionError(f'Illegal offer transition: {s}/{e}')"
   },
   {
     "id": "l3-activation",
     "name": "Conditional, active, and fulfilled",
     "description": "Require all triggers and an outcome after activation.",
-    "weight": 20,
+    "weight": 15,
     "testCode": "import main\nr={'when':['a','b'],'do':'c','within':2}\nassert main.commitment_state(r,{'a':[0]},8)=='CONDITIONAL'\nassert main.commitment_state(r,{'a':[0],'b':[3]},4)=='ACTIVE'\nassert main.commitment_state(r,{'a':[0],'b':[3],'c':[2]},4)=='ACTIVE'\nassert main.commitment_state(r,{'a':[0],'b':[3],'c':[5]},5)=='FULFILLED'"
   },
   {
     "id": "l3-deadline",
     "name": "Deadlines and late delivery",
     "description": "An outcome on the deadline is timely, but one day later is a violation.",
-    "weight": 25,
+    "weight": 15,
     "testCode": "import main\nr={'when':['a'],'do':'b','within':5}\nassert main.commitment_state(r,{'a':[1]},6)=='ACTIVE'\nassert main.commitment_state(r,{'a':[1]},7)=='VIOLATED'\nassert main.commitment_state(r,{'a':[1],'b':[6]},8)=='FULFILLED'\nassert main.commitment_state(r,{'a':[1],'b':[7]},8)=='VIOLATED'"
   },
   {
@@ -31,7 +31,21 @@
     "id": "l3-scenarios",
     "name": "Six campaign scenarios",
     "description": "Check the ledger states and deduplicated payment.",
-    "weight": 20,
+    "weight": 10,
     "testCode": "import main\ns={n:main.run_case(n) for n in main.SCENARIOS}\nstatus=lambda n,k:next(c['status'] for c in s[n]['ledger'] if c['id']==k)\nassert all(status('SUCCESS',f'K{i}')=='FULFILLED' for i in range(1,6))\nassert status('LATE_DELIVERY','K2')=='VIOLATED'\nassert status('PAYOUT_MISSED','K5')=='VIOLATED'\nassert all(status('WITHDRAWN_OFFER',f'K{i}')=='CONDITIONAL' for i in range(1,6))\nassert status('COMPLIANCE_REJECTED','K4')=='CONDITIONAL'\nassert status('COMPLIANCE_REJECTED','K5')=='CONDITIONAL'\nassert s['DUPLICATE_PAYOUT']['event_count']==s['SUCCESS']['event_count']"
+  },
+  {
+    "id": "l3-agent-policies",
+    "name": "Independent agents generate valid events",
+    "description": "Creator, compliance, brand, and payment agents produce correctly timed messages.",
+    "weight": 15,
+    "testCode": "import main\np=main.AGENT_POLICIES['AGENT_NORMAL']\na=main.agent_reactions({'id':'x','day':0,'type':'offer_accepted'},p)\nassert [e['type'] for e in a]==['escrow_funded'] and a[0]['day']==1\nb=main.agent_reactions({'id':'x','day':1,'type':'escrow_funded'},p)\nassert [e['type'] for e in b]==['video_submitted'] and b[0]['day']==4\nc=main.agent_reactions({'id':'x','day':4,'type':'video_submitted'},p)\nassert [e['type'] for e in c]==['compliance_passed']\nr=main.agent_reactions({'id':'x','day':5,'type':'compliance_passed'},p)\nassert {e['type'] for e in r}=={'brand_reviewed','brand_approved'}\npay=main.agent_reactions({'id':'x','day':7,'type':'video_published'},p)\nassert len(pay)==1 and pay[0]['type']=='payout_requested' and pay[0]['attempt']==1"
+  },
+  {
+    "id": "l3-distributed-simulator",
+    "name": "Agent-driven delivery, retries and outage",
+    "description": "Run event-driven campaigns with late delivery, retry, outage, and rejected content.",
+    "weight": 20,
+    "testCode": "import main\ncases={n:main.run_case(n) for n in main.AGENT_POLICIES}\nstatus=lambda n,k:next(c['status'] for c in cases[n]['ledger'] if c['id']==k)\nassert all(status('AGENT_NORMAL',f'K{i}')=='FULFILLED' for i in range(1,6))\nassert status('AGENT_CREATOR_LATE','K2')=='VIOLATED'\nassert status('AGENT_PAYMENT_RETRY','K5')=='FULFILLED'\nassert status('AGENT_PAYMENT_OUTAGE','K5')=='VIOLATED'\nassert status('AGENT_REJECTED','K4')=='CONDITIONAL'\nassert status('AGENT_REJECTED','K5')=='CONDITIONAL'\nretry=cases['AGENT_PAYMENT_RETRY']\nassert sum(e['type']=='payout_settled' for e in retry['events'])==1\nassert sum(e['type']=='payout_requested' for e in retry['events'])==3\nassert all(a['day']<=b['day'] for a,b in zip(retry['events'],retry['events'][1:]))"
   }
 ]
