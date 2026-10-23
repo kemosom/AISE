@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity, ArrowRight, BadgeCheck, BookOpen, CalendarDays, CheckCircle2,
   ChevronRight, CircleDollarSign, Clock3, ExternalLink, FileVideo2, Heart,
@@ -119,6 +119,197 @@ function EarbudsArt() {
   );
 }
 
+
+const FEED_CLIPS = [
+  {
+    id: 'campaign', title: 'NovaSound wireless earbuds',
+    user: 'mayatech', caption: 'When the client says the deadline is flexible… and then checks the SLA 😭',
+    tag: '#NovaSound #CreatorCampaign', source: '', sourcePage: '', author: 'Lab 03 illustration', featured: true,
+  },
+  {
+    id: 'cat-surprise', title: 'The surprise deployment',
+    user: 'debuggingcat', caption: 'POV: the deadline alert finally reaches the creator service 🐈',
+    tag: '#SoftwareEngineering #Jumpscare',
+    source: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Cat_Jumpscare.webm',
+    sourcePage: 'https://commons.wikimedia.org/wiki/File:Cat_Jumpscare.webm', author: 'Panini! · CC0', featured: false,
+  },
+  {
+    id: 'husky', title: 'The payment-service outage',
+    user: 'huskysupport', caption: 'The payment agent after its third retry fails.',
+    tag: '#DistributedSystems #IncidentResponse',
+    source: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Howling_Husky_Dog.webm',
+    sourcePage: 'https://commons.wikimedia.org/wiki/File:Howling_Husky_Dog.webm', author: 'Klaudya Teodora · CC0', featured: false,
+  },
+  {
+    id: 'moomin', title: 'Regression test at 2 AM',
+    user: 'moomin.qa', caption: 'Trying the same test again because it passed on my laptop.',
+    tag: '#QA #Programming',
+    source: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Moomin1.webm',
+    sourcePage: 'https://commons.wikimedia.org/wiki/File:Moomin1.webm', author: 'Tet · CC0', featured: false,
+  },
+  {
+    id: 'oreo', title: 'The rejected pull request',
+    user: 'oreo.engineer', caption: 'When compliance sends the same rejection again.',
+    tag: '#CodeReview #NoMoreRetries',
+    source: 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Miss_Oreo_%28O-Dog%29.webm',
+    sourcePage: 'https://commons.wikimedia.org/wiki/File:Miss_Oreo_(O-Dog).webm', author: 'Fancibaer · CC0', featured: false,
+  },
+];
+
+function TikTokVideoFeed() {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+  const [active, setActive] = useState(0);
+  const [muted, setMuted] = useState(true);
+  const [liked, setLiked] = useState<string[]>([]);
+  const [following, setFollowing] = useState<string[]>([]);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<Record<string, string[]>>({});
+  const [failedVideos, setFailedVideos] = useState<string[]>([]);
+  const [playing, setPlaying] = useState(true);
+  const [shareStatus, setShareStatus] = useState('');
+  const clip = FEED_CLIPS[active];
+
+  useEffect(() => {
+    videoRefs.current.forEach((video, index) => {
+      if (!video) return;
+      video.muted = muted;
+      if (index === active && playing) {
+        void video.play().catch(() => setPlaying(false));
+      } else {
+        video.pause();
+      }
+    });
+  }, [active, muted, playing]);
+
+  const navigate = (index: number) => {
+    const next = Math.max(0, Math.min(FEED_CLIPS.length - 1, index));
+    const viewport = scrollRef.current;
+    if (viewport) viewport.scrollTo({ top: next * viewport.clientHeight, behavior: 'smooth' });
+    setActive(next);
+    setPlaying(true);
+    setCommentsOpen(false);
+  };
+
+  const onScroll = () => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    const index = Math.max(0, Math.min(FEED_CLIPS.length - 1, Math.round(viewport.scrollTop / viewport.clientHeight)));
+    if (index !== active) {
+      setActive(index);
+      setPlaying(true);
+      setCommentsOpen(false);
+      setShareStatus('');
+    }
+  };
+
+  const addComment = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const value = comment.trim();
+    if (!value) return;
+    setComments((old) => ({ ...old, [clip.id]: [...(old[clip.id] || []), value] }));
+    setComment('');
+  };
+
+  const shareClip = async () => {
+    try {
+      await navigator.clipboard.writeText(clip.sourcePage || window.location.href);
+      setShareStatus('Link copied');
+    } catch {
+      setShareStatus('Link not available');
+    }
+  };
+
+  return (
+    <section className="min-w-0 overflow-hidden rounded-[28px] border-[5px] border-[#292d37] bg-black shadow-2xl" aria-label="Interactive short-video feed">
+      <div className="relative">
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-center gap-5 bg-gradient-to-b from-black/80 to-transparent px-3 pb-8 pt-4 text-sm font-semibold">
+          <span className="text-white/60">Following</span><span className="border-b-2 border-white pb-1">For You</span>
+        </div>
+        <div ref={scrollRef} onScroll={onScroll} onKeyDown={(e) => { if (e.key === 'ArrowDown') navigate(active + 1); if (e.key === 'ArrowUp') navigate(active - 1); }}
+          tabIndex={0} aria-label="Scroll through short videos. Use arrow keys to navigate."
+          className="h-[550px] snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {FEED_CLIPS.map((item, index) => (
+            <article key={item.id} className="relative h-[550px] w-full snap-start overflow-hidden bg-[#0e1725]">
+              {item.featured ? (
+                <div className="absolute inset-0" style={{background:'radial-gradient(circle at 50% 30%, #277087 0%, #143d54 40%, #050a13 92%)'}}>
+                  <div className="absolute left-5 top-[20%] z-10 max-w-[215px] text-2xl font-black leading-tight">MAKE EVERY BEAT COUNT.</div>
+                  <div className="absolute inset-x-0 top-[26%] h-[57%]"><EarbudsArt /></div>
+                  <div className="absolute left-4 top-[12%] z-10 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">FICTIONAL CAMPAIGN PREVIEW</div>
+                </div>
+              ) : (
+                <>
+                  <video
+                    ref={(node) => { videoRefs.current[index] = node; }}
+                    src={item.source}
+                    autoPlay={index === active} muted={muted} loop playsInline preload={index === active ? 'metadata' : 'none'}
+                    onError={() => setFailedVideos((old) => old.includes(item.id) ? old : [...old, item.id])}
+                    className="absolute inset-0 h-full w-full object-cover"
+                    aria-label={item.title}
+                  />
+                  {failedVideos.includes(item.id) && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-slate-700 to-zinc-950 p-6 text-center">
+                      <Video className="h-10 w-10 text-zinc-400" />
+                      <p className="text-xs leading-5 text-zinc-200">This video could not load from Wikimedia Commons.</p>
+                      <a className="text-xs font-semibold text-cyan-300 underline" href={item.sourcePage} target="_blank" rel="noreferrer">Open licensed video source</a>
+                    </div>
+                  )}
+                </>
+              )}
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/80" />
+              <div className="absolute bottom-[62px] left-4 right-14 z-10">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold">@{item.user}</span>
+                  {!item.featured && <button type="button" onClick={() => setFollowing((old) => old.includes(item.user) ? old.filter((x) => x !== item.user) : [...old, item.user])}
+                    className={'rounded border px-2 py-0.5 text-[10px] font-bold ' + (following.includes(item.user) ? 'border-white/40 bg-white/20' : 'border-[#fe2c55] bg-[#fe2c55]')}>{following.includes(item.user) ? 'Following' : 'Follow +'}</button>}
+                </div>
+                <p className="mt-1.5 text-xs font-semibold leading-5">{item.caption}</p>
+                <p className="mt-1 text-[11px] text-cyan-200">{item.tag}</p>
+                {item.sourcePage && <a href={item.sourcePage} target="_blank" rel="noreferrer" className="mt-2 inline-flex max-w-full items-center gap-1 truncate text-[10px] text-white/70 underline">{item.author} <ExternalLink className="h-3 w-3 shrink-0" /></a>}
+                {shareStatus && <p className="mt-2 text-[11px] text-emerald-300">{shareStatus}</p>}
+              </div>
+              <div className="absolute bottom-[87px] right-3 z-10 flex flex-col items-center gap-4 text-white">
+                <button type="button" title="Like clip" aria-label="Like clip" onClick={() => setLiked((old)=>old.includes(item.id)?old.filter((x)=>x!==item.id):[...old,item.id])} className="flex flex-col items-center">
+                  <Heart className={'h-7 w-7 ' + (liked.includes(item.id) ? 'fill-[#fe2c55] text-[#fe2c55]' : 'fill-white')} /><span className="mt-1 text-[10px]">{liked.includes(item.id) ? '1,285' : '1,284'}</span>
+                </button>
+                <button type="button" title="Comments" aria-label="Comments" onClick={() => setCommentsOpen(true)} className="flex flex-col items-center">
+                  <MessageCircle className="h-7 w-7 fill-white" /><span className="mt-1 text-[10px]">{86 + (comments[item.id]?.length || 0)}</span>
+                </button>
+                <button type="button" title="Copy source link" aria-label="Share clip" onClick={() => void shareClip()} className="flex flex-col items-center">
+                  <ArrowRight className="h-7 w-7" /><span className="mt-1 text-[10px]">Share</span>
+                </button>
+                <button type="button" title="Toggle sound" aria-label="Toggle sound" onClick={() => setMuted((v)=>!v)} className="rounded-full bg-black/35 p-2 text-[10px] font-bold">{muted ? 'Muted' : 'Sound'}</button>
+              </div>
+              {!item.featured && <button type="button" aria-label={playing ? 'Pause video' : 'Play video'} onClick={() => setPlaying((v)=>!v)} className="absolute left-[42%] top-[45%] z-10 flex h-12 w-12 items-center justify-center rounded-full bg-black/20 text-white/65 hover:bg-black/50">
+                {!playing && <Play className="h-7 w-7 fill-current" />}
+              </button>}
+              {commentsOpen && index === active && <div className="absolute bottom-0 left-0 right-0 z-30 flex max-h-[63%] flex-col rounded-t-2xl bg-[#171a22] p-4 shadow-2xl">
+                <div className="flex items-center justify-between text-sm font-semibold"><span>Comments</span><button type="button" aria-label="Close comments" onClick={() => setCommentsOpen(false)}><XCircle className="h-5 w-5" /></button></div>
+                <div className="my-4 flex-1 space-y-3 overflow-y-auto text-xs text-zinc-300">
+                  <p><strong>@softwaredev</strong> Please tell the payment service to retry.</p>
+                  <p><strong>@tester</strong> Works on my machine is not a test result.</p>
+                  {(comments[item.id] || []).map((message,i)=><p key={i}><strong>@you</strong> {message}</p>)}
+                </div>
+                <form onSubmit={addComment} className="flex gap-2"><input value={comment} onChange={(e)=>setComment(e.target.value)} placeholder="Add a comment" className="min-w-0 flex-1 rounded-lg border border-white/15 bg-black/50 px-3 py-2 text-xs text-white" /><button type="submit" className="rounded-lg bg-[#fe2c55] px-3 text-xs font-semibold">Post</button></form>
+              </div>}
+            </article>
+          ))}
+        </div>
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex h-[46px] items-center justify-around border-t border-white/15 bg-black/85 text-[10px] font-semibold">
+          <span>Home</span><span>Friends</span><span className="rounded bg-white px-3 py-0.5 text-xl font-black leading-6 text-black" style={{boxShadow:'-3px 0 #20d5ec,3px 0 #fe2c55'}}>+</span><span>Inbox</span><span>Profile</span>
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-white/10 bg-[#0f131b] px-3 py-2">
+        <button type="button" onClick={() => navigate(active - 1)} disabled={active===0} className="rounded border border-white/15 px-2 py-1.5 text-[11px] disabled:opacity-30">Previous</button>
+        <span className="text-[10px] text-zinc-400">Swipe or scroll · {active+1}/{FEED_CLIPS.length}</span>
+        <button type="button" onClick={() => navigate(active + 1)} disabled={active===FEED_CLIPS.length-1} className="rounded border border-white/15 px-2 py-1.5 text-[11px] disabled:opacity-30">Next ↓</button>
+      </div>
+      <p className="border-t border-white/10 px-3 py-2 text-[10px] leading-4 text-zinc-500">Demonstration feed with licensed Wikimedia Commons videos. Likes, follows, and comments are local only.</p>
+    </section>
+  );
+}
+
 export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) => {
   const [scenarioId, setScenarioId] = useState('SUCCESS');
   const [selectedRule, setSelectedRule] = useState('K2');
@@ -180,31 +371,7 @@ export const Lab03TikTokCasePanel: React.FC<Props> = ({ result, onOpenCode }) =>
             </div>
           </aside>
 
-          <section className="overflow-hidden rounded-[26px] border-[5px] border-[#252936] bg-black shadow-2xl" aria-label="TikTok-style creator post preview">
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-xs">
-              <span className="font-semibold text-zinc-400">Following</span><span className="border-b-2 border-white pb-1 text-sm font-black">For You</span><span className="text-zinc-300"><Video className="h-4 w-4" /></span>
-            </div>
-            <div className="relative h-[460px] overflow-hidden bg-[#113344] sm:h-[510px]" style={{ backgroundImage: 'radial-gradient(circle at 50% 35%,#28566e 0%,#172c49 45%,#060b16 95%)' }}>
-              <div className="absolute left-4 top-4 z-10 rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold tracking-wider text-white">PAID PARTNERSHIP</div>
-              <div className="absolute inset-x-2 top-[15%] h-[60%]"><EarbudsArt /></div>
-              <div className="absolute left-6 top-[14%] max-w-[215px] text-3xl font-black leading-tight tracking-tight">MAKE EVERY BEAT COUNT.</div>
-              <div className="absolute bottom-[70px] left-4 right-12 z-10">
-                <div className="flex items-center gap-1.5 text-sm font-bold">@mayatech <BadgeCheck className="h-3.5 w-3.5 fill-cyan-500 text-white" /></div>
-                <div className="mt-1 text-xs font-semibold">NovaSound AirPods concept • wireless audio</div>
-                <div className="mt-1 text-[11px] text-white/80">#NovaSound #CreatorCollab #TechReview</div>
-                <div className="mt-3 flex items-center gap-2 text-[11px] text-white/70"><span>♫</span><span className="truncate">Original classroom audio</span></div>
-              </div>
-              <div className="absolute bottom-[90px] right-3 z-10 flex flex-col items-center gap-4 text-white">
-                <button type="button" onClick={() => setLiked((v)=>!v)} aria-label="Like preview" className="flex flex-col items-center gap-1"><Heart className={'h-7 w-7 ' + (liked ? 'fill-[#fe2c55] text-[#fe2c55]' : 'fill-white text-white')} /><span className="text-[10px]">{liked ? '1,285' : '1,284'}</span></button>
-                <span className="flex flex-col items-center gap-1"><MessageCircle className="h-7 w-7 fill-white text-white/90" /><span className="text-[10px]">86</span></span>
-                <button type="button" onClick={() => setSaved((v)=>!v)} aria-label="Save preview" className="flex flex-col items-center gap-1"><span className={'text-2xl leading-6 ' + (saved ? 'text-yellow-300' : 'text-white')}>★</span><span className="text-[10px]">{saved ? 'Saved' : 'Save'}</span></button>
-              </div>
-              <div className="absolute bottom-0 flex h-12 w-full items-center justify-around border-t border-white/15 bg-black/80 text-[10px] font-semibold">
-                <span>⌂ Home</span><span>Explore</span><span className="rounded bg-white px-3 py-0.5 text-xl font-black leading-6 text-black" style={{boxShadow:'-3px 0 #20d5ec,3px 0 #fe2c55'}}>+</span><span>Inbox</span><span>Profile</span>
-              </div>
-            </div>
-            <div className="border-t border-white/10 bg-[#0e1118] px-4 py-3 text-[11px] text-zinc-400">Creator feed mockup · No TikTok login or actual video</div>
-          </section>
+          <TikTokVideoFeed />
 
           <main className="min-w-0 space-y-4">
             <section className="rounded-2xl border border-white/10 bg-[#12151d] p-5">
