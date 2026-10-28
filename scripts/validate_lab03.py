@@ -1,8 +1,8 @@
-"""Smoke tests for the unreleased TikTok Lab 03 teaching package.
+"""Smoke tests for the released TikTok Lab 03 teaching package.
 
 The starter intentionally fails public mastery tests. This script checks
 that the editor can run it, the eleven case payloads are structurally sound,
-and the student release guard remains closed.
+and student access is enabled only through Lab 03.
 """
 from pathlib import Path
 import json
@@ -52,6 +52,8 @@ assert cases["PAYOUT_MISSED"]["ledger"][-1]["status"] != "VIOLATED"
 assert cases["DUPLICATE_PAYOUT"]["event_count"] > cases["SUCCESS"]["event_count"]
 
 app = (ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
-assert "manifest.labNumber <= 2" in app, "Lab 03 was accidentally released."
+assert "manifest.labNumber <= 3" in app, "Lab 03 should be available to students."
 assert "instructorSelectedLabId === 'lab03-social-commitment-agents'" in app
-print("Lab 03 smoke checks passed. Student navigation remains locked.")
+workspace = (ROOT / "src" / "components" / "LabWorkspace.tsx").read_text(encoding="utf-8")
+assert "loadedManifest.labNumber > 3 && !isInstructorPreview" in workspace
+print("Lab 03 validation passed. Lab 03 released; Labs 04+ remain locked.")
