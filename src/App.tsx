@@ -77,8 +77,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Lab 01 and Lab 02 are released to students.
-        const isUnlocked = manifest.labNumber <= 2;
+        // Labs 01 through 03 are released to students.
+        const isUnlocked = manifest.labNumber <= 3;
 
         return {
           id: manifest.id,
