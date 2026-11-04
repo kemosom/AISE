@@ -29,7 +29,7 @@
       "id": "discussion",
       "title": "5. Failure Analysis and Comparison",
       "required": true,
-      "placeholder": "Show one actual compiler diagnostic, regression failure or unsuccessful patch. Explain how each agent responded, whether feedback changed the outcome, and why time and worker/model costs differed. Do not count API outages as failed software patches."
+      "placeholder": "Explain which defects and repetitions were evaluated, any API errors, and whether a second or third patch was needed. If both agents achieved 100% first-attempt success, identify the ceiling effect and compare time/model/worker costs instead of claiming an unsupported performance benefit. Include one actual patch or diagnostic from the traces."
     },
     {
       "id": "conclusion",

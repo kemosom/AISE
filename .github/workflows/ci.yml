@@ -53,3 +53,6 @@ jobs:
 
       - name: Validate Lab 04 quiz checkpoints and CSV-based figures
         run: node scripts/validate_lab04_analysis.mjs
+
+      - name: Validate Lab 04 complete batch and Gemini recovery
+        run: node scripts/validate_lab04_batch.mjs

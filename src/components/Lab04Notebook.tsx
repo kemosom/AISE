@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Editor from '@monaco-editor/react';
 import {
   Activity, AlertCircle, ArrowRight, BookOpen, CheckCircle2, ChevronDown, Clipboard,
@@ -71,6 +71,11 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   const [busy, setBusy] = useState(false);
   const [runningCell, setRunningCell] = useState<string | null>(null);
   const [activity, setActivity] = useState<string[]>([]);
+  const [repetitions, setRepetitions] = useState(1);
+  const [batchProgress, setBatchProgress] = useState<{
+    completed: number; total: number; issue: string; strategy: string;
+  } | null>(null);
+  const terminalRef = useRef<HTMLPreElement | null>(null);
   const [analysisPlots, setAnalysisPlots] = useState<string[]>([]);
   const [runs, setRuns] = useState<RepairRun[]>(() => {
     try {
@@ -96,7 +101,11 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     onCodeChange(combined);
   }, [cells]);
 
-  const appendLog = (entry: string) => setActivity((previous) => [...previous.slice(-60), entry]);
+  const appendLog = (entry: string) => setActivity((previous) => [...previous.slice(-100), entry]);
+  useEffect(() => {
+    // Make live compiler and model events visible as they arrive.
+    if (terminalRef.current) terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+  }, [activity]);
   const updateCell = (id: string, code: string) => setCells((previous) => ({ ...previous, [id]: code }));
 
   const verifyExercise = async (exercise: Exercise) => {
@@ -125,16 +134,45 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     } finally { setBusy(false); }
   };
 
-  const callModel = async (prompt: string): Promise<{ text: string; tokens: number }> => {
+  const callModel = async (prompt: string, onRequest?: () => void, onTokens?: (count: number) => void):
+    Promise<{ text: string; tokens: number }> => {
     if (!apiKey.trim()) throw new Error('Enter a Gemini API key in Step 07.');
-    const response = await fetch('/api/lab04-model', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: apiKey.trim(), prompt }),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || 'Model request failed.');
-    return { text: data.text, tokens: (data.inputTokens || 0) + (data.outputTokens || 0) };
+    // A transient 503, timeout or empty candidate is a provider problem.
+    // Retry that request once without counting it as an agent repair attempt.
+    for (let request = 0; request < 2; request++) {
+      onRequest?.();
+      let response: Response;
+      try {
+        response = await fetch('/api/lab04-model', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: apiKey.trim(), prompt }),
+        });
+      } catch (error) {
+        if (request === 0) {
+          appendLog('Gemini connection interrupted. Retrying the model request once...');
+          continue;
+        }
+        throw new Error('Gemini connection failed after two requests.');
+      }
+      const data = await response.json().catch(() => ({}));
+      // Count provider-reported tokens even when reasoning stops before
+      // producing visible code; otherwise unsuccessful calls look free.
+      const reportedTokens = Number(
+        data.usageTokens ?? ((data.inputTokens || 0) + (data.outputTokens || 0) + (data.thoughtTokens || 0))
+      );
+      if (Number.isFinite(reportedTokens) && reportedTokens > 0) onTokens?.(reportedTokens);
+      if (!response.ok || typeof data.text !== 'string' || !data.text.trim()) {
+        const reason: string = data.error || 'Gemini returned an empty or invalid response.';
+        if (request === 0 && data.retryable === true) {
+          appendLog(reason + ' Retrying the model request once...');
+          continue;
+        }
+        throw new Error(reason);
+      }
+      return { text: data.text, tokens: reportedTokens };
+    }
+    throw new Error('Gemini did not return usable source code after two model requests.');
   };
 
   const checkApi = async () => {
@@ -216,10 +254,12 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (decision.action === 'stop') { status = passed ? 'Resolved' : 'Unresolved'; break; }
         if (attempts >= limit) throw new Error('Agent exceeded the attempt limit.');
         phase = 'model';
-        modelCalls++;
         record('Requesting model-generated patch ' + (attempts + 1) + '/' + limit + '...');
-        const response = await callModel(decision.prompt || '');
-        modelTokens += response.tokens;
+        const response = await callModel(
+          decision.prompt || '',
+          () => { modelCalls++; },
+          (count) => { modelTokens += count; }
+        );
         let generatedSource: string;
         try {
           generatedSource = extractTypeScriptSource(response.text);
@@ -271,40 +311,56 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   const runSelected = async () => {
     if (busy) return;
     setBusy(true); setActivity([]);
+    setBatchProgress({ completed: 0, total: 2, issue: currentIssue.id, strategy: 'reactive' });
     try {
       if (!await verifyAgents()) return;
       if (!apiConnected) { appendLog('Use the API connection check in Step 07 first.'); return; }
-      const reactive = await runOne(currentIssue, 'reactive');
-      if (reactive.status !== 'Resolved' && reactive.status !== 'Unresolved') {
-        appendLog('The first run encountered a technical error. Correct it, then retry this issue.');
-        return;
+      const strategies = ['reactive', 'intelligent'] as const;
+      for (let i = 0; i < strategies.length; i++) {
+        setBatchProgress({ completed: i, total: 2, issue: currentIssue.id, strategy: strategies[i] });
+        await runOne(currentIssue, strategies[i]);
+        setBatchProgress({ completed: i + 1, total: 2, issue: currentIssue.id, strategy: strategies[i] });
       }
-      const intelligent = await runOne(currentIssue, 'intelligent');
-      appendLog(intelligent.status === 'Resolved' || intelligent.status === 'Unresolved'
-        ? 'Both repair strategies completed for ' + currentIssue.id + '.'
-        : 'The intelligent run encountered a technical error. Its result is excluded from repair-success statistics.');
+      appendLog('Both agent attempts recorded for ' + currentIssue.id + '. Check each outcome below.');
     } finally { setBusy(false); }
   };
+
   const runAll = async () => {
     if (busy) return;
     if (!apiConnected) { setApiStatus('Test the API connection first.'); return; }
-    if (!window.confirm('Run both agents on all three issues? This can make up to 12 Gemini API requests and consume your API quota.')) return;
+    // No confirmation dialog: each click runs exactly the selected number
+    // of independent trials for both agents on all three cases.
     setBusy(true); setActivity([]);
+    const total = cases.length * 2 * repetitions;
+    let completed = 0, errors = 0, resolved = 0;
+    setBatchProgress({ completed: 0, total, issue: cases[0].id, strategy: 'reactive' });
     try {
       if (!await verifyAgents()) return;
-      let completed = 0;
-      for (const issue of cases) {
-        for (const strategy of ['reactive', 'intelligent'] as const) {
-          const run = await runOne(issue, strategy);
-          if (run.status !== 'Resolved' && run.status !== 'Unresolved') {
-            appendLog('Batch stopped after a technical error in ' + issue.id +
-              ' (' + strategy + '). ' + completed + ' completed repair trials. Review the error and retry.');
-            return;
+      // A full batch is a new experiment dataset, not a continuation of
+      // obsolete or partially completed trials from earlier debugging.
+      setRuns([]);
+      setAnalysisPlots([]);
+      setCellOutput((previous) => {
+        const updated = { ...previous };
+        delete updated.metrics;
+        return updated;
+      });
+      for (let repetition = 0; repetition < repetitions; repetition++) {
+        if (repetitions > 1) appendLog('Repetition ' + (repetition + 1) + ' of ' + repetitions + '.');
+        for (const issue of cases) {
+          for (const strategy of ['reactive', 'intelligent'] as const) {
+            setBatchProgress({ completed, total, issue: issue.id, strategy });
+            const run = await runOne(issue, strategy);
+            completed++;
+            if (run.status !== 'Resolved' && run.status !== 'Unresolved') errors++;
+            if (run.success && run.status === 'Resolved') resolved++;
+            setBatchProgress({ completed, total, issue: issue.id, strategy });
           }
-          completed++;
         }
       }
-      appendLog('All six repair trials completed. Review the measured results and per-issue comparison.');
+      appendLog('Batch finished: ' + completed + '/' + total +
+        ' trials recorded, ' + resolved + ' resolved, ' + errors +
+        ' technical errors. Review the per-issue table and traces.');
     } finally { setBusy(false); }
   };
 
@@ -542,13 +598,40 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
               className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-xs font-semibold disabled:opacity-50">
               <RefreshCw className="h-4 w-4"/> Run all three cases
             </button>
-            {busy && <span className="text-xs font-medium text-blue-700"><Activity className="mr-1 inline h-3 w-3 animate-pulse"/> Executing agent steps...</span>}
+            <label className="flex items-center gap-2 text-xs text-slate-600">
+              Repetitions per issue
+              <select value={repetitions} onChange={(event) => setRepetitions(Number(event.target.value))}
+                disabled={busy} aria-label="Repetitions per issue"
+                className="rounded-md border border-slate-300 bg-white px-2 py-2 text-xs font-medium text-slate-800">
+                {[1, 2, 3].map((count) => <option key={count} value={count}>{count}</option>)}
+              </select>
+            </label>
+            {busy && <span className="text-xs font-medium text-blue-700"><Activity className="mr-1 inline h-3 w-3 animate-pulse"/> Running compiler and agents...</span>}
           </div>
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            One repetition runs six independent agent trials. Repetitions add observations and use more model requests.
+            Run all starts a fresh experiment dataset; export earlier results first if needed.
+            A technical error is recorded and does not stop the remaining cases.
+          </p>
+          {batchProgress && (
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3" role="status">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="font-semibold text-slate-800">
+                  {busy ? 'Running' : 'Last run'}: {batchProgress.issue} / {batchProgress.strategy}
+                </span>
+                <span className="text-slate-600">{batchProgress.completed} of {batchProgress.total} trials recorded</span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-200">
+                <div className="h-full rounded-full bg-blue-600 transition-all duration-200"
+                  style={{ width: (100 * batchProgress.completed / batchProgress.total) + '%' }} />
+              </div>
+            </div>
+          )}
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-800 bg-slate-950">
             <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-2 text-xs font-medium text-slate-300">
               <Terminal className="h-4 w-4" /> Agent and compiler execution log
             </div>
-            <pre aria-live="polite" className="max-h-72 min-h-28 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-xs leading-6 text-emerald-200">
+            <pre ref={terminalRef} aria-live="polite" className="max-h-96 min-h-40 overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-xs leading-6 text-emerald-200">
               {activity.length ? activity.join('\n\n') : 'Run an experiment to view model actions, compiler diagnostics and regression-test results.'}
             </pre>
           </div>

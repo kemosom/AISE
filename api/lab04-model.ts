@@ -16,42 +16,68 @@ export default async function handler(req: any, res: any) {
     return res.status(400).json({ error: 'Enter a valid Gemini API key and a prompt below 16,000 characters.' });
   }
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  const timeout = setTimeout(() => controller.abort(), 26000);
   try {
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': key,
-      },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 8192,
+          // Limit invisible reasoning so the model has room to return source code.
+          thinkingConfig: { thinkingLevel: 'low' },
+        },
       }),
       signal: controller.signal,
     });
     const data: any = await response.json();
     if (!response.ok) {
+      const retryable = [500, 502, 503, 504].includes(response.status);
       const reason = response.status === 429
-        ? 'Gemini API quota reached. Check the rate limit shown in Google AI Studio.'
+        ? 'Gemini request quota reached. Check your classroom API quota.'
         : response.status === 401 || response.status === 403
           ? 'Gemini rejected this API key or project permissions.'
-          : 'Gemini request failed with status ' + response.status + '.';
-      return res.status(response.status >= 500 ? 502 : response.status).json({ error: reason });
+          : response.status === 503
+            ? 'Gemini is temporarily unavailable (503).'
+            : 'Gemini returned HTTP ' + response.status + '.';
+      return res.status(retryable ? 502 : response.status).json({
+        error: reason, retryable,
+        code: response.status === 429 ? 'RATE_LIMIT' : 'UPSTREAM_' + response.status,
+      });
     }
-    const answer = (data.candidates || [])
-      .flatMap((candidate: any) => candidate.content?.parts || [])
-      .map((part: any) => part.text || '')
-      .join('\n').trim();
-    if (!answer) return res.status(502).json({ error: 'Gemini returned no source code. Retry once or select another issue.' });
+    const candidate = data.candidates?.[0];
+    const finishReason: string = candidate?.finishReason || 'UNKNOWN';
+    const answer: string = (candidate?.content?.parts || [])
+      .filter((part: any) => !part.thought && typeof part.text === 'string')
+      .map((part: any) => part.text).join('\n').trim();
+    const usage = data.usageMetadata || {};
+    const inputTokens = Number(usage.promptTokenCount || 0);
+    const outputTokens = Number(usage.candidatesTokenCount || 0);
+    const thoughtTokens = Number(usage.thoughtsTokenCount || 0);
+    if (!answer) {
+      const reason = finishReason === 'MAX_TOKENS'
+        ? 'Gemini used its output token budget without returning source code.'
+        : 'Gemini returned an empty response (finish reason: ' + finishReason + ').';
+      return res.status(502).json({
+        error: reason, retryable: finishReason === 'MAX_TOKENS' || finishReason === 'STOP',
+        code: 'EMPTY_OUTPUT', usageTokens: inputTokens + outputTokens + thoughtTokens,
+      });
+    }
+    // Return the candidate finish reason for diagnosis, without exposing any key.
     return res.status(200).json({
-      text: answer,
-      model: 'gemini-3.6-flash',
-      inputTokens: data.usageMetadata?.promptTokenCount || 0,
-      outputTokens: data.usageMetadata?.candidatesTokenCount || 0,
+      text: answer, model: 'gemini-3.6-flash', finishReason,
+      inputTokens, outputTokens, thoughtTokens,
     });
   } catch (error) {
-    return res.status(502).json({ error: 'Model request failed or timed out. Check network connectivity and retry.' });
+    const isTimeout = error instanceof Error && error.name === 'AbortError';
+    return res.status(502).json({
+      error: isTimeout ? 'Gemini did not respond before the request timeout.' :
+        'Cannot reach Gemini. Check the network or try again.',
+      code: isTimeout ? 'UPSTREAM_TIMEOUT' : 'UPSTREAM_NETWORK',
+      retryable: true,
+    });
   } finally {
     clearTimeout(timeout);
   }
