@@ -32,7 +32,7 @@ for (const label of ['What software are we fixing?', 'What is an agent?', 'What 
   assert.ok(theory.includes(label), 'Missing Theory section: ' + label);
 }
 assert.ok(theory.includes('Open Notebook'));
-assert.ok(theory.includes('not copied from a real'));
+assert.ok(theory.includes('not reports copied from a real'));
 assert.ok(theory.includes('one') && theory.includes('three'));
 assert.ok(theoryText.includes('Both agents use the same coding model'));
 assert.ok(!theory.includes('github.com/kemosom/AISE'));
