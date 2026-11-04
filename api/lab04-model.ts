@@ -27,7 +27,7 @@ export default async function handler(req: any, res: any) {
           temperature: 0.1,
           maxOutputTokens: 8192,
           // Limit invisible reasoning so the model has room to return source code.
-          thinkingConfig: { thinkingLevel: 'LOW' },
+          thinkingConfig: { thinkingLevel: 'low' },
         },
       }),
       signal: controller.signal,
