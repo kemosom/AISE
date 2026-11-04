@@ -62,7 +62,7 @@ export default async function handler(req: any, res: any) {
         : 'Gemini returned an empty response (finish reason: ' + finishReason + ').';
       return res.status(502).json({
         error: reason, retryable: finishReason === 'MAX_TOKENS' || finishReason === 'STOP',
-        code: 'EMPTY_OUTPUT',
+        code: 'EMPTY_OUTPUT', usageTokens: inputTokens + outputTokens + thoughtTokens,
       });
     }
     // Return the candidate finish reason for diagnosis, without exposing any key.
