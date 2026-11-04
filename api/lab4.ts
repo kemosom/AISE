@@ -1,5 +1,5 @@
 import { createDecipheriv, scryptSync, timingSafeEqual } from 'node:crypto';
-import { gunzipSync } from 'node:zlib';
+import { brotliDecompressSync } from 'node:zlib';
 import { LAB04_ENCRYPTED_PAYLOAD, LAB04_ENCRYPTION_SALT, LAB04_NONCE } from './lab4-encrypted';
 
 function sameCode(value: unknown, expected: string): boolean {
@@ -23,7 +23,7 @@ export default function handler(req: any, res: any) {
     const decipher = createDecipheriv('aes-256-gcm', key, Buffer.from(LAB04_NONCE, 'base64url'));
     decipher.setAuthTag(payload.subarray(payload.length - 16));
     const plaintext = Buffer.concat([decipher.update(payload.subarray(0, -16)), decipher.final()]);
-    return res.status(200).json({ ok: true, data: JSON.parse(gunzipSync(plaintext).toString('utf8')) });
+    return res.status(200).json({ ok: true, data: JSON.parse(brotliDecompressSync(plaintext).toString('utf8')) });
   } catch {
     return res.status(503).json({ error: 'Private Lab 04 material cannot be opened with the configured instructor code.' });
   }
