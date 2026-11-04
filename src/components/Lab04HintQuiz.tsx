@@ -53,7 +53,11 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
       setOpen(false);
       setFeedback('');
     } else {
-      setFeedback(correct + ' of 3 correct. Review the concepts, then try a new set of questions.');
+      // A failed submission starts a fresh checkpoint, with newly shuffled
+      // questions and answer positions. There is no retry limit.
+      setQuestions(drawQuestions(exerciseId));
+      setAnswers({});
+      setFeedback(correct + ' of 3 correct. A new set of questions is ready. Try again.');
     }
   };
 
