@@ -614,12 +614,12 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
 
         <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
           <p className="text-xs font-semibold text-blue-700">PART C · CONNECT A CODING MODEL</p>
-          <h3 className="mt-1 text-lg font-semibold">07. Get your Gemini API key and test the connection</h3>
+          <h3 className="mt-1 text-lg font-semibold">07. Connect Gemini and test the connection</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Open <a className="font-semibold text-blue-700 underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio API Keys</a>,
-            sign in, and select <strong>Create API key</strong>. Copy your key into the field below.
-            Your key is used only for requests during this session and is not saved in the notebook.
-            Gemini free-tier availability and daily limits depend on your Google project.
+            Enter the classroom Gemini API key supplied by your instructor and select <strong>Test API connection</strong>.
+            If instructed to obtain your own key, use <a className="font-semibold text-blue-700 underline"
+              href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio</a>.
+            The key is used for requests during this session and is not saved with your code or report.
           </p>
           <p className="mt-2 text-xs text-slate-500">Model: {MODEL}. An API request is required to generate each real source-code patch. Do not paste your key into Python cells or your report.</p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
