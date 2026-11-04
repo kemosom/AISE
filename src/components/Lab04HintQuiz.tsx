@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { CheckCircle2, ChevronDown, LockKeyhole, X } from 'lucide-react';
 import questionBanks from '../../labs/lab04-software-repair-agents/hint-questions.json';
 
@@ -39,6 +39,7 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState('');
   const [review, setReview] = useState<Review | null>(null);
+  const questionAreaRef = useRef<HTMLDivElement>(null);
   const [attempts, setAttempts] = useState(0);
 
   const start = () => {
@@ -74,6 +75,9 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
     setQuestions(drawQuestions(exerciseId, questions));
     setAnswers({});
     setFeedback('');
+    // Show the review immediately, even when the student submitted
+    // from the bottom of the scrollable question list.
+    questionAreaRef.current?.scrollTo({ top: 0, behavior: 'instant' });
   };
 
   return (
@@ -114,7 +118,7 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
               </div>
               <button aria-label="Close checkpoint" type="button" onClick={() => setOpen(false)} className="rounded-md p-1 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5"/></button>
             </div>
-            <div className="max-h-[min(65vh,590px)] space-y-5 overflow-y-auto px-5 py-4">
+            <div ref={questionAreaRef} className="max-h-[min(65vh,590px)] space-y-5 overflow-y-auto px-5 py-4">
               {review && (
                 <section aria-label="Feedback on previous answers" className="rounded-lg border border-blue-200 bg-blue-50 p-3">
                   <h5 className="text-sm font-semibold text-slate-900">
