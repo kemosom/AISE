@@ -189,7 +189,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     let toolMessages = 0;
     let toolBytes = 0;
     let passed = false;
-    let status = 'Stopped without a valid patch';
+    let status = 'Unresolved';
+    let phase: 'baseline' | 'agent' | 'model' | 'compile' = 'baseline';
     const trace: string[] = [];
     const record = (message: string) => { trace.push(message); appendLog('[' + issue.id + ' / ' + strategy + '] ' + message); };
     const history: Array<{ feedback: string }> = [];
@@ -205,6 +206,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
       // A clean starting source would invalidate this defect-repair experiment.
       if (baseline.passed) throw new Error('The original case unexpectedly passes. Stop and inspect the repository.');
       for (let index = 0; index < limit + 1; index++) {
+        phase = 'agent';
         const decision = await pythonPolicy(
           strategy === 'reactive' ? 'reactive_agent' : 'intelligent_agent',
           issue, source, feedback, attempts, passed, history, limit
@@ -213,12 +215,25 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (decision.action === 'finish') { status = passed ? 'Resolved' : 'Stopped'; break; }
         if (decision.action === 'stop') { status = passed ? 'Resolved' : 'Unresolved'; break; }
         if (attempts >= limit) throw new Error('Agent exceeded the attempt limit.');
+        phase = 'model';
         modelCalls++;
         record('Requesting model-generated patch ' + (attempts + 1) + '/' + limit + '...');
         const response = await callModel(decision.prompt || '');
         modelTokens += response.tokens;
-        source = extractTypeScriptSource(response.text);
+        let generatedSource: string;
+        try {
+          generatedSource = extractTypeScriptSource(response.text);
+        } catch (error) {
+          attempts++;
+          feedback = 'Generated patch was not a valid complete TypeScript source: ' +
+            (error instanceof Error ? error.message : String(error));
+          history.push({ feedback });
+          record(feedback);
+          continue;
+        }
         attempts++;
+        source = generatedSource;
+        phase = 'compile';
         record('Compiling generated code and executing regression tests...');
         const checked = await compileAndTest(issue, source);
         toolMessages += checked.messages;
@@ -230,8 +245,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (passed) { status = 'Resolved'; break; }
       }
     } catch (error) {
-      status = 'Error: ' + (error instanceof Error ? error.message : String(error));
-      record(status);
+      status = phase === 'model' ? 'API error' : 'Execution error';
+      record(status + ': ' + (error instanceof Error ? error.message : String(error)));
     }
     const row: RepairRun = {
       issue: issue.id, strategy, success: passed, attempts, modelCalls, modelTokens,
@@ -259,9 +274,15 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     try {
       if (!await verifyAgents()) return;
       if (!apiConnected) { appendLog('Use the API connection check in Step 07 first.'); return; }
-      await runOne(currentIssue, 'reactive');
-      await runOne(currentIssue, 'intelligent');
-      appendLog('Completed both agent strategies for ' + currentIssue.id + '.');
+      const reactive = await runOne(currentIssue, 'reactive');
+      if (reactive.status !== 'Resolved' && reactive.status !== 'Unresolved') {
+        appendLog('The first run encountered a technical error. Correct it, then retry this issue.');
+        return;
+      }
+      const intelligent = await runOne(currentIssue, 'intelligent');
+      appendLog(intelligent.status === 'Resolved' || intelligent.status === 'Unresolved'
+        ? 'Both repair strategies completed for ' + currentIssue.id + '.'
+        : 'The intelligent run encountered a technical error. Its result is excluded from repair-success statistics.');
     } finally { setBusy(false); }
   };
   const runAll = async () => {
@@ -271,11 +292,19 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     setBusy(true); setActivity([]);
     try {
       if (!await verifyAgents()) return;
+      let completed = 0;
       for (const issue of cases) {
-        await runOne(issue, 'reactive');
-        await runOne(issue, 'intelligent');
+        for (const strategy of ['reactive', 'intelligent'] as const) {
+          const run = await runOne(issue, strategy);
+          if (run.status !== 'Resolved' && run.status !== 'Unresolved') {
+            appendLog('Batch stopped after a technical error in ' + issue.id +
+              ' (' + strategy + '). ' + completed + ' completed repair trials. Review the error and retry.');
+            return;
+          }
+          completed++;
+        }
       }
-      appendLog('All six experiments completed. Review failures and the comparison table.');
+      appendLog('All six repair trials completed. Review the measured results and per-issue comparison.');
     } finally { setBusy(false); }
   };
 
