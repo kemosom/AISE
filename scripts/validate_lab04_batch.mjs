@@ -80,6 +80,7 @@ const empty = await makeRequest({
 assert.equal(empty.status,502);
 assert.equal(empty.answer.retryable,true);
 assert.equal(empty.answer.code,'EMPTY_OUTPUT');
+assert.equal(empty.answer.usageTokens, 8222, 'Billable thought tokens should not disappear on empty output');
 assert.match(empty.answer.error,/token budget/);
 console.log('PASS: no-source Gemini response is diagnosed correctly');
 
