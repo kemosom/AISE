@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { LabRegistry } from '../../labs/registry';
-import { Lab04InstructorPreview } from './Lab04InstructorPreview';
 import {
   ArrowLeft,
   BookOpenCheck,
@@ -59,12 +58,29 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
   };
 
   if (data.labId === 'lab04-software-repair-agents') {
-    return <Lab04InstructorPreview
-      notebook={data.notebook || []}
-      files={data.files || {}}
-      onExit={onExit}
-      onSwitchLab={onSwitchLab}
-    />;
+    return (
+      <div className="min-h-[calc(100vh-3.5rem)] bg-slate-50 px-6 py-12">
+        <div className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-8">
+          <div className="text-xs font-bold uppercase tracking-widest text-blue-700">Instructor access · Lab 04</div>
+          <h1 className="mt-3 text-2xl font-semibold">Building and Evaluating AI Software Repair Agents</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-600">
+            Open the complete student notebook with all executable Python cells,
+            TypeScript compilation, Gemini repair experiments, hints and the standard report editor.
+            The laboratory remains locked for student accounts.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button type="button" onClick={onPreviewLab}
+              className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
+              Open the student notebook
+            </button>
+            <button type="button" onClick={onSwitchLab}
+              className="rounded-md border border-slate-300 px-5 py-3 text-sm">Switch laboratory</button>
+            <button type="button" onClick={onExit}
+              className="rounded-md border border-slate-300 px-5 py-3 text-sm">Exit instructor access</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // The earlier encrypted Lab 02 instructor payload belongs to the retired
