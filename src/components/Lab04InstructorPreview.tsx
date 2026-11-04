@@ -8,7 +8,7 @@ type Props = { notebook: Cell[]; files: Record<string, string>; onExit: () => vo
 function Inline({ value }: { value: string }) {
   return <>{value.split(/(\*\*[^*]+\*\*|`[^`]+`|https?:\/\/[^\s)]+)/g).map((v,i) => {
     if (v.startsWith('**') && v.endsWith('**')) return <strong key={i}>{v.slice(2,-2)}</strong>;
-    if (v.startsWith('`) && v.endsWith('`)) return <code key={i} className="rounded bg-slate-100 px-1 py-0.5 text-xs">{v.slice(1,-1)}</code>;
+    if (v.startsWith('`') && v.endsWith('`')) return <code key={i} className="rounded bg-slate-100 px-1 py-0.5 text-xs">{v.slice(1,-1)}</code>;
     if (v.startsWith('https://')) return <a key={i} href={v} target="_blank" rel="noreferrer" className="text-blue-700 underline">{v}</a>;
     return <React.Fragment key={i}>{v}</React.Fragment>;
   })}</>;
