@@ -9,6 +9,7 @@ import {
 type Props = {
   rows: RepairRun[];
   onClear: () => void;
+  busy?: boolean;
   onCsv: () => void;
   onTraces: () => void;
 };
@@ -94,7 +95,7 @@ function SummaryCell({ group, field, digits = 0 }: { group: Lab04Group; field: k
   return <>{typeof value === 'number' ? value.toFixed(digits) : '—'}</>;
 }
 
-export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces }) => {
+export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces, busy }) => {
   const summary = summarizeLab04(rows);
   const reactive = summary.overall.reactive, intelligent = summary.overall.intelligent;
   return (
@@ -108,7 +109,7 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces 
             Figures and tables are calculated from recorded experiment executions.
           </p>
         </div>
-        <button type="button" onClick={onClear} disabled={!rows.length}
+        <button type="button" onClick={onClear} disabled={busy || !rows.length}
           className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 disabled:opacity-40">
           <RotateCcw className="h-3.5 w-3.5"/> Clear measurements
         </button>
