@@ -134,7 +134,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     } finally { setBusy(false); }
   };
 
-  const callModel = async (prompt: string, onRequest?: () => void):
+  const callModel = async (prompt: string, onRequest?: () => void, onTokens?: (count: number) => void):
     Promise<{ text: string; tokens: number }> => {
     if (!apiKey.trim()) throw new Error('Enter a Gemini API key in Step 07.');
     // A transient 503, timeout or empty candidate is a provider problem.
@@ -156,6 +156,12 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         throw new Error('Gemini connection failed after two requests.');
       }
       const data = await response.json().catch(() => ({}));
+      // Count provider-reported tokens even when reasoning stops before
+      // producing visible code; otherwise unsuccessful calls look free.
+      const reportedTokens = Number(
+        data.usageTokens ?? ((data.inputTokens || 0) + (data.outputTokens || 0) + (data.thoughtTokens || 0))
+      );
+      if (Number.isFinite(reportedTokens) && reportedTokens > 0) onTokens?.(reportedTokens);
       if (!response.ok || typeof data.text !== 'string' || !data.text.trim()) {
         const reason: string = data.error || 'Gemini returned an empty or invalid response.';
         if (request === 0 && data.retryable === true) {
@@ -164,10 +170,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         }
         throw new Error(reason);
       }
-      return {
-        text: data.text,
-        tokens: (data.inputTokens || 0) + (data.outputTokens || 0) + (data.thoughtTokens || 0),
-      };
+      return { text: data.text, tokens: reportedTokens };
     }
     throw new Error('Gemini did not return usable source code after two model requests.');
   };
@@ -252,8 +255,11 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (attempts >= limit) throw new Error('Agent exceeded the attempt limit.');
         phase = 'model';
         record('Requesting model-generated patch ' + (attempts + 1) + '/' + limit + '...');
-        const response = await callModel(decision.prompt || '', () => { modelCalls++; });
-        modelTokens += response.tokens;
+        const response = await callModel(
+          decision.prompt || '',
+          () => { modelCalls++; },
+          (count) => { modelTokens += count; }
+        );
         let generatedSource: string;
         try {
           generatedSource = extractTypeScriptSource(response.text);
