@@ -30,7 +30,7 @@ assert.ok(py.includes('INTERPRETATION') && py.includes('float(') && py.includes(
 console.log('PASS: CSV analysis interpretation and absent-issue handling');
 
 const serverText = fs.readFileSync('api/lab04-model.ts','utf8');
-assert.match(serverText, /thinkingLevel: 'LOW'/);
+assert.match(serverText, /thinkingLevel: 'low'/);
 assert.match(serverText, /maxOutputTokens: 8192/);
 const js = ts.transpileModule(serverText,{
   fileName:'api/lab04-model.ts',
@@ -67,7 +67,7 @@ const successful = await makeRequest({
 assert.equal(successful.status,200);
 assert.equal(successful.answer.text,'export const n: number = 1;');
 assert.equal(successful.answer.thoughtTokens,4);
-assert.equal(successful.outbound.generationConfig.thinkingConfig.thinkingLevel,'LOW');
+assert.equal(successful.outbound.generationConfig.thinkingConfig.thinkingLevel,'low');
 assert.equal(successful.outbound.generationConfig.maxOutputTokens,8192);
 assert.equal(successful.upstreamHeaders['x-goog-api-key'],'test-api-key');
 assert.ok(!JSON.stringify(successful.answer).includes('test-api-key'));
