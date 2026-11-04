@@ -5,6 +5,7 @@ import {
   Code2, Download, FileText, KeyRound, Play, RefreshCw, ShieldCheck, Terminal,
 } from 'lucide-react';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
+import { Lab04HintQuiz } from './Lab04HintQuiz';
 import casesJson from '../../labs/lab04-software-repair-agents/cases.json';
 import exercisesJson from '../../labs/lab04-software-repair-agents/exercises.json';
 import type { Lab04Issue } from '../../labs/lab04-software-repair-agents/types';
@@ -357,8 +358,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
             <p className="text-xs font-semibold text-blue-700">PART A · THE SOFTWARE MAINTENANCE CASE</p>
             <h3 className="mt-1 text-lg font-semibold">01. A production service has three reported defects</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              You are supporting a TypeScript service used by a development team. Each issue includes its original
-              source, expected behaviour and regression tests. Your agents must repair the implementation without modifying the tests.
+              You are a software engineer maintaining an operations service. The team has reported three defects: incorrect checkout totals, misordered incident tickets and exposed authentication headers. Each case includes a bug report, its affected TypeScript function and a regression suite. Write the Python agent decision logic that controls an AI coding model. Your agents must repair the implementation without changing the tests.
 
             </p>
           </div>
@@ -403,7 +403,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           <h3 className="mt-1 text-lg font-semibold">02. Execute the notebook cells in order</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Complete each function where marked. Press <strong>Run cell</strong> to execute real Python assertions in the browser.
-            If stuck, open <strong>Show full-code hint</strong> next to the cell. Your changes are saved in this browser.
+            If you need a full-code example, complete the three-question checkpoint next to that cell. You can retry the questions as often as needed. Your code is saved in this browser.
           </p>
         </div>
 
@@ -443,19 +443,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
                 className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
                 <Play className="h-3.5 w-3.5" /> {runningCell === exercise.id ? 'Running Python...' : 'Run cell'}
               </button>
-              <details className="group max-w-full text-xs">
-                <summary className="flex cursor-pointer items-center gap-1 font-medium text-blue-700">
-                  <ChevronDown className="h-3.5 w-3.5" /> Show full-code hint
-                </summary>
-                <div className="mt-3 max-w-[740px] rounded-lg border border-blue-200 bg-blue-50 p-3">
-                  <p className="mb-2 text-xs text-blue-800">Reference implementation for this function. Compare it with your approach before using it.</p>
-                  <pre className="max-h-72 overflow-auto whitespace-pre-wrap font-mono text-xs leading-5">{exercise.solution}</pre>
-                  <button type="button" onClick={() => updateCell(exercise.id, exercise.solution)}
-                    className="mt-3 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-blue-800 ring-1 ring-blue-200">
-                    Insert complete example
-                  </button>
-                </div>
-              </details>
+              <Lab04HintQuiz exerciseId={exercise.id} source={exercise.solution}
+                onInsert={(code) => updateCell(exercise.id, code)} />
             </div>
             {cellOutput[exercise.id] && (
               <pre className={'whitespace-pre-wrap break-words border-t px-5 py-3 font-mono text-xs leading-6 ' +
@@ -589,10 +578,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
                 className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
                 {runningCell === 'metrics' ? 'Running...' : 'Run analysis cell'}
               </button>
-              <details className="text-xs"><summary className="cursor-pointer font-medium text-blue-700">Show full-code hint</summary>
-                <pre className="mt-3 max-w-[740px] overflow-x-auto rounded-lg bg-blue-50 p-3 font-mono text-xs">{exercise.solution}</pre>
-                <button onClick={() => updateCell('metrics', exercise.solution)} className="mt-2 rounded border px-3 py-1.5 text-xs">Insert complete example</button>
-              </details>
+              <Lab04HintQuiz exerciseId="metrics" source={exercise.solution}
+                onInsert={(code) => updateCell('metrics', code)} />
             </div>
             {cellOutput.metrics && <pre className="whitespace-pre-wrap break-words border-t p-4 font-mono text-xs">{cellOutput.metrics.text}</pre>}
           </section>
