@@ -556,6 +556,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
 
         <Lab04Analysis
           rows={runs}
+          busy={busy}
           onClear={() => {
             if (!window.confirm('Clear all saved Lab 4 experiment measurements? Your code cells will be kept.')) return;
             setRuns([]);
