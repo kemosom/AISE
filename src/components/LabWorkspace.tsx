@@ -686,6 +686,11 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         {viewMode === 'notebook' && labId === 'lab04-software-repair-agents' && (
           <Lab04Notebook
             isInstructorPreview={isInstructorPreview}
+            onCodeChange={(source) => {
+              const updated = [{ name: 'agents.py', language: 'python', content: source }];
+              setFiles(updated);
+              if (useLocalPersistence) void writeLocal('files', updated);
+            }}
             onOpenReport={() => setViewMode('report')}
             onCopyEvidence={(evidence) => {
               const updated = {
