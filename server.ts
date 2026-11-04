@@ -96,6 +96,13 @@ app.post('/api/instructor', (req: Request, res: Response) => {
     return res.status(401).json({ error: 'Invalid instructor code.' });
   }
 
+  if (req.body?.labId === 'lab04-software-repair-agents') {
+    return res.json({
+      ok: true,
+      data: { labId: 'lab04-software-repair-agents', labNumber: 4 },
+    });
+  }
+
   try {
     return res.json({ ok: true, data: decryptInstructorContent() });
   } catch {
