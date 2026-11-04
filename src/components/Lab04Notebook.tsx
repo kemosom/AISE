@@ -21,6 +21,7 @@ type Props = {
   isInstructorPreview?: boolean;
   onOpenReport: () => void;
   onCopyEvidence?: (text: string) => void;
+  onCodeChange?: (source: string) => void;
 };
 const exercises = exercisesJson as Exercise[];
 const cases = casesJson as Lab04Issue[];
@@ -48,7 +49,7 @@ function describe(result: BuildResult): string[] {
   return output;
 }
 
-export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenReport, onCopyEvidence }) => {
+export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenReport, onCopyEvidence, onCodeChange }) => {
   const [cells, setCells] = useState<Record<string, string>>(() => {
     const initial = Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.starter]));
     try {
@@ -80,6 +81,14 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     // Only code and experiment records are saved. Never store an API key.
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ cells, runs }));
   }, [cells, runs]);
+
+  useEffect(() => {
+    if (!onCodeChange) return;
+    const combined = exercises.map((exercise) =>
+      '# ' + exercise.title + '\n' + cells[exercise.id]
+    ).join('\n\n');
+    onCodeChange(combined);
+  }, [cells]);
 
   const appendLog = (entry: string) => setActivity((previous) => [...previous.slice(-60), entry]);
   const updateCell = (id: string, code: string) => setCells((previous) => ({ ...previous, [id]: code }));
