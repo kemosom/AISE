@@ -367,7 +367,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     // of independent trials for both agents on all three cases.
     setBusy(true); setActivity([]);
     const total = cases.length * 2 * repetitions;
-    let completed = 0, errors = 0, resolved = 0;
+    let completed = 0;
     setBatchProgress({ completed: 0, total, issue: cases[0].id, strategy: 'reactive' });
     try {
       if (!await verifyAgents()) return;
@@ -385,17 +385,13 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         for (const issue of cases) {
           for (const strategy of ['reactive', 'intelligent'] as const) {
             setBatchProgress({ completed, total, issue: issue.id, strategy });
-            const run = await runOne(issue, strategy);
+            await runOne(issue, strategy);
             completed++;
-            if (run.status !== 'Resolved' && run.status !== 'Unresolved') errors++;
-            if (run.success && run.status === 'Resolved') resolved++;
             setBatchProgress({ completed, total, issue: issue.id, strategy });
           }
         }
       }
-      appendLog('Batch finished: ' + completed + '/' + total +
-        ' trials recorded, ' + resolved + ' resolved, ' + errors +
-        ' technical errors. Review the per-issue table and traces.');
+      appendLog('All scheduled agent runs finished. Inspect the measurements and execution traces below.');
     } finally { setBusy(false); }
   };
 
