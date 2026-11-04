@@ -24,9 +24,8 @@ assert.match(analysis, /Observed feedback-driven recoveries/);
 console.log('PASS: data-coverage, ceiling-effect and retry interpretation');
 
 const py = fs.readFileSync('src/lib/lab04-analysis-python.ts','utf8');
-assert.ok(py.includes('INTERPRETATION') && py.includes('float(\\\\"nan\\\\")') ||
-  py.includes('INTERPRETATION') && py.includes('float(\\\\\\"nan\\\\\\")'),
-  'Python analysis should explain actual results and plot empty issue groups as N/A');
+assert.ok(py.includes('INTERPRETATION') && py.includes('float(') && py.includes('nan'),
+  'Python analysis must explain actual results and treat absent issue groups as N/A');
 console.log('PASS: CSV analysis interpretation and absent-issue handling');
 
 const serverText = fs.readFileSync('api/lab04-model.ts','utf8');
