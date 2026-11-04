@@ -24,6 +24,7 @@ import { LabStepsPanel } from './LabStepsPanel';
 import { Lab02SpotifyCasePanel } from './Lab02SpotifyCasePanel';
 import { Lab03TikTokCasePanel } from './Lab03TikTokCasePanel';
 import { Lab04Notebook } from './Lab04Notebook';
+import { Lab04Theory } from './Lab04Theory';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import type { ExecutionResult } from '../../lib/runners/types';
 import { getBrowserValue, setBrowserValue } from '../lib/browser-persistence';
@@ -51,9 +52,12 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   // Session persistence prevents a browser refresh from throwing the student
   // out of the page they were actively using.
   const [viewMode, setViewMode] = useState<'theory' | 'steps' | 'code' | 'spotify' | 'tiktok' | 'notebook' | 'report'>(() => {
-    if (labId === 'lab04-software-repair-agents') return 'notebook';
     if (typeof window === 'undefined') return 'theory';
     const saved = window.sessionStorage.getItem(`aise:${isInstructorPreview ? 'instructor:' : ''}${labId}:view-mode`);
+    if (labId === 'lab04-software-repair-agents') {
+      return saved === 'theory' || saved === 'notebook' || saved === 'report'
+        ? saved : 'theory';
+    }
     return saved === 'steps' || saved === 'code' || saved === 'report' ||
       (labId === 'lab02-requirement-prioritization' && (saved === 'spotify' || saved === 'assistant')) ||
       (labId === 'lab03-social-commitment-agents' && saved === 'tiktok')
@@ -563,11 +567,18 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
         {/* Compact workspace navigation */}
         <div className="flex items-center bg-slate-100 p-0.5 rounded-md border border-slate-200 text-xs">
           {labId === 'lab04-software-repair-agents' ? (
-            <button onClick={() => setViewMode('notebook')}
-              className={'flex items-center gap-1.5 rounded px-3 py-1 text-xs font-medium ' +
-                (viewMode === 'notebook' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900')}>
-              <NotebookTabs className="h-3.5 w-3.5" /> Notebook
-            </button>
+            <>
+              <button type="button" onClick={() => setViewMode('theory')}
+                className={'flex items-center gap-1.5 rounded px-3 py-1 text-xs font-medium ' +
+                  (viewMode === 'theory' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900')}>
+                <BookOpen className="h-3.5 w-3.5" /> Theory
+              </button>
+              <button type="button" onClick={() => setViewMode('notebook')}
+                className={'flex items-center gap-1.5 rounded px-3 py-1 text-xs font-medium ' +
+                  (viewMode === 'notebook' ? 'bg-white text-slate-950 shadow-xs' : 'text-slate-600 hover:text-slate-900')}>
+                <NotebookTabs className="h-3.5 w-3.5" /> Notebook
+              </button>
+            </>
           ) : (
             <>
           <button
@@ -709,14 +720,18 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
         {/* VIEW 0: THEORY & LABSHEET ARTICLE (MEDIUM STYLE WITH ANNOTATIONS) */}
         {viewMode === 'theory' && (
-          <div className="h-full flex overflow-hidden">
-            <LabTheoryArticle
-              manifest={manifest}
-              studentName={reportState.studentName || user.name}
-              studentId={reportState.studentId || user.studentId}
-              onBeginLab={() => setViewMode('steps')}
-            />
-          </div>
+          labId === 'lab04-software-repair-agents' ? (
+            <Lab04Theory onOpenNotebook={() => setViewMode('notebook')} />
+          ) : (
+            <div className="h-full flex overflow-hidden">
+              <LabTheoryArticle
+                manifest={manifest}
+                studentName={reportState.studentName || user.name}
+                studentId={reportState.studentId || user.studentId}
+                onBeginLab={() => setViewMode('steps')}
+              />
+            </div>
+          )
         )}
 
         {/* VIEW 1: STEP-BY-STEP WORKFLOW */}

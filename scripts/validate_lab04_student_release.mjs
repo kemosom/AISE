@@ -19,6 +19,25 @@ const analysis = fs.readFileSync('src/components/Lab04Analysis.tsx','utf8');
 assert.ok(app.includes('const isUnlocked = manifest.labNumber <= 4'));
 assert.ok(!app.includes('manifest.labNumber !== 4'));
 assert.ok(workspace.includes('loadedManifest.labNumber > 4'));
+const theory = fs.readFileSync('src/components/Lab04Theory.tsx','utf8');
+const theoryText = fs.readFileSync('labs/lab04-software-repair-agents/theory.md','utf8');
+assert.ok(workspace.includes("import { Lab04Theory } from './Lab04Theory';"));
+assert.match(workspace, /<Lab04Theory onOpenNotebook=\{\(\) => setViewMode\('notebook'\)\}/);
+assert.ok(workspace.includes("if (labId === 'lab04-software-repair-agents') {"));
+assert.ok(workspace.includes("saved === 'theory' || saved === 'notebook' || saved === 'report'"));
+assert.ok(workspace.includes("onClick={() => setViewMode('theory')}"));
+assert.ok(workspace.includes("onClick={() => setViewMode('notebook')}"));
+for (const label of ['What software are we fixing?', 'What is an agent?', 'What will you write in Python?',
+  'Why compile and test the code?', 'What will you compare?', 'What happens after the experiments?']) {
+  assert.ok(theory.includes(label), 'Missing Theory section: ' + label);
+}
+assert.ok(theory.includes('Open Notebook'));
+assert.ok(theory.includes('not reports copied from a real'));
+assert.ok(theory.includes('one') && theory.includes('three'));
+assert.ok(theoryText.includes('Both agents use the same coding model'));
+assert.ok(!theory.includes('github.com/kemosom/AISE'));
+console.log('PASS: Lab 04 Theory tab, accessible explanations and notebook navigation');
+
 assert.ok(!ui.includes('View original laboratory source files'));
 assert.ok(!ui.includes('https://github.com/kemosom/AISE/blob/main/labs/lab04-software-repair-agents/cases.json'));
 assert.ok(!ui.includes('View the regression test source'));
