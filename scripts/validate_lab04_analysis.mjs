@@ -31,6 +31,21 @@ for (const id of ['context','reactive','intelligent','metrics']) {
 }
 console.log('PASS: question banks and correct indices');
 
+// The quiz should reveal correctness for the actual selected options, then
+// automatically draw the next set after an unsuccessful submission.
+const hintUI = fs.readFileSync('src/components/Lab04HintQuiz.tsx', 'utf8');
+assert.match(hintUI, /items:\s*ReviewedAnswer\[\]/);
+assert.match(hintUI, /selected:\s*question\.options\[answers\[question\.id\]\]/);
+assert.match(hintUI, /isCorrect:\s*answers\[question\.id\]\s*===\s*question\.correct/);
+assert.match(hintUI, /item\.isCorrect \? 'Correct' : 'Incorrect'/);
+assert.match(hintUI, /Correct answer: \{item\.correct\}/);
+assert.match(hintUI, /setReview\(\{ correctCount, items \}\)/);
+assert.match(hintUI, /setQuestions\(drawQuestions\(exerciseId, questions\)\)/);
+assert.ok(!hintUI.includes('New questions') && !hintUI.includes('onClick={retry}'));
+console.log('PASS: per-answer feedback and automatic new question set on quiz submission');
+
+
+
 // Exercise the same noLib virtual-file compiler configuration used by the
 // browser. This catches TS5107 and missing TypeScript global declarations.
 const cases = JSON.parse(fs.readFileSync('labs/lab04-software-repair-agents/cases.json','utf8'));
