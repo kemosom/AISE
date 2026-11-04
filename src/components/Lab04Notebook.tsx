@@ -358,7 +358,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
             <p className="mt-2 text-sm leading-6 text-slate-600">
               You are supporting a TypeScript service used by a development team. Each issue includes its original
               source, expected behaviour and regression tests. Your agents must repair the implementation without modifying the tests.
-              These are prepared classroom defects based on realistic failure modes, not claims of archived GitHub issues.
+
             </p>
           </div>
           <div className="grid gap-0 lg:grid-cols-[300px_1fr]">
