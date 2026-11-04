@@ -330,6 +330,15 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     setBatchProgress({ completed: 0, total, issue: cases[0].id, strategy: 'reactive' });
     try {
       if (!await verifyAgents()) return;
+      // A full batch is a new experiment dataset, not a continuation of
+      // obsolete or partially completed trials from earlier debugging.
+      setRuns([]);
+      setAnalysisPlots([]);
+      setCellOutput((previous) => {
+        const updated = { ...previous };
+        delete updated.metrics;
+        return updated;
+      });
       for (let repetition = 0; repetition < repetitions; repetition++) {
         if (repetitions > 1) appendLog('Repetition ' + (repetition + 1) + ' of ' + repetitions + '.');
         for (const issue of cases) {
@@ -595,6 +604,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           </div>
           <p className="mt-2 text-xs leading-5 text-slate-500">
             One repetition runs six independent agent trials. Repetitions add observations and use more model requests.
+            Run all starts a fresh experiment dataset; export earlier results first if needed.
             A technical error is recorded and does not stop the remaining cases.
           </p>
           {batchProgress && (
