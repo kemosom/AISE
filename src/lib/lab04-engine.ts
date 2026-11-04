@@ -19,15 +19,15 @@ export async function compileAndTest(issue: Lab04Issue, source: string): Promise
   const started = performance.now();
   const input = { issue: issue.id, source };
   const [tsModule, es5, core, iterable, symbol, symbolWellKnown, collection] = await Promise.all([
-    import('typescript'),
-    import('typescript/lib/lib.es5.d.ts?raw'),
-    import('typescript/lib/lib.es2015.core.d.ts?raw'),
-    import('typescript/lib/lib.es2015.iterable.d.ts?raw'),
-    import('typescript/lib/lib.es2015.symbol.d.ts?raw'),
-    import('typescript/lib/lib.es2015.symbol.wellknown.d.ts?raw'),
-    import('typescript/lib/lib.es2015.collection.d.ts?raw'),
+    import('ts-browser'),
+    import('ts-browser/lib/lib.es5.d.ts?raw'),
+    import('ts-browser/lib/lib.es2015.core.d.ts?raw'),
+    import('ts-browser/lib/lib.es2015.iterable.d.ts?raw'),
+    import('ts-browser/lib/lib.es2015.symbol.d.ts?raw'),
+    import('ts-browser/lib/lib.es2015.symbol.wellknown.d.ts?raw'),
+    import('ts-browser/lib/lib.es2015.collection.d.ts?raw'),
   ]);
-  const ts = tsModule.default || tsModule;
+  const ts = (tsModule as any).default || tsModule;
   const files: Record<string, string> = {
     '/main.ts': source,
     '/lib.es5.d.ts': es5.default,
