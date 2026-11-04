@@ -17,19 +17,19 @@
       "id": "methodology",
       "title": "3. Experimental Procedure",
       "required": true,
-      "placeholder": "State the selected model, identical starting sources, attempt limits, TypeScript compiler, regression checks and how communication bytes were counted. Record the number of trials."
+      "placeholder": "Describe the identical starting TypeScript source, Gemini model, fixed initial prompts, compiler and regression suite. Explain the one-attempt reactive policy and the intelligent agent's three-attempt limit. State how repetitions and excluded API failures were handled."
     },
     {
       "id": "results",
       "title": "4. Measured Results",
       "required": true,
-      "placeholder": "Paste measured rows and plots. Compare issue resolution, response time, worker messages, exchanged JSON bytes, and model calls or tokens. Clearly state the run count per strategy."
+      "placeholder": "Include the overall table and per-issue breakdown for checkout, queue and security. Report completed trial counts, successful fixes, mean end-to-end time, worker JSON messages/bytes, model calls and model tokens. Use at least two figures generated from your observed CSV records. List excluded API or execution errors separately."
     },
     {
       "id": "discussion",
       "title": "5. Failure Analysis and Comparison",
       "required": true,
-      "placeholder": "Use an actual failed test, diagnostic or patch to explain the agent's next action. Discuss whether additional attempts improved success and how much extra time or communication they used."
+      "placeholder": "Show one actual compiler diagnostic, regression failure or unsuccessful patch. Explain how each agent responded, whether feedback changed the outcome, and why time and worker/model costs differed. Do not count API outages as failed software patches."
     },
     {
       "id": "conclusion",
