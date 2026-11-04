@@ -10,6 +10,7 @@ assert.ok(!runAll.includes('window.confirm'), 'Run all should not display a conf
 assert.match(runAll, /for \(const issue of cases\)/, 'Must execute every issue');
 assert.match(runAll, /for \(const strategy of \['reactive', 'intelligent'\]/);
 assert.match(runAll, /completed\+\+;/);
+assert.match(runAll, /setRuns\(\[\]\)/, 'Run all should reset the stale partial dataset');
 assert.ok(!runAll.includes("Batch stopped"), 'An API error must not stop the batch');
 assert.match(notebook, /Repetitions per issue/);
 assert.match(notebook, /ref=\{terminalRef\}/);
