@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
 import { Lab04HintQuiz } from './Lab04HintQuiz';
+import { Lab04Analysis } from './Lab04Analysis';
+import { buildLab04PythonAnalysis } from '../lib/lab04-analysis-python';
+import { summarizeLab04 } from '../lib/lab04-statistics';
 import casesJson from '../../labs/lab04-software-repair-agents/cases.json';
 import exercisesJson from '../../labs/lab04-software-repair-agents/exercises.json';
 import type { Lab04Issue } from '../../labs/lab04-software-repair-agents/types';
@@ -26,7 +29,7 @@ type Props = {
 };
 const exercises = exercisesJson as Exercise[];
 const cases = casesJson as Lab04Issue[];
-const STORAGE_PREFIX = 'aise:lab04:notebook-v2';
+const STORAGE_PREFIX = 'aise:lab04:notebook-v3';
 const MODEL = 'gemini-3.6-flash';
 
 function mean(values: number[]): number {
@@ -68,6 +71,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   const [busy, setBusy] = useState(false);
   const [runningCell, setRunningCell] = useState<string | null>(null);
   const [activity, setActivity] = useState<string[]>([]);
+  const [analysisPlots, setAnalysisPlots] = useState<string[]>([]);
   const [runs, setRuns] = useState<RepairRun[]>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
@@ -276,35 +280,25 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   };
 
   const runMetricsCell = async () => {
+    if (runningCell) return;
     setRunningCell('metrics');
+    setAnalysisPlots([]);
     try {
-      const rows = runs.map((r) => ({
-        strategy: r.strategy, success: r.success, elapsed_ms: r.elapsedMs,
-        tool_bytes: r.toolBytes, model_calls: r.modelCalls,
-      }));
-      const code = cells.metrics + '\nimport json\n_rows = json.loads(' +
-        JSON.stringify(JSON.stringify(rows)) + ')\nprint(json.dumps(summarize_runs(_rows), indent=2))';
-      const result = await defaultCodeRunner.run(code);
+      // This is the same CSV content exported through the results panel.
+      const csvText = resultsToCsv(runs);
+      const result = await defaultCodeRunner.run(buildLab04PythonAnalysis(cells.metrics, csvText));
       setCellOutput((previous) => ({
-        ...previous, metrics: {
-          success: result.exitCode === 0,
-          text: (result.stdout + '\n' + result.stderr).trim() || 'No output.',
-        },
+        ...previous,
+        metrics: { success: result.exitCode === 0, text: (result.stdout + '\n' + result.stderr).trim() || 'No output.' },
+      }));
+      setAnalysisPlots(result.exitCode === 0 ? (result.plots || []) : []);
+    } catch (error) {
+      setCellOutput((previous) => ({
+        ...previous,
+        metrics: { success: false, text: 'Analysis error: ' + (error instanceof Error ? error.message : String(error)) },
       }));
     } finally { setRunningCell(null); }
   };
-
-  const stats = (['reactive', 'intelligent'] as const).map((strategy) => {
-    const subset = runs.filter((r) => r.strategy === strategy);
-    return {
-      strategy, count: subset.length,
-      success: subset.filter((r) => r.success).length,
-      successRate: subset.length ? (100 * subset.filter((r) => r.success).length / subset.length) : 0,
-      meanTime: mean(subset.map((r) => r.elapsedMs)),
-      meanBytes: mean(subset.map((r) => r.toolBytes)),
-      meanMessages: mean(subset.map((r) => r.toolMessages)),
-    };
-  });
 
   const evidence = () => [
     'Lab 04: Reactive versus intelligent software repair agents',
@@ -509,79 +503,64 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           </div>
         </section>
 
-        <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
-          <p className="text-xs font-semibold text-blue-700">PART E · EXPERIMENTAL RESULTS</p>
-          <h3 className="mt-1 text-lg font-semibold">09. Compare task success, runtime and communication overhead</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Each row is a real completed agent execution. Runtime includes Python decisions, model API calls,
-            TypeScript compilation and regression testing. Tool messages and payload bytes measure JSON exchanges
-            with the test worker. Gemini token usage is reported separately.
-          </p>
-          <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600"><tr>
-                {['Issue', 'Agent', 'Success', 'Attempts', 'Time (ms)', 'Tool messages', 'Tool bytes', 'Model tokens'].map((label) =>
-                  <th className="whitespace-nowrap border-b border-slate-200 px-3 py-3 font-semibold" key={label}>{label}</th>)}
-              </tr></thead>
-              <tbody>{runs.length ? runs.map((r, index) => (
-                <tr key={index} className="border-t border-slate-100">
-                  <td className="px-3 py-2">{r.issue}</td><td className="px-3 py-2">{r.strategy}</td>
-                  <td className={'px-3 py-2 font-semibold ' + (r.success ? 'text-emerald-700' : 'text-red-700')}>{r.success ? 'Pass' : 'Fail'}</td>
-                  <td className="px-3 py-2">{r.attempts}</td><td className="px-3 py-2">{r.elapsedMs}</td>
-                  <td className="px-3 py-2">{r.toolMessages}</td><td className="px-3 py-2">{r.toolBytes}</td>
-                  <td className="px-3 py-2">{r.modelTokens}</td>
-                </tr>
-              )) : <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-500">No experiment measurements yet. Run the agents first.</td></tr>}</tbody>
-            </table>
-          </div>
-          {runs.length > 0 && (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 p-4">
-                <h4 className="text-xs font-semibold">Observed repair success rate</h4>
-                {stats.map((item) => <div key={item.strategy} className="mt-4">
-                  <div className="mb-1 flex justify-between text-xs"><span className="capitalize">{item.strategy} ({item.success}/{item.count})</span><span>{item.successRate.toFixed(1)}%</span></div>
-                  <div className="h-3 rounded bg-slate-100"><div className="h-3 rounded bg-blue-600" style={{ width: item.successRate + '%' }}/></div>
-                </div>)}
-              </div>
-              <div className="rounded-lg border border-slate-200 p-4">
-                <h4 className="text-xs font-semibold">Mean end-to-end runtime</h4>
-                {stats.map((item) => <div key={item.strategy} className="mt-4">
-                  <div className="mb-1 flex justify-between text-xs"><span className="capitalize">{item.strategy}</span><span>{item.count ? item.meanTime.toFixed(0) + ' ms' : 'No trials'}</span></div>
-                  <div className="h-3 rounded bg-slate-100"><div className="h-3 rounded bg-emerald-600"
-                    style={{ width: (Math.max(0, item.meanTime) / Math.max(1, ...stats.map((s) => s.meanTime)) * 100) + '%' }}/></div>
-                </div>)}
-              </div>
-            </div>
-          )}
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button disabled={!runs.length} onClick={downloadCsv} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold disabled:opacity-50">
-              <Download className="h-4 w-4"/> Export measurements CSV
-            </button>
-            <button disabled={!runs.length} onClick={downloadTraces} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold disabled:opacity-50">
-              <Download className="h-4 w-4"/> Export agent traces JSON
-            </button>
-          </div>
-        </section>
+        <Lab04Analysis
+          rows={runs}
+          onClear={() => {
+            if (!window.confirm('Clear all saved Lab 4 experiment measurements? Your code cells will be kept.')) return;
+            setRuns([]);
+            setAnalysisPlots([]);
+            setActivity([]);
+            setCellOutput((previous) => {
+              const updated = { ...previous };
+              delete updated.metrics;
+              return updated;
+            });
+          }}
+          onCsv={() => downloadCsv()}
+          onTraces={() => downloadTraces()}
+        />
 
         {exercises.filter((item) => item.id === 'metrics').map((exercise) => (
           <section key={exercise.id} className="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="p-5 sm:px-7">
               <span className="text-xs font-semibold text-blue-700">Step {exercise.step} · Python data analysis</span>
               <h3 className="mt-1 text-base font-semibold">{exercise.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{exercise.explanation}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{exercise.explanation} This cell uses the same CSV as the export button and produces summary tables and five plots from recorded trials.</p>
             </div>
             <div className="border-y border-slate-100 bg-slate-50 px-5 py-2 text-xs text-slate-500">In [09] · Python 3</div>
-            <Editor height={200} language="python" value={cells.metrics} onChange={(v) => updateCell('metrics', v || '')}
+            <Editor height={Math.max(220, cells.metrics.split('\n').length * 19 + 40)} language="python" value={cells.metrics} onChange={(v) => updateCell('metrics', v || '')}
               options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, automaticLayout: true }}/>
             <div className="flex flex-wrap justify-between gap-2 border-t border-slate-100 p-4">
               <button disabled={busy || runningCell !== null} onClick={() => void runMetricsCell()}
                 className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
-                {runningCell === 'metrics' ? 'Running...' : 'Run analysis cell'}
+                {runningCell === 'metrics' ? 'Analysing CSV...' : 'Run analysis and generate figures'}
               </button>
               <Lab04HintQuiz exerciseId="metrics" source={exercise.solution}
                 onInsert={(code) => updateCell('metrics', code)} />
             </div>
-            {cellOutput.metrics && <pre className="whitespace-pre-wrap break-words border-t p-4 font-mono text-xs">{cellOutput.metrics.text}</pre>}
+            {cellOutput.metrics && (
+              <div className="border-t border-slate-200 p-5">
+                <div className="mb-2 text-xs font-semibold text-slate-700">Results calculated from the exported CSV</div>
+                <pre className={'overflow-x-auto whitespace-pre rounded-lg p-4 font-mono text-xs leading-6 ' +
+                  (cellOutput.metrics.success ? 'bg-slate-950 text-emerald-100' : 'bg-amber-50 text-amber-900')}>
+                  {cellOutput.metrics.text}
+                </pre>
+              </div>
+            )}
+            {analysisPlots.length > 0 && (
+              <div className="grid gap-4 border-t border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
+                {analysisPlots.map((src, index) => (
+                  <div key={index} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="mb-2 text-xs font-semibold text-slate-600">Figure {index + 1}</div>
+                    <img src={src} alt={'Measured Lab 4 experiment figure ' + (index + 1)} className="w-full" />
+                    <a href={src} download={'Lab04_figure_' + (index + 1) + '.png'}
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700">
+                      <Download className="h-3 w-3"/> Save figure
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
 
