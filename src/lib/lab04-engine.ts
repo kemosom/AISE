@@ -71,8 +71,7 @@ export async function compileAndTest(issue: Lab04Issue, source: string): Promise
   });
   if (!diagnostics.length) program.emit();
   if (diagnostics.length || !emitted) {
-    const result = { passed: false, compilationPassed: false, diagnostics: diagnostics.length ? diagnostics : ['Compiler emitted no JavaScript.'], checks: [] as TestCheck[], elapsedMs: Math.round(performance.now() - started), messages: 2, bytes: 0 };
-    result.bytes = countBytes(input) + countBytes(result);
+    const result = { passed: false, compilationPassed: false, diagnostics: diagnostics.length ? diagnostics : ['Compiler emitted no JavaScript.'], checks: [] as TestCheck[], elapsedMs: Math.round(performance.now() - started), messages: 0, bytes: 0 };
     return result;
   }
 
@@ -98,14 +97,10 @@ export async function compileAndTest(issue: Lab04Issue, source: string): Promise
     diagnostics: workerResult.error ? [workerResult.error] : [],
     checks: workerResult.results || [],
     elapsedMs: Math.round(performance.now() - started),
-    messages: 4,
+    messages: 2,
     bytes: 0,
   };
-  result.bytes =
-    countBytes(input) +
-    countBytes({ compilationPassed: true }) +
-    countBytes({ issue: issue.id, code: emitted }) +
-    countBytes(workerResult);
+  result.bytes = countBytes({ issue: issue.id, code: emitted }) + countBytes(workerResult);
   return result;
 }
 
