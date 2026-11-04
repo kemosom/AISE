@@ -10,8 +10,6 @@ A TypeScript service has three outstanding defects involving checkout totals, in
 
 The three source files are authored for this teaching laboratory and contain seeded defects. They are not copied from a published production incident. Students compile and test the actual code in the browser.
 
-- [Lab 04 source files (TypeScript fixtures)](https://github.com/kemosom/AISE/blob/main/labs/lab04-software-repair-agents/cases.json)
-- [Lab 04 regression tests](https://github.com/kemosom/AISE/blob/main/src/workers/lab04-tests.worker.ts)
 - [Stripe currency minor-unit documentation](https://docs.stripe.com/currencies): background for checkout amounts in integer cents
 - [BullMQ prioritized jobs](https://docs.bullmq.io/guide/jobs/prioritized): background for priority-based job ordering. The lab uses its own simpler priority labels
 - [OWASP Logging Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html): background for protecting tokens and credentials in application logs

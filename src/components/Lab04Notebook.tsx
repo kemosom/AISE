@@ -495,12 +495,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
               that ask a coding model for a repair, compile the returned source and execute regression tests.
               The software runs in your browser. The example bugs are teaching fixtures, not copied production incidents.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium">
-              <a href="https://github.com/kemosom/AISE/blob/main/labs/lab04-software-repair-agents/cases.json"
-                target="_blank" rel="noreferrer" className="text-blue-700 underline">View original laboratory source files</a>
-              <a href="https://github.com/kemosom/AISE/blob/main/src/workers/lab04-tests.worker.ts"
-                target="_blank" rel="noreferrer" className="text-blue-700 underline">View the regression test source</a>
-            </div>
+
           </div>
           <div className="grid gap-0 lg:grid-cols-[300px_1fr]">
             <div className="border-b border-slate-100 p-4 lg:border-b-0 lg:border-r">
