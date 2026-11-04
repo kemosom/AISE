@@ -31,7 +31,8 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "vite": "^8.3.0",
-    "katex": "^0.16.22"
+    "katex": "^0.16.22",
+    "ts-browser": "npm:typescript@6.0.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
