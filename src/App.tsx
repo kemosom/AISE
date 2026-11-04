@@ -143,7 +143,7 @@ export default function App() {
     setInstructorUnlockError(null);
 
     try {
-      const response = await fetch(instructorSelectedLabId === 'lab04-software-repair-agents' ? '/api/lab4' : '/api/instructor', {
+      const response = await fetch('/api/instructor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,7 +176,8 @@ export default function App() {
       // authentication. Preserve Lab 01's established answer-guide landing.
       // The Lab 02 student access lock remains in force.
       const openCasePreview = instructorSelectedLabId === 'lab02-requirement-prioritization' ||
-        instructorSelectedLabId === 'lab03-social-commitment-agents';
+        instructorSelectedLabId === 'lab03-social-commitment-agents' ||
+        instructorSelectedLabId === 'lab04-software-repair-agents';
       setIsInstructorPreview(openCasePreview);
       setShowInstructorAccess(false);
       setActiveView(openCasePreview ? 'lab' : 'instructor');
