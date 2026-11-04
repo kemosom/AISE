@@ -1,0 +1,274 @@
+{
+  "context": [
+    {
+      "id": "context-1",
+      "question": "What should select_context return after locating the requested source file?",
+      "options": [
+        "The TypeScript source text",
+        "A model-generated patch",
+        "The compiler exit code",
+        "The report file name"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "context-2",
+      "question": "Why should select_context reject a path that is absent from the repository dictionary?",
+      "options": [
+        "The model needs more tokens",
+        "The file may not exist or be permitted",
+        "All TypeScript files require a build",
+        "The test worker rejects comments"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "context-3",
+      "question": "What does the repository dictionary map in this exercise?",
+      "options": [
+        "Bug IDs to API keys",
+        "Source paths to file contents",
+        "Test scores to student IDs",
+        "Model prompts to token prices"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "context-4",
+      "question": "Which check helps prevent a path-traversal request?",
+      "options": [
+        "Accepting ../parent.ts when given",
+        "Requiring an absolute Windows path",
+        "Rejecting path segments containing ..",
+        "Deleting the repository after each read"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "context-5",
+      "question": "If the issue refers to a source file that is missing, what is an appropriate response?",
+      "options": [
+        "Silently inspect a different file",
+        "Report a validation error",
+        "Generate a patch with an empty context",
+        "Treat the issue as resolved"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "context-6",
+      "question": "Why does selecting the correct file matter for software repair?",
+      "options": [
+        "It guarantees the generated patch will pass tests",
+        "It supplies relevant program context to the model",
+        "It prevents the model from using any tokens",
+        "It eliminates all type checking"
+      ],
+      "correct": 1
+    }
+  ],
+  "reactive": [
+    {
+      "id": "reactive-1",
+      "question": "How many code-generation attempts may the reactive agent make in this lab?",
+      "options": [
+        "One",
+        "Two",
+        "Three",
+        "Unlimited"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "reactive-2",
+      "question": "What should the reactive agent do when its first patch fails regression tests?",
+      "options": [
+        "Stop and report unresolved",
+        "Replace the tests",
+        "Try the same model again indefinitely",
+        "Mark success if compilation passed"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "reactive-3",
+      "question": "Which information is most useful in the reactive agent's initial patch prompt?",
+      "options": [
+        "Issue report, affected source and failure feedback",
+        "Student name and course timetable",
+        "Only the number of model tokens",
+        "An empty source file"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "reactive-4",
+      "question": "Why can the reactive strategy use fewer model requests than the feedback-driven strategy?",
+      "options": [
+        "It always produces shorter source code",
+        "It never calls a compiler",
+        "Its repair policy is limited to one attempt",
+        "It uses a different regression suite"
+      ],
+      "correct": 2
+    },
+    {
+      "id": "reactive-5",
+      "question": "What action should the reactive agent return after a successful first patch?",
+      "options": [
+        "Generate another patch",
+        "Finish",
+        "Delete all tests",
+        "Start a new issue automatically"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "reactive-6",
+      "question": "Which statement describes the fixed decision rule used by the reactive agent?",
+      "options": [
+        "It reads failures and replans until a fix is found",
+        "It generates one patch and then stops or finishes",
+        "It trains a new neural network on every issue",
+        "It edits the reference tests to guarantee success"
+      ],
+      "correct": 1
+    }
+  ],
+  "intelligent": [
+    {
+      "id": "intelligent-1",
+      "question": "When should the feedback-driven agent stop immediately?",
+      "options": [
+        "After any model response",
+        "When the most recent patch passes all checks",
+        "When the issue has a long description",
+        "Before examining the first failure"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "intelligent-2",
+      "question": "Why include the last compiler or test failure in the next repair prompt?",
+      "options": [
+        "To inform the model what remains incorrect",
+        "To make the Python runner faster",
+        "To hide the issue from the model",
+        "To avoid compiling again"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "intelligent-3",
+      "question": "What prevents the intelligent agent from retrying indefinitely?",
+      "options": [
+        "A fixed maximum attempt count",
+        "Increasing the HTTP timeout forever",
+        "A random process exit",
+        "Deleting the repair history"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "intelligent-4",
+      "question": "Which feedback indicates a behavioural defect rather than a TypeScript type error?",
+      "options": [
+        "A failing regression assertion after successful compilation",
+        "A missing API key",
+        "A network connection refusal",
+        "A malformed JSON response"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "intelligent-5",
+      "question": "The intelligent agent's next prompt should include what after a failed patch?",
+      "options": [
+        "Current source, failure output and repair history",
+        "Only the successful test names",
+        "Only the model name",
+        "Student report headings"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "intelligent-6",
+      "question": "Why might the intelligent agent have higher end-to-end runtime?",
+      "options": [
+        "Its additional repair attempts require model calls and repeated testing",
+        "It skips compilation entirely",
+        "It uses a larger software repository by definition",
+        "It always downloads new dependencies"
+      ],
+      "correct": 0
+    }
+  ],
+  "metrics": [
+    {
+      "id": "metrics-1",
+      "question": "Which trials belong in the denominator for software repair success rate?",
+      "options": [
+        "Completed repair trials with a pass or an unresolved result",
+        "API timeouts only",
+        "Every button click including connection checks",
+        "Only successful repairs"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "metrics-2",
+      "question": "How should a Gemini HTTP 503 error be classified in the comparison?",
+      "options": [
+        "A successful repair",
+        "An infrastructure/API error, not evidence that the patch failed tests",
+        "A regression-test failure",
+        "An agent communication saving"
+      ],
+      "correct": 1
+    },
+    {
+      "id": "metrics-3",
+      "question": "What is measured by toolBytes in this lab?",
+      "options": [
+        "JSON payload bytes exchanged with the isolated test worker",
+        "Gemini subscription fees",
+        "Total laptop network traffic",
+        "The number of lines of TypeScript"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "metrics-4",
+      "question": "Why is it useful to compare results separately for checkout, queue and security?",
+      "options": [
+        "Each defect may have different repair difficulty",
+        "Each issue uses an incompatible Python interpreter",
+        "Every issue must have identical execution time",
+        "Per-issue results eliminate measurement noise"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "metrics-5",
+      "question": "What does a mean runtime represent?",
+      "options": [
+        "Sum of recorded times divided by the number of included trials",
+        "The fastest run only",
+        "A predicted time from the bug report",
+        "The number of model tokens"
+      ],
+      "correct": 0
+    },
+    {
+      "id": "metrics-6",
+      "question": "Why report Gemini model tokens separately from worker communication bytes?",
+      "options": [
+        "They represent different operations and different resources",
+        "They are always numerically equal",
+        "Token counts are the same as network packets",
+        "Compiler errors are measured in tokens"
+      ],
+      "correct": 0
+    }
+  ]
+}
