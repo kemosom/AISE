@@ -5,4 +5,5 @@ export interface Lab04Issue {
   type: string;
   report: string;
   source: string;
+  sources?: Array<{ label: string; url: string; note: string }>;
 }
