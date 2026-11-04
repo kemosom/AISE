@@ -98,6 +98,10 @@ function SummaryCell({ group, field, digits = 0 }: { group: Lab04Group; field: k
 export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces, busy }) => {
   const summary = summarizeLab04(rows);
   const reactive = summary.overall.reactive, intelligent = summary.overall.intelligent;
+  const fullyObservedIssues = summary.perIssue.filter((item) => item.reactive.n > 0 && item.intelligent.n > 0).length;
+  const recoveredAfterRetry = rows.filter((item) => isCompletedRepair(item) && item.success && item.attempts > 1).length;
+  const allFirstPass = summary.validCount > 0 &&
+    rows.filter(isCompletedRepair).every((item) => item.success && item.attempts === 1);
   return (
     <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -121,6 +125,35 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces,
           {' '}{summary.errorCount} API or execution errors excluded from repair success rates and means.
           {' '}A successful repair must compile and pass every regression test. An unresolved trial completed normally but did not pass.
           {' '}An API error is not a software repair failure.
+        </div>
+      )}
+      {summary.validCount > 0 && (
+        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-700">
+          <div className="text-sm font-semibold text-slate-900">How to interpret these measurements</div>
+          {fullyObservedIssues < 3 ? (
+            <p className="mt-1">
+              Only {fullyObservedIssues} of 3 defects have completed trials for both strategies.
+              The overall success percentages are preliminary. Complete queue and security before
+              comparing agent performance across the full set of cases.
+            </p>
+          ) : allFirstPass ? (
+            <p className="mt-1">
+              Both agents repaired every observed defect on their first patch. The intelligent agent
+              did not need to revise any generated code in these trials. This is a ceiling effect,
+              not proof that the agents have identical capabilities. Compare runtime and model use,
+              then repeat the experiment if additional observations are needed.
+            </p>
+          ) : (
+            <p className="mt-1">
+              {recoveredAfterRetry} successful repairs required more than one patch attempt.
+              Examine their execution traces to see whether test feedback contributed to the
+              repair. Compare success and overhead per issue, not only the overall percentages.
+            </p>
+          )}
+          <p className="mt-1">
+            Observed feedback-driven recoveries: <strong>{recoveredAfterRetry}</strong>.
+            Completed trials are counted separately from provider and execution errors.
+          </p>
         </div>
       )}
       <div className="mt-5 overflow-x-auto rounded-lg border border-slate-200">
@@ -172,11 +205,15 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces,
                 intelligent:intelligent.meanMs===null?null:intelligent.meanMs/1000}}/>
             <ComparisonFigure title="Mean test-worker communication" subtitle="Serialized JSON bytes exchanged with the test worker"
               unit="bytes" values={{reactive:reactive.meanToolBytes,intelligent:intelligent.meanToolBytes}}/>
-            <ComparisonFigure title="Mean model token consumption" subtitle="Gemini input and output tokens per completed run"
+            <ComparisonFigure title="Mean model token consumption" subtitle="Gemini input, visible output and thinking tokens per completed run"
               unit="tokens" values={{reactive:reactive.meanTokens,intelligent:intelligent.meanTokens}}/>
           </div>
 
           <h4 className="mt-7 text-sm font-semibold">Per-issue breakdown</h4>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Cases with no valid trial remain N/A. Try repetitions to observe run-to-run variation.
+            A one-run success rate is descriptive, not a generalizable performance estimate.
+          </p>
           <p className="mt-1 text-xs leading-5 text-slate-500">
             Checkout checks type correctness. Queue checks incident dispatch order. Security checks sensitive-header redaction.
           </p>
