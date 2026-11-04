@@ -56,3 +56,6 @@ jobs:
 
       - name: Validate Lab 04 complete batch and Gemini recovery
         run: node scripts/validate_lab04_batch.mjs
+
+      - name: Validate Lab 04 student release, provenance and integrated Python agents
+        run: node scripts/validate_lab04_student_release.mjs
