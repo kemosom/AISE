@@ -2,7 +2,7 @@
 
 The starter intentionally fails public mastery tests. This script checks
 that the editor can run it, the eleven case payloads are structurally sound,
-and student access is enabled only through Lab 03.
+and released student access now includes Labs 01 through 04.
 """
 from pathlib import Path
 import json
@@ -52,8 +52,8 @@ assert cases["PAYOUT_MISSED"]["ledger"][-1]["status"] != "VIOLATED"
 assert cases["DUPLICATE_PAYOUT"]["event_count"] > cases["SUCCESS"]["event_count"]
 
 app = (ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
-assert "manifest.labNumber <= 3" in app, "Lab 03 should be available to students."
+assert "manifest.labNumber <= 4" in app, "Labs 01 through 04 should be available to students."
 assert "instructorSelectedLabId === 'lab03-social-commitment-agents'" in app
 workspace = (ROOT / "src" / "components" / "LabWorkspace.tsx").read_text(encoding="utf-8")
-assert "loadedManifest.labNumber > 3 && !isInstructorPreview" in workspace
-print("Lab 03 validation passed. Lab 03 released; Labs 04+ remain locked.")
+assert "loadedManifest.labNumber > 4 && !isInstructorPreview" in workspace
+print("Lab 03 validation passed. Labs 01–04 released; Labs 05+ remain locked.")
