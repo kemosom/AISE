@@ -74,7 +74,7 @@ export default function App() {
     setLabsError(null);
 
     try {
-      const manifests = LabRegistry.getAllLabs();
+      const manifests = LabRegistry.getAllLabs().filter((manifest) => manifest.labNumber !== 4);
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
         // Labs 01 through 03 are released to students.
@@ -143,7 +143,7 @@ export default function App() {
     setInstructorUnlockError(null);
 
     try {
-      const response = await fetch('/api/instructor', {
+      const response = await fetch(instructorSelectedLabId === 'lab04-software-repair-agents' ? '/api/lab4' : '/api/instructor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

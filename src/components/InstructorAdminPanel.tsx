@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LabRegistry } from '../../labs/registry';
+import { Lab04InstructorPreview } from './Lab04InstructorPreview';
 import {
   ArrowLeft,
   BookOpenCheck,
@@ -56,6 +57,15 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
     strategyB: 'B: Policy in model',
     strategyC: 'C: Separated',
   };
+
+  if (data.labId === 'lab04-software-repair-agents') {
+    return <Lab04InstructorPreview
+      notebook={data.notebook || []}
+      files={data.files || {}}
+      onExit={onExit}
+      onSwitchLab={onSwitchLab}
+    />;
+  }
 
   // The earlier encrypted Lab 02 instructor payload belongs to the retired
   // model-training lab. Until it is re-encrypted for the current case study,
