@@ -1,0 +1,26 @@
+[
+  {
+    "id": "checkout",
+    "title": "ISSUE-104 · Checkout total has the wrong type",
+    "file": "src/orders.ts",
+    "type": "Compilation defect",
+    "report": "The invoicing service expects totalAfterTax to return integer cents. A refactor introduced a TypeScript type error. Keep the existing input validation and rounded cents calculation. Do not change the public function signature.",
+    "source": "export interface Order {\n  id: string;\n  amountCents: number;\n}\n\n/** Return the amount owed in integer cents after percentage tax. */\nexport function totalAfterTax(order: Order, taxPercentage: number): number {\n  if (!Number.isFinite(taxPercentage) || taxPercentage < 0) {\n    throw new RangeError('Tax percentage must be nonnegative and finite');\n  }\n  const taxCents = Math.round(order.amountCents * taxPercentage / 100);\n  return String(order.amountCents + taxCents);\n}"
+  },
+  {
+    "id": "queue",
+    "title": "ISSUE-117 · Critical incidents wait behind routine tickets",
+    "file": "src/queue.ts",
+    "type": "Behavioural regression",
+    "report": "The dispatcher selects older normal-priority work before newer critical incidents. Priority order must be critical, high, normal. Break ties using the earliest createdAt. Do not mutate the input array. Return null for an empty queue.",
+    "source": "export interface Job {\n  id: string;\n  priority: 'critical' | 'high' | 'normal';\n  createdAt: number;\n}\n\n/** Choose highest priority, then earliest creation time. */\nexport function nextJob(jobs: Job[]): Job | null {\n  return [...jobs].sort((a, b) => a.createdAt - b.createdAt)[0] ?? null;\n}"
+  },
+  {
+    "id": "security",
+    "title": "ISSUE-126 · Request logs expose authentication headers",
+    "file": "src/security.ts",
+    "type": "Security regression",
+    "report": "The structured logger leaks credentials when header names are capitalised or use alternative names. Redact Authorization, Cookie, Set-Cookie, X-API-Key, and Proxy-Authorization, regardless of case. Keep other headers unchanged, and do not mutate caller input.",
+    "source": "/** Redact credential-bearing HTTP headers before logging. */\nexport function sanitizeHeaders(headers: Record<string, string>): Record<string, string> {\n  const cleaned = { ...headers };\n  if ('authorization' in cleaned) {\n    cleaned.authorization = '[REDACTED]';\n  }\n  return cleaned;\n}"
+  }
+]
