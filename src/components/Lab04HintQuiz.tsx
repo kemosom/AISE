@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { CheckCircle2, ChevronDown, LockKeyhole, RefreshCw, X } from 'lucide-react';
+import { CheckCircle2, ChevronDown, LockKeyhole, X } from 'lucide-react';
 import questionBanks from '../../labs/lab04-software-repair-agents/hint-questions.json';
 
 type Question = { id: string; question: string; options: string[]; correct: number };
 type Presented = Question & { shuffled: Array<{ index: number; label: string }> };
 type Props = { exerciseId: string; source: string; onInsert: (code: string) => void };
+type ReviewedAnswer = { question: string; selected: string; correct: string; isCorrect: boolean };
+type Review = { correctCount: number; items: ReviewedAnswer[] };
 
 const shuffle = <T,>(items: T[]): T[] => {
   const output = [...items];
@@ -36,37 +38,42 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
   const [questions, setQuestions] = useState<Presented[]>([]);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [feedback, setFeedback] = useState('');
+  const [review, setReview] = useState<Review | null>(null);
   const [attempts, setAttempts] = useState(0);
 
   const start = () => {
     setQuestions(drawQuestions(exerciseId, questions));
     setAnswers({});
     setFeedback('');
+    setReview(null);
     setOpen(true);
-  };
-  const retry = () => {
-    setQuestions(drawQuestions(exerciseId));
-    setAnswers({});
-    setFeedback('');
   };
   const grade = () => {
     if (questions.some((question) => answers[question.id] === undefined)) {
-      setFeedback('Answer all three questions before checking your responses.');
+      setFeedback('Select one answer for each of the three questions before submitting.');
       return;
     }
-    const correct = questions.filter((question) => answers[question.id] === question.correct).length;
+    const items: ReviewedAnswer[] = questions.map((question) => ({
+      question: question.question,
+      selected: question.options[answers[question.id]],
+      correct: question.options[question.correct],
+      isCorrect: answers[question.id] === question.correct,
+    }));
+    const correctCount = items.filter((item) => item.isCorrect).length;
     setAttempts((previous) => previous + 1);
-    if (correct === 3) {
+    if (correctCount === 3) {
       setUnlocked(true);
       setOpen(false);
       setFeedback('');
-    } else {
-      // A failed submission starts a fresh checkpoint, with newly shuffled
-      // questions and answer positions. There is no retry limit.
-      setQuestions(drawQuestions(exerciseId));
-      setAnswers({});
-      setFeedback(correct + ' of 3 correct. A new set of questions is ready. Try again.');
+      setReview(null);
+      return;
     }
+    // Immediately present new questions but retain an answer-by-answer
+    // review of the previous submission above them.
+    setReview({ correctCount, items });
+    setQuestions(drawQuestions(exerciseId, questions));
+    setAnswers({});
+    setFeedback('');
   };
 
   return (
@@ -89,10 +96,6 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
                 className="rounded-md border border-blue-200 bg-white px-3 py-2 text-xs font-semibold text-blue-800 hover:bg-blue-100">
                 Insert complete example
               </button>
-              <button type="button" onClick={start}
-                className="rounded-md px-3 py-2 text-xs text-slate-600 hover:bg-white">
-                Practise another quiz
-              </button>
             </div>
           </div>
         </details>
@@ -107,11 +110,38 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
               <div>
                 <div className="text-xs font-semibold uppercase tracking-widest text-blue-700">Code hint checkpoint</div>
                 <h4 className="mt-1 text-base font-semibold text-slate-900">Answer three questions to reveal the code</h4>
-                <p className="mt-1 text-xs leading-5 text-slate-600">Choose one answer for each question. All three must be correct. You may try as many times as needed.</p>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Choose one answer for each question and submit. You will see which selections were correct. If needed, the next three questions appear automatically. There is no attempt limit.</p>
               </div>
               <button aria-label="Close checkpoint" type="button" onClick={() => setOpen(false)} className="rounded-md p-1 text-slate-500 hover:bg-slate-100"><X className="h-5 w-5"/></button>
             </div>
             <div className="max-h-[min(65vh,590px)] space-y-5 overflow-y-auto px-5 py-4">
+              {review && (
+                <section aria-label="Feedback on previous answers" className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                  <h5 className="text-sm font-semibold text-slate-900">
+                    Previous attempt: {review.correctCount} of 3 correct
+                  </h5>
+                  <p className="mt-1 text-xs text-slate-600">
+                    Review your selected answers below. A new set of three questions is ready underneath.
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {review.items.map((item, index) => (
+                      <div key={index}
+                        className={'rounded-md border bg-white p-3 text-xs leading-5 ' +
+                          (item.isCorrect ? 'border-emerald-200' : 'border-rose-200')}>
+                        <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
+                          <span className="font-semibold text-slate-800">{index + 1}. {item.question}</span>
+                          <span className={'shrink-0 font-semibold ' +
+                            (item.isCorrect ? 'text-emerald-700' : 'text-rose-700')}>
+                            {item.isCorrect ? 'Correct' : 'Incorrect'}
+                          </span>
+                        </div>
+                        <p className="text-slate-700">Your answer: {item.selected}</p>
+                        {!item.isCorrect && <p className="mt-1 font-medium text-emerald-800">Correct answer: {item.correct}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
               {questions.map((question, index) => (
                 <fieldset key={question.id} className="rounded-lg border border-slate-200 p-3">
                   <legend className="px-1 text-xs font-semibold text-slate-800">Question {index + 1} of 3</legend>
@@ -135,14 +165,10 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3">
               <span className="text-xs text-slate-600">Attempts: {attempts} · Unlimited retries</span>
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={retry}
-                  className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700">
-                  <RefreshCw className="h-3.5 w-3.5"/> New questions
-                </button>
-                <button type="button" onClick={grade}
-                  className="rounded-md bg-blue-700 px-4 py-2 text-xs font-semibold text-white">Check answers</button>
-              </div>
+              <button type="button" onClick={grade}
+                className="rounded-md bg-blue-700 px-4 py-2 text-xs font-semibold text-white">
+                Submit answers
+              </button>
             </div>
           </div>
         </div>
