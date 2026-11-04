@@ -14,9 +14,17 @@ const shuffle = <T,>(items: T[]): T[] => {
   }
   return output;
 };
-function drawQuestions(exerciseId: string): Presented[] {
+function drawQuestions(exerciseId: string, previous: Presented[] = []): Presented[] {
   const banks = questionBanks as Record<string, Question[]>;
-  return shuffle(banks[exerciseId] || []).slice(0, 3).map((q) => ({
+  const pool = banks[exerciseId] || [];
+  const selection = shuffle(pool).slice(0, 3);
+  // Guarantee at least one different question on each retry.
+  if (previous.length && selection.length === previous.length &&
+    selection.every((q) => previous.some((old) => old.id === q.id))) {
+    const replacement = shuffle(pool.filter((q) => !selection.some((selected) => selected.id === q.id)))[0];
+    if (replacement) selection[0] = replacement;
+  }
+  return selection.map((q) => ({
     ...q,
     shuffled: shuffle(q.options.map((label, index) => ({ label, index }))),
   }));
@@ -31,7 +39,7 @@ export const Lab04HintQuiz: React.FC<Props> = ({ exerciseId, source, onInsert })
   const [attempts, setAttempts] = useState(0);
 
   const start = () => {
-    setQuestions(drawQuestions(exerciseId));
+    setQuestions(drawQuestions(exerciseId, questions));
     setAnswers({});
     setFeedback('');
     setOpen(true);
