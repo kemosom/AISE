@@ -435,7 +435,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
             </p>
           </div>
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium">
-            {isInstructorPreview ? 'Student workspace preview · Unreleased' : 'Interactive notebook'}
+            {isInstructorPreview ? 'Instructor preview · Lab 04 released' : 'Interactive notebook'}
           </span>
         </div>
 
@@ -457,11 +457,19 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         <section className="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
             <p className="text-xs font-semibold text-blue-700">PART A · THE SOFTWARE MAINTENANCE CASE</p>
-            <h3 className="mt-1 text-lg font-semibold">01. A production service has three reported defects</h3>
+            <h3 className="mt-1 text-lg font-semibold">01. Maintain a TypeScript operations service</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              You are a software engineer maintaining an operations service. The team has reported three defects: incorrect checkout totals, misordered incident tickets and exposed authentication headers. Each case includes a bug report, its affected TypeScript function and a regression suite. Write the Python agent decision logic that controls an AI coding model. Your agents must repair the implementation without changing the tests.
-
+              This laboratory uses three small, lab-authored TypeScript modules with deliberately introduced defects:
+              checkout calculations, incident scheduling and request-header logging. You will implement Python agents
+              that ask a coding model for a repair, compile the returned source and execute regression tests.
+              The software runs in your browser. The example bugs are teaching fixtures, not copied production incidents.
             </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium">
+              <a href="https://github.com/kemosom/AISE/blob/main/labs/lab04-software-repair-agents/cases.json"
+                target="_blank" rel="noreferrer" className="text-blue-700 underline">View original laboratory source files</a>
+              <a href="https://github.com/kemosom/AISE/blob/main/src/workers/lab04-tests.worker.ts"
+                target="_blank" rel="noreferrer" className="text-blue-700 underline">View the regression test source</a>
+            </div>
           </div>
           <div className="grid gap-0 lg:grid-cols-[300px_1fr]">
             <div className="border-b border-slate-100 p-4 lg:border-b-0 lg:border-r">
@@ -486,6 +494,19 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
                 <Code2 className="h-4 w-4" /> {currentIssue.file}
               </div>
               <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-4 text-[12px] leading-6 text-slate-100"><code>{currentIssue.source}</code></pre>
+              {currentIssue.sources && (
+                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                  <div className="text-xs font-semibold text-slate-700">Engineering references for this case</div>
+                  {currentIssue.sources.map((source) => (
+                    <div key={source.url} className="text-xs leading-5">
+                      <a href={source.url} target="_blank" rel="noreferrer" className="font-medium text-blue-700 underline">
+                        {source.label}
+                      </a>
+                      <p className="text-slate-500">{source.note}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
               {buildResult && (
                 <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-xs font-semibold"><Terminal className="h-4 w-4"/> Compiler and test output</div>
