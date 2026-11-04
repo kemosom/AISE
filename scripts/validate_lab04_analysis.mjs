@@ -31,6 +31,49 @@ for (const id of ['context','reactive','intelligent','metrics']) {
 }
 console.log('PASS: question banks and correct indices');
 
+// Exercise the same noLib virtual-file compiler configuration used by the
+// browser. This catches TS5107 and missing TypeScript global declarations.
+const cases = JSON.parse(fs.readFileSync('labs/lab04-software-repair-agents/cases.json','utf8'));
+const names = [
+  'lib.es5.d.ts', 'lib.es2015.core.d.ts', 'lib.es2015.iterable.d.ts',
+  'lib.es2015.symbol.d.ts', 'lib.es2015.symbol.wellknown.d.ts',
+  'lib.es2015.collection.d.ts',
+];
+const libraryFiles = Object.fromEntries(names.map(name => [
+  '/'+name, fs.readFileSync('node_modules/ts-browser/lib/'+name,'utf8')
+]));
+function browserDiagnostics(source) {
+  const files = { '/main.ts':source, ...libraryFiles };
+  const options = {
+    module:ts.ModuleKind.CommonJS, target:ts.ScriptTarget.ES2015,
+    strict:true, noLib:true, noEmitOnError:true, skipLibCheck:true,
+  };
+  const host = {
+    getSourceFile: (name, language) => Object.hasOwn(files, name)
+      ? ts.createSourceFile(name, files[name], language, true) : undefined,
+    getDefaultLibFileName:()=>'', writeFile:()=>{},
+    getCurrentDirectory:()=> '/', getDirectories:()=>[],
+    fileExists:(name)=>Object.hasOwn(files, name),
+    readFile:(name)=>files[name], useCaseSensitiveFileNames:()=>true,
+    getCanonicalFileName:(name)=>name, getNewLine:()=>'\n',
+  };
+  const program = ts.createProgram(Object.keys(files),options,host);
+  return ts.getPreEmitDiagnostics(program);
+}
+for (const item of cases) {
+  const diagnostics = browserDiagnostics(item.source);
+  assert.ok(!diagnostics.some(d=>d.code===5107), item.id+' has TS5107');
+  if(item.id==='checkout') {
+    assert.ok(diagnostics.some(d=>d.code===2322), 'Checkout must reproduce TS2322');
+  } else {
+    assert.equal(diagnostics.length,0,
+      item.id+' original should compile, not fail type checking: '+
+      diagnostics.map(d=>ts.flattenDiagnosticMessageText(d.messageText,'\n')).join('; '));
+  }
+}
+console.log('PASS: real browser compiler configuration reproduces correct defect classes');
+
+
 const stats = evaluateModule('src/lib/lab04-statistics.ts');
 const sample = [
   { issue:'checkout', strategy:'reactive', success:true, status:'Resolved', attempts:1,
