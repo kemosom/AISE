@@ -5,6 +5,10 @@ import {
   Code2, Download, FileText, KeyRound, Play, RefreshCw, ShieldCheck, Terminal,
 } from 'lucide-react';
 import { defaultCodeRunner } from '../../lib/runners/pyodide-runner';
+import { Lab04HintQuiz } from './Lab04HintQuiz';
+import { Lab04Analysis } from './Lab04Analysis';
+import { buildLab04PythonAnalysis } from '../lib/lab04-analysis-python';
+import { summarizeLab04 } from '../lib/lab04-statistics';
 import casesJson from '../../labs/lab04-software-repair-agents/cases.json';
 import exercisesJson from '../../labs/lab04-software-repair-agents/exercises.json';
 import type { Lab04Issue } from '../../labs/lab04-software-repair-agents/types';
@@ -25,7 +29,7 @@ type Props = {
 };
 const exercises = exercisesJson as Exercise[];
 const cases = casesJson as Lab04Issue[];
-const STORAGE_PREFIX = 'aise:lab04:notebook-v2';
+const STORAGE_PREFIX = 'aise:lab04:notebook-v3';
 const MODEL = 'gemini-3.6-flash';
 
 function mean(values: number[]): number {
@@ -67,6 +71,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   const [busy, setBusy] = useState(false);
   const [runningCell, setRunningCell] = useState<string | null>(null);
   const [activity, setActivity] = useState<string[]>([]);
+  const [analysisPlots, setAnalysisPlots] = useState<string[]>([]);
   const [runs, setRuns] = useState<RepairRun[]>(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
@@ -184,7 +189,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     let toolMessages = 0;
     let toolBytes = 0;
     let passed = false;
-    let status = 'Stopped without a valid patch';
+    let status = 'Unresolved';
+    let phase: 'baseline' | 'agent' | 'model' | 'compile' = 'baseline';
     const trace: string[] = [];
     const record = (message: string) => { trace.push(message); appendLog('[' + issue.id + ' / ' + strategy + '] ' + message); };
     const history: Array<{ feedback: string }> = [];
@@ -200,6 +206,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
       // A clean starting source would invalidate this defect-repair experiment.
       if (baseline.passed) throw new Error('The original case unexpectedly passes. Stop and inspect the repository.');
       for (let index = 0; index < limit + 1; index++) {
+        phase = 'agent';
         const decision = await pythonPolicy(
           strategy === 'reactive' ? 'reactive_agent' : 'intelligent_agent',
           issue, source, feedback, attempts, passed, history, limit
@@ -208,12 +215,25 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (decision.action === 'finish') { status = passed ? 'Resolved' : 'Stopped'; break; }
         if (decision.action === 'stop') { status = passed ? 'Resolved' : 'Unresolved'; break; }
         if (attempts >= limit) throw new Error('Agent exceeded the attempt limit.');
+        phase = 'model';
         modelCalls++;
         record('Requesting model-generated patch ' + (attempts + 1) + '/' + limit + '...');
         const response = await callModel(decision.prompt || '');
         modelTokens += response.tokens;
-        source = extractTypeScriptSource(response.text);
+        let generatedSource: string;
+        try {
+          generatedSource = extractTypeScriptSource(response.text);
+        } catch (error) {
+          attempts++;
+          feedback = 'Generated patch was not a valid complete TypeScript source: ' +
+            (error instanceof Error ? error.message : String(error));
+          history.push({ feedback });
+          record(feedback);
+          continue;
+        }
         attempts++;
+        source = generatedSource;
+        phase = 'compile';
         record('Compiling generated code and executing regression tests...');
         const checked = await compileAndTest(issue, source);
         toolMessages += checked.messages;
@@ -225,8 +245,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         if (passed) { status = 'Resolved'; break; }
       }
     } catch (error) {
-      status = 'Error: ' + (error instanceof Error ? error.message : String(error));
-      record(status);
+      status = phase === 'model' ? 'API error' : 'Execution error';
+      record(status + ': ' + (error instanceof Error ? error.message : String(error)));
     }
     const row: RepairRun = {
       issue: issue.id, strategy, success: passed, attempts, modelCalls, modelTokens,
@@ -254,9 +274,15 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     try {
       if (!await verifyAgents()) return;
       if (!apiConnected) { appendLog('Use the API connection check in Step 07 first.'); return; }
-      await runOne(currentIssue, 'reactive');
-      await runOne(currentIssue, 'intelligent');
-      appendLog('Completed both agent strategies for ' + currentIssue.id + '.');
+      const reactive = await runOne(currentIssue, 'reactive');
+      if (reactive.status !== 'Resolved' && reactive.status !== 'Unresolved') {
+        appendLog('The first run encountered a technical error. Correct it, then retry this issue.');
+        return;
+      }
+      const intelligent = await runOne(currentIssue, 'intelligent');
+      appendLog(intelligent.status === 'Resolved' || intelligent.status === 'Unresolved'
+        ? 'Both repair strategies completed for ' + currentIssue.id + '.'
+        : 'The intelligent run encountered a technical error. Its result is excluded from repair-success statistics.');
     } finally { setBusy(false); }
   };
   const runAll = async () => {
@@ -266,54 +292,74 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     setBusy(true); setActivity([]);
     try {
       if (!await verifyAgents()) return;
+      let completed = 0;
       for (const issue of cases) {
-        await runOne(issue, 'reactive');
-        await runOne(issue, 'intelligent');
+        for (const strategy of ['reactive', 'intelligent'] as const) {
+          const run = await runOne(issue, strategy);
+          if (run.status !== 'Resolved' && run.status !== 'Unresolved') {
+            appendLog('Batch stopped after a technical error in ' + issue.id +
+              ' (' + strategy + '). ' + completed + ' completed repair trials. Review the error and retry.');
+            return;
+          }
+          completed++;
+        }
       }
-      appendLog('All six experiments completed. Review failures and the comparison table.');
+      appendLog('All six repair trials completed. Review the measured results and per-issue comparison.');
     } finally { setBusy(false); }
   };
 
   const runMetricsCell = async () => {
+    if (runningCell) return;
     setRunningCell('metrics');
+    setAnalysisPlots([]);
     try {
-      const rows = runs.map((r) => ({
-        strategy: r.strategy, success: r.success, elapsed_ms: r.elapsedMs,
-        tool_bytes: r.toolBytes, model_calls: r.modelCalls,
-      }));
-      const code = cells.metrics + '\nimport json\n_rows = json.loads(' +
-        JSON.stringify(JSON.stringify(rows)) + ')\nprint(json.dumps(summarize_runs(_rows), indent=2))';
-      const result = await defaultCodeRunner.run(code);
+      // This is the same CSV content exported through the results panel.
+      const csvText = resultsToCsv(runs);
+      const result = await defaultCodeRunner.run(buildLab04PythonAnalysis(cells.metrics, csvText));
       setCellOutput((previous) => ({
-        ...previous, metrics: {
-          success: result.exitCode === 0,
-          text: (result.stdout + '\n' + result.stderr).trim() || 'No output.',
-        },
+        ...previous,
+        metrics: { success: result.exitCode === 0, text: (result.stdout + '\n' + result.stderr).trim() || 'No output.' },
+      }));
+      setAnalysisPlots(result.exitCode === 0 ? (result.plots || []) : []);
+    } catch (error) {
+      setCellOutput((previous) => ({
+        ...previous,
+        metrics: { success: false, text: 'Analysis error: ' + (error instanceof Error ? error.message : String(error)) },
       }));
     } finally { setRunningCell(null); }
   };
 
-  const stats = (['reactive', 'intelligent'] as const).map((strategy) => {
-    const subset = runs.filter((r) => r.strategy === strategy);
-    return {
-      strategy, count: subset.length,
-      success: subset.filter((r) => r.success).length,
-      successRate: subset.length ? (100 * subset.filter((r) => r.success).length / subset.length) : 0,
-      meanTime: mean(subset.map((r) => r.elapsedMs)),
-      meanBytes: mean(subset.map((r) => r.toolBytes)),
-      meanMessages: mean(subset.map((r) => r.toolMessages)),
-    };
-  });
-
-  const evidence = () => [
-    'Lab 04: Reactive versus intelligent software repair agents',
-    'Model: ' + MODEL + '. All experiments used the TypeScript compiler and the same case-specific regression suite.',
-    ...runs.map((r) => r.issue + ' / ' + r.strategy + ': success=' + r.success +
-      ', attempts=' + r.attempts + ', elapsed_ms=' + r.elapsedMs +
-      ', tool_messages=' + r.toolMessages + ', tool_bytes=' + r.toolBytes +
-      ', model_calls=' + r.modelCalls + ', total_model_tokens=' + r.modelTokens),
-    'The communication metrics count JSON requests and replies exchanged with the browser test worker, not Internet packet traffic.',
-  ].join('\n');
+  const evidence = () => {
+    const summary = summarizeLab04(runs);
+    const describeGroup = (name: string, group: { n: number; successes: number; successRate: number | null; meanMs: number | null; meanToolBytes: number | null }) =>
+      name + ': ' + group.successes + '/' + group.n + ' resolved' +
+      ', success=' + (group.successRate === null ? 'N/A' : group.successRate.toFixed(1) + '%') +
+      ', mean time=' + (group.meanMs === null ? 'N/A' : group.meanMs.toFixed(0) + ' ms') +
+      ', mean worker bytes=' + (group.meanToolBytes === null ? 'N/A' : group.meanToolBytes.toFixed(0));
+    return [
+      'Lab 04: Reactive versus intelligent software repair agents',
+      'Model: ' + MODEL + '. Same initial TypeScript source and regression checks for both strategies.',
+      'Completed trials: ' + summary.validCount + '. API/execution errors excluded: ' + summary.errorCount + '.',
+      '',
+      'OVERALL COMPARISON',
+      describeGroup('Reactive', summary.overall.reactive),
+      describeGroup('Intelligent', summary.overall.intelligent),
+      '',
+      'PER-ISSUE BREAKDOWN',
+      ...summary.perIssue.flatMap((entry) => [
+        describeGroup(entry.issue + ' / reactive', entry.reactive),
+        describeGroup(entry.issue + ' / intelligent', entry.intelligent),
+      ]),
+      '',
+      'RECORDED EXECUTION LOG',
+      ...runs.map((r) => r.issue + ' / ' + r.strategy + ': status=' + r.status +
+        ', success=' + r.success + ', patches=' + r.attempts + ', elapsed_ms=' + r.elapsedMs +
+        ', worker_messages=' + r.toolMessages + ', worker_bytes=' + r.toolBytes +
+        ', model_calls=' + r.modelCalls + ', model_tokens=' + r.modelTokens),
+      '',
+      'Worker JSON bytes exclude Gemini API traffic. Unavailable API runs are not software repair failures.',
+    ].join('\n');
+  };
 
   const downloadCsv = () => saveTextFile('Lab04_agent_comparison.csv', resultsToCsv(runs), 'text/csv');
   const downloadTraces = () => saveTextFile('Lab04_execution_traces.json', JSON.stringify(runs, null, 2), 'application/json');
@@ -357,8 +403,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
             <p className="text-xs font-semibold text-blue-700">PART A · THE SOFTWARE MAINTENANCE CASE</p>
             <h3 className="mt-1 text-lg font-semibold">01. A production service has three reported defects</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              You are supporting a TypeScript service used by a development team. Each issue includes its original
-              source, expected behaviour and regression tests. Your agents must repair the implementation without modifying the tests.
+              You are a software engineer maintaining an operations service. The team has reported three defects: incorrect checkout totals, misordered incident tickets and exposed authentication headers. Each case includes a bug report, its affected TypeScript function and a regression suite. Write the Python agent decision logic that controls an AI coding model. Your agents must repair the implementation without changing the tests.
 
             </p>
           </div>
@@ -403,7 +448,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           <h3 className="mt-1 text-lg font-semibold">02. Execute the notebook cells in order</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Complete each function where marked. Press <strong>Run cell</strong> to execute real Python assertions in the browser.
-            If stuck, open <strong>Show full-code hint</strong> next to the cell. Your changes are saved in this browser.
+            If you need a full-code example, complete the three-question checkpoint next to that cell. You can retry the questions as often as needed. Your code is saved in this browser.
           </p>
         </div>
 
@@ -443,19 +488,8 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
                 className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
                 <Play className="h-3.5 w-3.5" /> {runningCell === exercise.id ? 'Running Python...' : 'Run cell'}
               </button>
-              <details className="group max-w-full text-xs">
-                <summary className="flex cursor-pointer items-center gap-1 font-medium text-blue-700">
-                  <ChevronDown className="h-3.5 w-3.5" /> Show full-code hint
-                </summary>
-                <div className="mt-3 max-w-[740px] rounded-lg border border-blue-200 bg-blue-50 p-3">
-                  <p className="mb-2 text-xs text-blue-800">Reference implementation for this function. Compare it with your approach before using it.</p>
-                  <pre className="max-h-72 overflow-auto whitespace-pre-wrap font-mono text-xs leading-5">{exercise.solution}</pre>
-                  <button type="button" onClick={() => updateCell(exercise.id, exercise.solution)}
-                    className="mt-3 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-blue-800 ring-1 ring-blue-200">
-                    Insert complete example
-                  </button>
-                </div>
-              </details>
+              <Lab04HintQuiz exerciseId={exercise.id} source={exercise.solution}
+                onInsert={(code) => updateCell(exercise.id, code)} />
             </div>
             {cellOutput[exercise.id] && (
               <pre className={'whitespace-pre-wrap break-words border-t px-5 py-3 font-mono text-xs leading-6 ' +
@@ -520,81 +554,65 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           </div>
         </section>
 
-        <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
-          <p className="text-xs font-semibold text-blue-700">PART E · EXPERIMENTAL RESULTS</p>
-          <h3 className="mt-1 text-lg font-semibold">09. Compare task success, runtime and communication overhead</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
-            Each row is a real completed agent execution. Runtime includes Python decisions, model API calls,
-            TypeScript compilation and regression testing. Tool messages and payload bytes measure JSON exchanges
-            with the test worker. Gemini token usage is reported separately.
-          </p>
-          <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
-            <table className="min-w-full text-left text-xs">
-              <thead className="bg-slate-50 text-slate-600"><tr>
-                {['Issue', 'Agent', 'Success', 'Attempts', 'Time (ms)', 'Tool messages', 'Tool bytes', 'Model tokens'].map((label) =>
-                  <th className="whitespace-nowrap border-b border-slate-200 px-3 py-3 font-semibold" key={label}>{label}</th>)}
-              </tr></thead>
-              <tbody>{runs.length ? runs.map((r, index) => (
-                <tr key={index} className="border-t border-slate-100">
-                  <td className="px-3 py-2">{r.issue}</td><td className="px-3 py-2">{r.strategy}</td>
-                  <td className={'px-3 py-2 font-semibold ' + (r.success ? 'text-emerald-700' : 'text-red-700')}>{r.success ? 'Pass' : 'Fail'}</td>
-                  <td className="px-3 py-2">{r.attempts}</td><td className="px-3 py-2">{r.elapsedMs}</td>
-                  <td className="px-3 py-2">{r.toolMessages}</td><td className="px-3 py-2">{r.toolBytes}</td>
-                  <td className="px-3 py-2">{r.modelTokens}</td>
-                </tr>
-              )) : <tr><td colSpan={8} className="px-4 py-6 text-center text-slate-500">No experiment measurements yet. Run the agents first.</td></tr>}</tbody>
-            </table>
-          </div>
-          {runs.length > 0 && (
-            <div className="mt-5 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-lg border border-slate-200 p-4">
-                <h4 className="text-xs font-semibold">Observed repair success rate</h4>
-                {stats.map((item) => <div key={item.strategy} className="mt-4">
-                  <div className="mb-1 flex justify-between text-xs"><span className="capitalize">{item.strategy} ({item.success}/{item.count})</span><span>{item.successRate.toFixed(1)}%</span></div>
-                  <div className="h-3 rounded bg-slate-100"><div className="h-3 rounded bg-blue-600" style={{ width: item.successRate + '%' }}/></div>
-                </div>)}
-              </div>
-              <div className="rounded-lg border border-slate-200 p-4">
-                <h4 className="text-xs font-semibold">Mean end-to-end runtime</h4>
-                {stats.map((item) => <div key={item.strategy} className="mt-4">
-                  <div className="mb-1 flex justify-between text-xs"><span className="capitalize">{item.strategy}</span><span>{item.count ? item.meanTime.toFixed(0) + ' ms' : 'No trials'}</span></div>
-                  <div className="h-3 rounded bg-slate-100"><div className="h-3 rounded bg-emerald-600"
-                    style={{ width: (Math.max(0, item.meanTime) / Math.max(1, ...stats.map((s) => s.meanTime)) * 100) + '%' }}/></div>
-                </div>)}
-              </div>
-            </div>
-          )}
-          <div className="mt-5 flex flex-wrap gap-2">
-            <button disabled={!runs.length} onClick={downloadCsv} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold disabled:opacity-50">
-              <Download className="h-4 w-4"/> Export measurements CSV
-            </button>
-            <button disabled={!runs.length} onClick={downloadTraces} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold disabled:opacity-50">
-              <Download className="h-4 w-4"/> Export agent traces JSON
-            </button>
-          </div>
-        </section>
+        <Lab04Analysis
+          rows={runs}
+          busy={busy}
+          onClear={() => {
+            if (!window.confirm('Clear all saved Lab 4 experiment measurements? Your code cells will be kept.')) return;
+            setRuns([]);
+            setAnalysisPlots([]);
+            setActivity([]);
+            setCellOutput((previous) => {
+              const updated = { ...previous };
+              delete updated.metrics;
+              return updated;
+            });
+          }}
+          onCsv={() => downloadCsv()}
+          onTraces={() => downloadTraces()}
+        />
 
         {exercises.filter((item) => item.id === 'metrics').map((exercise) => (
           <section key={exercise.id} className="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
             <div className="p-5 sm:px-7">
               <span className="text-xs font-semibold text-blue-700">Step {exercise.step} · Python data analysis</span>
               <h3 className="mt-1 text-base font-semibold">{exercise.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{exercise.explanation}</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{exercise.explanation} This cell uses the same CSV as the export button and produces summary tables and five plots from recorded trials.</p>
             </div>
             <div className="border-y border-slate-100 bg-slate-50 px-5 py-2 text-xs text-slate-500">In [09] · Python 3</div>
-            <Editor height={200} language="python" value={cells.metrics} onChange={(v) => updateCell('metrics', v || '')}
+            <Editor height={Math.max(220, cells.metrics.split('\n').length * 19 + 40)} language="python" value={cells.metrics} onChange={(v) => updateCell('metrics', v || '')}
               options={{ minimap: { enabled: false }, fontSize: 13, scrollBeyondLastLine: false, automaticLayout: true }}/>
             <div className="flex flex-wrap justify-between gap-2 border-t border-slate-100 p-4">
               <button disabled={busy || runningCell !== null} onClick={() => void runMetricsCell()}
                 className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">
-                {runningCell === 'metrics' ? 'Running...' : 'Run analysis cell'}
+                {runningCell === 'metrics' ? 'Analysing CSV...' : 'Run analysis and generate figures'}
               </button>
-              <details className="text-xs"><summary className="cursor-pointer font-medium text-blue-700">Show full-code hint</summary>
-                <pre className="mt-3 max-w-[740px] overflow-x-auto rounded-lg bg-blue-50 p-3 font-mono text-xs">{exercise.solution}</pre>
-                <button onClick={() => updateCell('metrics', exercise.solution)} className="mt-2 rounded border px-3 py-1.5 text-xs">Insert complete example</button>
-              </details>
+              <Lab04HintQuiz exerciseId="metrics" source={exercise.solution}
+                onInsert={(code) => updateCell('metrics', code)} />
             </div>
-            {cellOutput.metrics && <pre className="whitespace-pre-wrap break-words border-t p-4 font-mono text-xs">{cellOutput.metrics.text}</pre>}
+            {cellOutput.metrics && (
+              <div className="border-t border-slate-200 p-5">
+                <div className="mb-2 text-xs font-semibold text-slate-700">Results calculated from the exported CSV</div>
+                <pre className={'overflow-x-auto whitespace-pre rounded-lg p-4 font-mono text-xs leading-6 ' +
+                  (cellOutput.metrics.success ? 'bg-slate-950 text-emerald-100' : 'bg-amber-50 text-amber-900')}>
+                  {cellOutput.metrics.text}
+                </pre>
+              </div>
+            )}
+            {analysisPlots.length > 0 && (
+              <div className="grid gap-4 border-t border-slate-200 bg-slate-50 p-5 sm:grid-cols-2">
+                {analysisPlots.map((src, index) => (
+                  <div key={index} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="mb-2 text-xs font-semibold text-slate-600">Figure {index + 1}</div>
+                    <img src={src} alt={'Measured Lab 4 experiment figure ' + (index + 1)} className="w-full" />
+                    <a href={src} download={'Lab04_figure_' + (index + 1) + '.png'}
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-700">
+                      <Download className="h-3 w-3"/> Save figure
+                    </a>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
 

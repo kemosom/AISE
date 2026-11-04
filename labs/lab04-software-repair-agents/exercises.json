@@ -44,12 +44,12 @@
   {
     "id": "metrics",
     "step": "09",
-    "title": "Analyse the measurements with Python",
-    "explanation": "Implement summarize_runs(rows). Each row represents a completed experiment. Report the actual successful repair rate, mean end-to-end runtime and mean bytes exchanged with the compiler/test worker. Empty groups must not produce invented values.",
+    "title": "Analyse actual experiment data and generate figures",
+    "explanation": "Implement summarize_runs(rows). The analysis cell parses the recorded experiment CSV, excludes API and execution errors, and uses your function for overall and per-issue summaries. It generates five matplotlib figures from observed trials.",
     "requirements": [
-      "Group completed runs by strategy.",
-      "Calculate success rate from observed passes and failures.",
-      "Calculate mean elapsed_ms and tool_bytes for each strategy."
+      "Calculate success rates only from completed repair trials.",
+      "Calculate average elapsed time and test-worker payload bytes by agent.",
+      "Inspect the overall and per-issue results, figures and excluded-error count."
     ],
     "starter": "def summarize_runs(rows):\n    # Each row has strategy, success, elapsed_ms, tool_bytes.\n    # Return a dictionary indexed by agent strategy.\n    raise NotImplementedError(\"Implement summarize_runs\")\n",
     "solution": "def summarize_runs(rows):\n    summary = {}\n    for name in (\"reactive\", \"intelligent\"):\n        subset = [r for r in rows if r[\"strategy\"] == name]\n        if not subset:\n            continue\n        n = len(subset)\n        summary[name] = {\n            \"runs\": n,\n            \"success_rate\": sum(bool(r[\"success\"]) for r in subset) / n,\n            \"mean_elapsed_ms\": sum(r[\"elapsed_ms\"] for r in subset) / n,\n            \"mean_tool_bytes\": sum(r[\"tool_bytes\"] for r in subset) / n,\n        }\n    return summary\n",

@@ -47,3 +47,9 @@ jobs:
 
       - name: Validate Lab 04 browser compiler, regression tests and agent hints
         run: node scripts/validate_lab04.mjs
+
+      - name: Install plotting package for Lab 04 analysis QA
+        run: python -m pip install --disable-pip-version-check matplotlib
+
+      - name: Validate Lab 04 quiz checkpoints and CSV-based figures
+        run: node scripts/validate_lab04_analysis.mjs

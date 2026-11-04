@@ -16,7 +16,7 @@ A TypeScript service has three outstanding defects involving checkout totals, in
 7. Run the other two cases, then examine the measured results.
 8. Complete the Python data-analysis cell and open **Report** to prepare your findings.
 
-**Use the hints when needed.** Each editable Python function has an expandable full-code example. The report should still explain what your program does and what happened when you executed it.
+**Use the hints when needed.** Each editable Python cell has a three-question checkpoint before its full-code hint is revealed. Questions and answer order change between retries, and retries are unlimited. The report should still explain what your program does and what happened when you executed it.
 
 ## Evaluation
-Report task success, measured end-to-end runtime, messages and JSON bytes exchanged with the compiler/test worker, and model token counts. These are different costs. Use your execution records. If an API request fails, report the error rather than assuming an agent succeeded.
+Report task success, measured end-to-end runtime, messages and JSON bytes exchanged with the isolated test worker, and model token counts. These are different costs. Use your execution records. API and execution errors are excluded from repair-success percentages. Use **Clear measurements** after reviewing old runs, then repeat the experiments. Run the analysis cell to generate the overall and per-issue tables and five figures from the same CSV content that can be exported.
