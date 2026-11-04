@@ -36,7 +36,8 @@ function mean(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 }
 function normalizeDecision(output: string): { action: string; prompt?: string } {
-  const marker = output.split('\n').find((line) => line.startsWith('LAB4_DECISION:'));
+  const markers = output.split('\n').filter((line) => line.startsWith('LAB4_DECISION:'));
+  const marker = markers[markers.length - 1];
   if (!marker) throw new Error('Python did not return an agent decision. Check the code cell output.');
   const decision = JSON.parse(marker.slice('LAB4_DECISION:'.length));
   if (!['generate', 'finish', 'stop'].includes(decision.action)) throw new Error('Invalid agent action.');
@@ -202,19 +203,28 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
       issue: { id: issue.id, file: issue.file, report: issue.report },
       source, feedback, attempts, last_passed: lastPassed, history, max_attempts: maxAttempts,
     };
+    // Base64 transports the full issue and compiler feedback into Python
+    // without changing backslashes, multiline source or quote characters.
+    const encoded = btoa(Array.from(new TextEncoder().encode(JSON.stringify(state)),
+      (byte) => String.fromCharCode(byte)).join(''));
+    const selectedPolicy = name === 'reactive_agent' ? cells.reactive : cells.intelligent;
     const python = [
-      cells.context, cells.reactive, cells.intelligent,
-      'import json',
-      '_issue = json.loads(' + JSON.stringify(JSON.stringify(state.issue)) + ')',
-      '_repository = json.loads(' + JSON.stringify(JSON.stringify({ [issue.file]: source })) + ')',
-      '_context = select_context(_issue, _repository)',
-      '_state = json.loads(' + JSON.stringify(JSON.stringify(state)) + ')',
-      '_state["source"] = _context',
+      'import base64, json',
+      cells.context,
+      selectedPolicy,
+      '_state = json.loads(base64.b64decode("' + encoded + '").decode("utf-8"))',
+      '_issue = _state["issue"]',
+      '_repository = {_issue["file"]: _state["source"]}',
+      '_state["source"] = select_context(_issue, _repository)',
       '_decision = ' + name + '(_state)',
+      'if not isinstance(_decision, dict): raise TypeError("Agent policy must return a dictionary")',
       'print("LAB4_DECISION:" + json.dumps(_decision))',
     ].join('\n\n');
     const output = await defaultCodeRunner.run(python);
-    if (output.exitCode !== 0) throw new Error('Python agent error:\n' + (output.stderr || output.error || 'Unknown error'));
+    if (output.exitCode !== 0) {
+      throw new Error('Python ' + name + ' on ' + issue.id + ':\n' +
+        (output.stderr || output.error || 'Unknown Python execution failure'));
+    }
     return normalizeDecision(output.stdout);
   };
 
@@ -302,11 +312,36 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     for (const exercise of required) {
       const passed = await verifyExercise(exercise);
       if (!passed) {
-        appendLog('Complete the failed Python cell: ' + exercise.title);
+        appendLog('Fix the Python cell before running the agents: ' + exercise.title);
         return false;
       }
     }
-    return true;
+    // Unit checks alone do not verify that the student's policy works with
+    // the real compiler output and source code for every issue.
+    appendLog('Checking the integrated Python agents against the three issue files...');
+    try {
+      for (const issue of cases) {
+        const baseline = await compileAndTest(issue, issue.source);
+        if (baseline.passed) throw new Error(issue.id + ' has no reproducible defect.');
+        const feedback = buildFeedback(baseline);
+        for (const strategy of ['reactive', 'intelligent'] as const) {
+          const decision = await pythonPolicy(
+            strategy === 'reactive' ? 'reactive_agent' : 'intelligent_agent',
+            issue, issue.source, feedback, 0, false, [],
+            strategy === 'reactive' ? 1 : 3
+          );
+          if (decision.action !== 'generate') {
+            throw new Error(issue.id + ' / ' + strategy +
+              ': the first decision must request a patch, not ' + decision.action);
+          }
+        }
+      }
+      appendLog('Python policies validated on checkout, queue and security.');
+      return true;
+    } catch (error) {
+      appendLog('Python integration check failed: ' + (error instanceof Error ? error.message : String(error)));
+      return false;
+    }
   };
   const runSelected = async () => {
     if (busy) return;
