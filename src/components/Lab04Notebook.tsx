@@ -302,7 +302,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
       ', attempts=' + r.attempts + ', elapsed_ms=' + r.elapsedMs +
       ', tool_messages=' + r.toolMessages + ', tool_bytes=' + r.toolBytes +
       ', model_calls=' + r.modelCalls + ', total_model_tokens=' + r.modelTokens),
-    'The communication metrics count JSON requests and replies exchanged with the browser compiler/test worker, not Internet packet traffic.',
+    'The communication metrics count JSON requests and replies exchanged with the browser test worker, not Internet packet traffic.',
   ].join('\n');
 
   const downloadCsv = () => saveTextFile('Lab04_agent_comparison.csv', resultsToCsv(runs), 'text/csv');
@@ -516,7 +516,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
           <p className="mt-2 text-sm leading-6 text-slate-600">
             Each row is a real completed agent execution. Runtime includes Python decisions, model API calls,
             TypeScript compilation and regression testing. Tool messages and payload bytes measure JSON exchanges
-            with the compiler/test worker. Gemini token usage is reported separately.
+            with the test worker. Gemini token usage is reported separately.
           </p>
           <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
             <table className="min-w-full text-left text-xs">
