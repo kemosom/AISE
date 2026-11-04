@@ -329,15 +329,37 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     } finally { setRunningCell(null); }
   };
 
-  const evidence = () => [
-    'Lab 04: Reactive versus intelligent software repair agents',
-    'Model: ' + MODEL + '. All experiments used the TypeScript compiler and the same case-specific regression suite.',
-    ...runs.map((r) => r.issue + ' / ' + r.strategy + ': success=' + r.success +
-      ', attempts=' + r.attempts + ', elapsed_ms=' + r.elapsedMs +
-      ', tool_messages=' + r.toolMessages + ', tool_bytes=' + r.toolBytes +
-      ', model_calls=' + r.modelCalls + ', total_model_tokens=' + r.modelTokens),
-    'The communication metrics count JSON requests and replies exchanged with the browser test worker, not Internet packet traffic.',
-  ].join('\n');
+  const evidence = () => {
+    const summary = summarizeLab04(runs);
+    const describeGroup = (name: string, group: { n: number; successes: number; successRate: number | null; meanMs: number | null; meanToolBytes: number | null }) =>
+      name + ': ' + group.successes + '/' + group.n + ' resolved' +
+      ', success=' + (group.successRate === null ? 'N/A' : group.successRate.toFixed(1) + '%') +
+      ', mean time=' + (group.meanMs === null ? 'N/A' : group.meanMs.toFixed(0) + ' ms') +
+      ', mean worker bytes=' + (group.meanToolBytes === null ? 'N/A' : group.meanToolBytes.toFixed(0));
+    return [
+      'Lab 04: Reactive versus intelligent software repair agents',
+      'Model: ' + MODEL + '. Same initial TypeScript source and regression checks for both strategies.',
+      'Completed trials: ' + summary.validCount + '. API/execution errors excluded: ' + summary.errorCount + '.',
+      '',
+      'OVERALL COMPARISON',
+      describeGroup('Reactive', summary.overall.reactive),
+      describeGroup('Intelligent', summary.overall.intelligent),
+      '',
+      'PER-ISSUE BREAKDOWN',
+      ...summary.perIssue.flatMap((entry) => [
+        describeGroup(entry.issue + ' / reactive', entry.reactive),
+        describeGroup(entry.issue + ' / intelligent', entry.intelligent),
+      ]),
+      '',
+      'RECORDED EXECUTION LOG',
+      ...runs.map((r) => r.issue + ' / ' + r.strategy + ': status=' + r.status +
+        ', success=' + r.success + ', patches=' + r.attempts + ', elapsed_ms=' + r.elapsedMs +
+        ', worker_messages=' + r.toolMessages + ', worker_bytes=' + r.toolBytes +
+        ', model_calls=' + r.modelCalls + ', model_tokens=' + r.modelTokens),
+      '',
+      'Worker JSON bytes exclude Gemini API traffic. Unavailable API runs are not software repair failures.',
+    ].join('\n');
+  };
 
   const downloadCsv = () => saveTextFile('Lab04_agent_comparison.csv', resultsToCsv(runs), 'text/csv');
   const downloadTraces = () => saveTextFile('Lab04_execution_traces.json', JSON.stringify(runs, null, 2), 'application/json');
