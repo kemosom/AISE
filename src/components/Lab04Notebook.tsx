@@ -25,7 +25,7 @@ type Props = {
 };
 const exercises = exercisesJson as Exercise[];
 const cases = casesJson as Lab04Issue[];
-const STORAGE_KEY = 'aise:lab04:notebook-v1';
+const STORAGE_PREFIX = 'aise:lab04:notebook-v2';
 const MODEL = 'gemini-3.6-flash';
 
 function mean(values: number[]): number {
@@ -50,10 +50,11 @@ function describe(result: BuildResult): string[] {
 }
 
 export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenReport, onCopyEvidence, onCodeChange }) => {
+  const storageKey = STORAGE_PREFIX + (isInstructorPreview ? ':instructor-preview' : ':student');
   const [cells, setCells] = useState<Record<string, string>>(() => {
     const initial = Object.fromEntries(exercises.map((exercise) => [exercise.id, exercise.starter]));
     try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
       return { ...initial, ...(stored?.cells || {}) };
     } catch { return initial; }
   });
@@ -68,7 +69,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   const [activity, setActivity] = useState<string[]>([]);
   const [runs, setRuns] = useState<RepairRun[]>(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      const stored = JSON.parse(localStorage.getItem(storageKey) || '{}');
       return Array.isArray(stored?.runs) ? stored.runs : [];
     } catch { return []; }
   });
@@ -79,7 +80,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
   );
   useEffect(() => {
     // Only code and experiment records are saved. Never store an API key.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ cells, runs }));
+    localStorage.setItem(storageKey, JSON.stringify({ cells, runs }));
   }, [cells, runs]);
 
   useEffect(() => {
