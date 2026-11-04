@@ -1,0 +1,58 @@
+[
+  {
+    "id": "context",
+    "step": "04",
+    "title": "Select the source file to inspect",
+    "explanation": "Write select_context(issue, repository). The repository is a dictionary of source filenames and their contents. Validate the path before returning source. This is the agent's first software inspection tool.",
+    "requirements": [
+      "Read issue['file'] and validate it against repository.",
+      "Reject invalid and missing files with ValueError.",
+      "Return the complete source code as a string."
+    ],
+    "starter": "def select_context(issue, repository):\n    # TODO 1. Read the file requested by issue.\n    # TODO 2. Validate it against available source files.\n    # TODO 3. Return its source code.\n    raise NotImplementedError(\"Implement select_context\")\n",
+    "solution": "def select_context(issue, repository):\n    path = issue[\"file\"]\n    if not isinstance(path, str) or not path.startswith(\"src/\"):\n        raise ValueError(\"Invalid source path\")\n    if \"..\" in path or path not in repository:\n        raise ValueError(\"Source file not found\")\n    return repository[path]\n",
+    "verification": "files = {\"src/orders.ts\": \"export function totalAfterTax() {}\"}\nassert select_context({\"file\":\"src/orders.ts\"}, files) == files[\"src/orders.ts\"]\nfor path in (\"../secret.txt\", \"src/missing.ts\"):\n    try:\n        select_context({\"file\":path}, files)\n    except ValueError:\n        continue\n    raise AssertionError(\"Invalid file path was accepted: \" + path)\nprint(\"PASS: source inspection\")\n"
+  },
+  {
+    "id": "reactive",
+    "step": "05",
+    "title": "Build the reactive agent",
+    "explanation": "The controller calls reactive_agent(state). This agent should generate one patch, compile and test it, then stop. Your function returns a decision and a prompt. The interface is deliberately small so you can understand every part of the control loop.",
+    "requirements": [
+      "Return action='generate' only when attempts is zero.",
+      "Include the issue report, source and first failure message in the model prompt.",
+      "After one patch, return finish if tests passed, otherwise stop."
+    ],
+    "starter": "def reactive_agent(state):\n    # state: issue, source, feedback, attempts,\n    # last_passed, history, max_attempts\n    # Return {\"action\":\"generate\", \"prompt\":\"...\"}.\n    # After the first attempt return finish or stop.\n    raise NotImplementedError(\"Implement reactive_agent\")\n",
+    "solution": "def reactive_agent(state):\n    if state[\"attempts\"] >= 1:\n        return {\"action\": \"finish\" if state[\"last_passed\"] else \"stop\"}\n    issue = state[\"issue\"]\n    prompt = (\n        \"Repair this TypeScript source file. Return only the complete replacement code. \"\n        \"Do not alter tests or public interfaces.\\n\"\n        \"Issue: \" + issue[\"report\"] + \"\\n\"\n        \"File: \" + issue[\"file\"] + \"\\n\"\n        \"Source:\\n\" + state[\"source\"] + \"\\n\"\n        \"Compiler and test feedback:\\n\" + state[\"feedback\"]\n    )\n    return {\"action\": \"generate\", \"prompt\": prompt}\n",
+    "verification": "s = {\"issue\":{\"file\":\"src/orders.ts\",\"report\":\"Wrong return type\"},\n     \"source\":\"return String(2);\", \"feedback\":\"TS2322\",\n     \"attempts\":0,\"last_passed\":False,\"history\":[],\"max_attempts\":3}\nfirst = reactive_agent(s)\nassert first[\"action\"] == \"generate\"\nassert \"TS2322\" in first[\"prompt\"] and \"Wrong return type\" in first[\"prompt\"]\nassert reactive_agent(dict(s, attempts=1, last_passed=False))[\"action\"] == \"stop\"\nassert reactive_agent(dict(s, attempts=1, last_passed=True))[\"action\"] == \"finish\"\nprint(\"PASS: reactive strategy\")\n"
+  },
+  {
+    "id": "intelligent",
+    "step": "06",
+    "title": "Build the intelligent repair agent",
+    "explanation": "Implement the feedback-driven agent that can revise an unsuccessful patch. It receives actual compiler and regression-test output and should stop when all checks pass or the retry budget is exhausted.",
+    "requirements": [
+      "Return finish immediately when the latest patch passes.",
+      "Stop when attempts reaches max_attempts.",
+      "For remaining attempts, construct a new prompt using current source, current failure and previous attempts."
+    ],
+    "starter": "def intelligent_agent(state):\n    # TODO 1. Finish if the latest tests passed.\n    # TODO 2. Stop when the attempt limit is reached.\n    # TODO 3. Otherwise create a new repair prompt.\n    # Return {\"action\":\"generate\",\"prompt\":prompt}.\n    raise NotImplementedError(\"Implement intelligent_agent\")\n",
+    "solution": "def intelligent_agent(state):\n    if state[\"last_passed\"]:\n        return {\"action\": \"finish\"}\n    if state[\"attempts\"] >= state[\"max_attempts\"]:\n        return {\"action\": \"stop\"}\n    issue = state[\"issue\"]\n    earlier = \"\\n\".join(\n        \"Attempt \" + str(i + 1) + \": \" + str(x[\"feedback\"])\n        for i, x in enumerate(state[\"history\"])\n    )\n    prompt = (\n        \"You are repairing a TypeScript application. \"\n        \"Return ONLY the complete corrected TypeScript file. \"\n        \"Keep public interfaces and do not modify tests.\\n\"\n        \"Issue: \" + issue[\"report\"] + \"\\n\"\n        \"File: \" + issue[\"file\"] + \"\\n\"\n        \"Current source:\\n\" + state[\"source\"] + \"\\n\"\n        \"Latest compiler and test feedback:\\n\" + state[\"feedback\"] + \"\\n\"\n        \"Earlier attempts:\\n\" + earlier\n    )\n    return {\"action\": \"generate\", \"prompt\": prompt}\n",
+    "verification": "s = {\"issue\":{\"file\":\"src/queue.ts\",\"report\":\"Critical incidents first\"},\n     \"source\":\"export function nextJob() {}\", \"feedback\":\"test failed\",\n     \"attempts\":1,\"last_passed\":False,\n     \"history\":[{\"feedback\":\"critical case failed\"}],\"max_attempts\":3}\ndecision = intelligent_agent(s)\nassert decision[\"action\"] == \"generate\"\nassert \"critical case failed\" in decision[\"prompt\"] and \"test failed\" in decision[\"prompt\"]\nassert intelligent_agent(dict(s, last_passed=True))[\"action\"] == \"finish\"\nassert intelligent_agent(dict(s, attempts=3))[\"action\"] == \"stop\"\nprint(\"PASS: intelligent strategy\")\n"
+  },
+  {
+    "id": "metrics",
+    "step": "09",
+    "title": "Analyse the measurements with Python",
+    "explanation": "Implement summarize_runs(rows). Each row represents a completed experiment. Report the actual successful repair rate, mean end-to-end runtime and mean bytes exchanged with the compiler/test worker. Empty groups must not produce invented values.",
+    "requirements": [
+      "Group completed runs by strategy.",
+      "Calculate success rate from observed passes and failures.",
+      "Calculate mean elapsed_ms and tool_bytes for each strategy."
+    ],
+    "starter": "def summarize_runs(rows):\n    # Each row has strategy, success, elapsed_ms, tool_bytes.\n    # Return a dictionary indexed by agent strategy.\n    raise NotImplementedError(\"Implement summarize_runs\")\n",
+    "solution": "def summarize_runs(rows):\n    summary = {}\n    for name in (\"reactive\", \"intelligent\"):\n        subset = [r for r in rows if r[\"strategy\"] == name]\n        if not subset:\n            continue\n        n = len(subset)\n        summary[name] = {\n            \"runs\": n,\n            \"success_rate\": sum(bool(r[\"success\"]) for r in subset) / n,\n            \"mean_elapsed_ms\": sum(r[\"elapsed_ms\"] for r in subset) / n,\n            \"mean_tool_bytes\": sum(r[\"tool_bytes\"] for r in subset) / n,\n        }\n    return summary\n",
+    "verification": "rows = [\n    {\"strategy\":\"reactive\",\"success\":False,\"elapsed_ms\":100,\"tool_bytes\":50},\n    {\"strategy\":\"reactive\",\"success\":True,\"elapsed_ms\":200,\"tool_bytes\":70},\n    {\"strategy\":\"intelligent\",\"success\":True,\"elapsed_ms\":400,\"tool_bytes\":150},\n]\nv = summarize_runs(rows)\nassert v[\"reactive\"][\"success_rate\"] == 0.5\nassert v[\"reactive\"][\"mean_elapsed_ms\"] == 150\nassert v[\"reactive\"][\"mean_tool_bytes\"] == 60\nassert v[\"intelligent\"][\"success_rate\"] == 1\nprint(\"PASS: experimental metrics\")\n"
+  }
+]
