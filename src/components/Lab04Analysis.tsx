@@ -98,10 +98,6 @@ function SummaryCell({ group, field, digits = 0 }: { group: Lab04Group; field: k
 export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces, busy }) => {
   const summary = summarizeLab04(rows);
   const reactive = summary.overall.reactive, intelligent = summary.overall.intelligent;
-  const fullyObservedIssues = summary.perIssue.filter((item) => item.reactive.n > 0 && item.intelligent.n > 0).length;
-  const recoveredAfterRetry = rows.filter((item) => isCompletedRepair(item) && item.success && item.attempts > 1).length;
-  const allFirstPass = summary.validCount > 0 &&
-    rows.filter(isCompletedRepair).every((item) => item.success && item.attempts === 1);
   return (
     <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -118,44 +114,6 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces,
           <RotateCcw className="h-3.5 w-3.5"/> Clear measurements
         </button>
       </div>
-      {rows.length > 0 && (
-        <div className={'mt-4 rounded-lg border p-3 text-xs leading-5 ' +
-          (summary.errorCount ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-slate-200 bg-slate-50 text-slate-700')}>
-          <strong>{summary.validCount} completed repair trials.</strong>
-          {' '}{summary.errorCount} API or execution errors excluded from repair success rates and means.
-          {' '}A successful repair must compile and pass every regression test. An unresolved trial completed normally but did not pass.
-          {' '}An API error is not a software repair failure.
-        </div>
-      )}
-      {summary.validCount > 0 && (
-        <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-700">
-          <div className="text-sm font-semibold text-slate-900">How to interpret these measurements</div>
-          {fullyObservedIssues < 3 ? (
-            <p className="mt-1">
-              Only {fullyObservedIssues} of 3 defects have completed trials for both strategies.
-              The overall success percentages are preliminary. Complete queue and security before
-              comparing agent performance across the full set of cases.
-            </p>
-          ) : allFirstPass ? (
-            <p className="mt-1">
-              Both agents repaired every observed defect on their first patch. The intelligent agent
-              did not need to revise any generated code in these trials. This is a ceiling effect,
-              not proof that the agents have identical capabilities. Compare runtime and model use,
-              then repeat the experiment if additional observations are needed.
-            </p>
-          ) : (
-            <p className="mt-1">
-              {recoveredAfterRetry} successful repairs required more than one patch attempt.
-              Examine their execution traces to see whether test feedback contributed to the
-              repair. Compare success and overhead per issue, not only the overall percentages.
-            </p>
-          )}
-          <p className="mt-1">
-            Observed feedback-driven recoveries: <strong>{recoveredAfterRetry}</strong>.
-            Completed trials are counted separately from provider and execution errors.
-          </p>
-        </div>
-      )}
       <div className="mt-5 overflow-x-auto rounded-lg border border-slate-200">
         <table className="min-w-full text-left text-xs">
           <thead className="bg-slate-50 text-slate-600"><tr>
@@ -169,7 +127,9 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces,
               <td className="px-3 py-2 capitalize">{row.strategy}</td>
               <td className={'whitespace-nowrap px-3 py-2 font-semibold ' +
                 (row.success && completed ? 'text-emerald-700' : completed ? 'text-red-700' : 'text-amber-700')}>
-                {completed ? (row.success ? 'Resolved' : 'Unresolved') : 'Error'}
+                <span title={!completed ? (row.trace[row.trace.length - 1] || 'Execution error') : undefined}>
+                  {completed ? (row.success ? 'Resolved' : 'Unresolved') : 'Error'}
+                </span>
               </td>
               <td className="px-3 py-2">{row.attempts}</td>
               <td className="px-3 py-2">{row.elapsedMs.toLocaleString()}</td>
@@ -178,7 +138,7 @@ export const Lab04Analysis: React.FC<Props> = ({ rows, onClear, onCsv, onTraces,
               <td className="px-3 py-2">{row.modelTokens.toLocaleString()}</td>
               <td className="px-3 py-2">
                 <details className="max-w-[400px]">
-                  <summary className="cursor-pointer whitespace-nowrap font-semibold text-blue-700">View</summary>
+                  <summary className="cursor-pointer whitespace-nowrap font-semibold text-blue-700">{completed ? 'View trace' : 'View error details'}</summary>
                   <pre className="mt-2 max-h-64 w-[370px] max-w-full overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-3 font-mono text-[11px] leading-5 text-slate-700">
                     {row.trace.join('\n\n')}
                   </pre>

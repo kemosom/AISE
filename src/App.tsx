@@ -74,11 +74,11 @@ export default function App() {
     setLabsError(null);
 
     try {
-      const manifests = LabRegistry.getAllLabs().filter((manifest) => manifest.labNumber !== 4);
+      const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Labs 01 through 03 are released to students.
-        const isUnlocked = manifest.labNumber <= 3;
+        // Labs 01 through 04 are released to students.
+        const isUnlocked = manifest.labNumber <= 4;
 
         return {
           id: manifest.id,

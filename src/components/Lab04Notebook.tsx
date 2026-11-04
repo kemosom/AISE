@@ -36,7 +36,8 @@ function mean(values: number[]): number {
   return values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
 }
 function normalizeDecision(output: string): { action: string; prompt?: string } {
-  const marker = output.split('\n').find((line) => line.startsWith('LAB4_DECISION:'));
+  const markers = output.split('\n').filter((line) => line.startsWith('LAB4_DECISION:'));
+  const marker = markers[markers.length - 1];
   if (!marker) throw new Error('Python did not return an agent decision. Check the code cell output.');
   const decision = JSON.parse(marker.slice('LAB4_DECISION:'.length));
   if (!['generate', 'finish', 'stop'].includes(decision.action)) throw new Error('Invalid agent action.');
@@ -202,19 +203,28 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
       issue: { id: issue.id, file: issue.file, report: issue.report },
       source, feedback, attempts, last_passed: lastPassed, history, max_attempts: maxAttempts,
     };
+    // Base64 transports the full issue and compiler feedback into Python
+    // without changing backslashes, multiline source or quote characters.
+    const encoded = btoa(Array.from(new TextEncoder().encode(JSON.stringify(state)),
+      (byte) => String.fromCharCode(byte)).join(''));
+    const selectedPolicy = name === 'reactive_agent' ? cells.reactive : cells.intelligent;
     const python = [
-      cells.context, cells.reactive, cells.intelligent,
-      'import json',
-      '_issue = json.loads(' + JSON.stringify(JSON.stringify(state.issue)) + ')',
-      '_repository = json.loads(' + JSON.stringify(JSON.stringify({ [issue.file]: source })) + ')',
-      '_context = select_context(_issue, _repository)',
-      '_state = json.loads(' + JSON.stringify(JSON.stringify(state)) + ')',
-      '_state["source"] = _context',
+      'import base64, json',
+      cells.context,
+      selectedPolicy,
+      '_state = json.loads(base64.b64decode("' + encoded + '").decode("utf-8"))',
+      '_issue = _state["issue"]',
+      '_repository = {_issue["file"]: _state["source"]}',
+      '_state["source"] = select_context(_issue, _repository)',
       '_decision = ' + name + '(_state)',
+      'if not isinstance(_decision, dict): raise TypeError("Agent policy must return a dictionary")',
       'print("LAB4_DECISION:" + json.dumps(_decision))',
     ].join('\n\n');
     const output = await defaultCodeRunner.run(python);
-    if (output.exitCode !== 0) throw new Error('Python agent error:\n' + (output.stderr || output.error || 'Unknown error'));
+    if (output.exitCode !== 0) {
+      throw new Error('Python ' + name + ' on ' + issue.id + ':\n' +
+        (output.stderr || output.error || 'Unknown Python execution failure'));
+    }
     return normalizeDecision(output.stdout);
   };
 
@@ -302,11 +312,36 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     for (const exercise of required) {
       const passed = await verifyExercise(exercise);
       if (!passed) {
-        appendLog('Complete the failed Python cell: ' + exercise.title);
+        appendLog('Fix the Python cell before running the agents: ' + exercise.title);
         return false;
       }
     }
-    return true;
+    // Unit checks alone do not verify that the student's policy works with
+    // the real compiler output and source code for every issue.
+    appendLog('Checking the integrated Python agents against the three issue files...');
+    try {
+      for (const issue of cases) {
+        const baseline = await compileAndTest(issue, issue.source);
+        if (baseline.passed) throw new Error(issue.id + ' has no reproducible defect.');
+        const feedback = buildFeedback(baseline);
+        for (const strategy of ['reactive', 'intelligent'] as const) {
+          const decision = await pythonPolicy(
+            strategy === 'reactive' ? 'reactive_agent' : 'intelligent_agent',
+            issue, issue.source, feedback, 0, false, [],
+            strategy === 'reactive' ? 1 : 3
+          );
+          if (decision.action !== 'generate') {
+            throw new Error(issue.id + ' / ' + strategy +
+              ': the first decision must request a patch, not ' + decision.action);
+          }
+        }
+      }
+      appendLog('Python policies validated on checkout, queue and security.');
+      return true;
+    } catch (error) {
+      appendLog('Python integration check failed: ' + (error instanceof Error ? error.message : String(error)));
+      return false;
+    }
   };
   const runSelected = async () => {
     if (busy) return;
@@ -332,7 +367,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
     // of independent trials for both agents on all three cases.
     setBusy(true); setActivity([]);
     const total = cases.length * 2 * repetitions;
-    let completed = 0, errors = 0, resolved = 0;
+    let completed = 0;
     setBatchProgress({ completed: 0, total, issue: cases[0].id, strategy: 'reactive' });
     try {
       if (!await verifyAgents()) return;
@@ -350,17 +385,13 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         for (const issue of cases) {
           for (const strategy of ['reactive', 'intelligent'] as const) {
             setBatchProgress({ completed, total, issue: issue.id, strategy });
-            const run = await runOne(issue, strategy);
+            await runOne(issue, strategy);
             completed++;
-            if (run.status !== 'Resolved' && run.status !== 'Unresolved') errors++;
-            if (run.success && run.status === 'Resolved') resolved++;
             setBatchProgress({ completed, total, issue: issue.id, strategy });
           }
         }
       }
-      appendLog('Batch finished: ' + completed + '/' + total +
-        ' trials recorded, ' + resolved + ' resolved, ' + errors +
-        ' technical errors. Review the per-issue table and traces.');
+      appendLog('All scheduled agent runs finished. Inspect the measurements and execution traces below.');
     } finally { setBusy(false); }
   };
 
@@ -435,7 +466,7 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
             </p>
           </div>
           <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium">
-            {isInstructorPreview ? 'Student workspace preview · Unreleased' : 'Interactive notebook'}
+            {isInstructorPreview ? 'Instructor preview · Lab 04 released' : 'Interactive notebook'}
           </span>
         </div>
 
@@ -457,11 +488,19 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
         <section className="mb-5 overflow-hidden rounded-xl border border-slate-200 bg-white">
           <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
             <p className="text-xs font-semibold text-blue-700">PART A · THE SOFTWARE MAINTENANCE CASE</p>
-            <h3 className="mt-1 text-lg font-semibold">01. A production service has three reported defects</h3>
+            <h3 className="mt-1 text-lg font-semibold">01. Maintain a TypeScript operations service</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              You are a software engineer maintaining an operations service. The team has reported three defects: incorrect checkout totals, misordered incident tickets and exposed authentication headers. Each case includes a bug report, its affected TypeScript function and a regression suite. Write the Python agent decision logic that controls an AI coding model. Your agents must repair the implementation without changing the tests.
-
+              This laboratory uses three small, lab-authored TypeScript modules with deliberately introduced defects:
+              checkout calculations, incident scheduling and request-header logging. You will implement Python agents
+              that ask a coding model for a repair, compile the returned source and execute regression tests.
+              The software runs in your browser. The example bugs are teaching fixtures, not copied production incidents.
             </p>
+            <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-medium">
+              <a href="https://github.com/kemosom/AISE/blob/main/labs/lab04-software-repair-agents/cases.json"
+                target="_blank" rel="noreferrer" className="text-blue-700 underline">View original laboratory source files</a>
+              <a href="https://github.com/kemosom/AISE/blob/main/src/workers/lab04-tests.worker.ts"
+                target="_blank" rel="noreferrer" className="text-blue-700 underline">View the regression test source</a>
+            </div>
           </div>
           <div className="grid gap-0 lg:grid-cols-[300px_1fr]">
             <div className="border-b border-slate-100 p-4 lg:border-b-0 lg:border-r">
@@ -486,6 +525,19 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
                 <Code2 className="h-4 w-4" /> {currentIssue.file}
               </div>
               <pre className="mt-2 overflow-x-auto rounded-lg bg-slate-950 p-4 text-[12px] leading-6 text-slate-100"><code>{currentIssue.source}</code></pre>
+              {currentIssue.sources && (
+                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                  <div className="text-xs font-semibold text-slate-700">Engineering references for this case</div>
+                  {currentIssue.sources.map((source) => (
+                    <div key={source.url} className="text-xs leading-5">
+                      <a href={source.url} target="_blank" rel="noreferrer" className="font-medium text-blue-700 underline">
+                        {source.label}
+                      </a>
+                      <p className="text-slate-500">{source.note}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
               {buildResult && (
                 <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
                   <div className="mb-2 flex items-center gap-2 text-xs font-semibold"><Terminal className="h-4 w-4"/> Compiler and test output</div>
@@ -558,12 +610,12 @@ export const Lab04Notebook: React.FC<Props> = ({ isInstructorPreview, onOpenRepo
 
         <section className="mb-5 rounded-xl border border-slate-200 bg-white p-5 sm:p-7">
           <p className="text-xs font-semibold text-blue-700">PART C · CONNECT A CODING MODEL</p>
-          <h3 className="mt-1 text-lg font-semibold">07. Get your Gemini API key and test the connection</h3>
+          <h3 className="mt-1 text-lg font-semibold">07. Connect Gemini and test the connection</h3>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Open <a className="font-semibold text-blue-700 underline" href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio API Keys</a>,
-            sign in, and select <strong>Create API key</strong>. Copy your key into the field below.
-            Your key is used only for requests during this session and is not saved in the notebook.
-            Gemini free-tier availability and daily limits depend on your Google project.
+            Enter the classroom Gemini API key supplied by your instructor and select <strong>Test API connection</strong>.
+            If instructed to obtain your own key, use <a className="font-semibold text-blue-700 underline"
+              href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer">Google AI Studio</a>.
+            The key is used for requests during this session and is not saved with your code or report.
           </p>
           <p className="mt-2 text-xs text-slate-500">Model: {MODEL}. An API request is required to generate each real source-code patch. Do not paste your key into Python cells or your report.</p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
