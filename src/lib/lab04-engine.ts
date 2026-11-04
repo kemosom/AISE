@@ -44,7 +44,7 @@ export async function compileAndTest(issue: Lab04Issue, source: string): Promise
     noLib: true,
     noEmitOnError: true,
     skipLibCheck: true,
-    moduleResolution: ts.ModuleResolutionKind.Classic,
+    // No legacy Classic module resolution; no external modules are imported in these cases.
   };
   let emitted = '';
   const host = {
