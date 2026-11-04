@@ -22,7 +22,7 @@ const analysis = fs.readFileSync('src/components/Lab04Analysis.tsx','utf8');
 assert.ok(!analysis.includes('How to interpret these measurements'));
 assert.ok(!analysis.includes('completed repair trials.</strong>'));
 assert.match(analysis, /View error details/);
-assert.match(notebook, /View original laboratory source files/);
+assert.ok(!notebook.includes('View original laboratory source files'));
 console.log('PASS: data-coverage, ceiling-effect and retry interpretation');
 
 const py = fs.readFileSync('src/lib/lab04-analysis-python.ts','utf8');
