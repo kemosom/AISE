@@ -1,0 +1,41 @@
+{
+  "title": "Lab 04: Software Repair Agent Experiment Report",
+  "sections": [
+    {
+      "id": "objective",
+      "title": "1. Case and Objective",
+      "required": true,
+      "placeholder": "Identify the software service, the three defects and what the agent comparison measures. State the expected behaviour of one selected function."
+    },
+    {
+      "id": "implementation",
+      "title": "2. Agent Implementations",
+      "required": true,
+      "placeholder": "Explain your select_context, reactive_agent and intelligent_agent functions. Include the key code and one example of each agent's decision on failed tests."
+    },
+    {
+      "id": "methodology",
+      "title": "3. Experimental Procedure",
+      "required": true,
+      "placeholder": "State the selected model, identical starting sources, attempt limits, TypeScript compiler, regression checks and how communication bytes were counted. Record the number of trials."
+    },
+    {
+      "id": "results",
+      "title": "4. Measured Results",
+      "required": true,
+      "placeholder": "Paste measured rows and plots. Compare issue resolution, response time, worker messages, exchanged JSON bytes, and model calls or tokens. Clearly state the run count per strategy."
+    },
+    {
+      "id": "discussion",
+      "title": "5. Failure Analysis and Comparison",
+      "required": true,
+      "placeholder": "Use an actual failed test, diagnostic or patch to explain the agent's next action. Discuss whether additional attempts improved success and how much extra time or communication they used."
+    },
+    {
+      "id": "conclusion",
+      "title": "6. Conclusion",
+      "required": true,
+      "placeholder": "Summarise what was observed, not presumed. State one limitation of the sample size or variability and one improvement to the agent."
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "id": "lab04-software-repair-agents",
+  "labNumber": 4,
+  "week": 5,
+  "title": "Building and Evaluating AI Software Repair Agents",
+  "shortDescription": "Program reactive and feedback-driven Python agents to repair TypeScript software, compile generated patches, execute regression tests, and measure outcomes.",
+  "estimatedDuration": "2 hours",
+  "language": "python",
+  "runner": "pyodide",
+  "packages": [],
+  "features": {
+    "visualDesigner": false,
+    "blockly": false,
+    "functionPalette": false,
+    "testRunner": false,
+    "reportEditor": true,
+    "webPreview": false
+  },
+  "learningOutcomes": [
+    "Implement a reactive one-pass coding agent and a feedback-driven bounded repair agent in Python.",
+    "Use an actual coding model to generate a source-code artifact for a reported defect.",
+    "Compile generated TypeScript code and evaluate regression tests for three software maintenance incidents.",
+    "Compare task success, elapsed time, agent-to-tool messages, data exchanged and language-model token use."
+  ],
+  "courseAlignment": [
+    {
+      "clo": "CLO1",
+      "plo": "PLO1",
+      "contribution": "primary",
+      "evidence": "Reason about state and decisions in two software engineering agent strategies."
+    },
+    {
+      "clo": "CLO2",
+      "plo": "PLO2",
+      "contribution": "primary",
+      "evidence": "Implement and execute Python agent policies and TypeScript patch generation."
+    },
+    {
+      "clo": "CLO3",
+      "plo": "PLO7",
+      "contribution": "secondary",
+      "evidence": "Interpret empirical effectiveness and communication overhead."
+    }
+  ],
+  "tasks": [
+    {
+      "id": "l4-t1",
+      "title": "Reproduce the three software defects",
+      "description": "Inspect the TypeScript source and record compilation and behavioural failures.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l4-t2",
+      "title": "Implement reactive and intelligent agents",
+      "description": "Program Python functions and verify agent decisions.",
+      "category": "code",
+      "action": "code"
+    },
+    {
+      "id": "l4-t3",
+      "title": "Execute generated repairs",
+      "description": "Connect Gemini, compile actual generated code, and run regression tests.",
+      "category": "test",
+      "action": "code"
+    },
+    {
+      "id": "l4-t4",
+      "title": "Compare measured performance",
+      "description": "Analyse task success, time, worker messages and model usage.",
+      "category": "analysis",
+      "action": "code"
+    },
+    {
+      "id": "l4-t5",
+      "title": "Prepare and submit technical report",
+      "description": "Attach evidence and explain decisions, failures and experimental limitations.",
+      "category": "report",
+      "action": "report"
+    }
+  ]
+}

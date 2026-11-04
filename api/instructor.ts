@@ -107,6 +107,13 @@ export default function handler(req: any, res: any) {
     normalizeSecret(body.labId) || 'lab01-behavioral-programming';
 
   try {
+    if (requestedLabId === 'lab04-software-repair-agents') {
+      return res.status(200).json({
+        ok: true,
+        data: { labId: requestedLabId, labNumber: 4 },
+      });
+    }
+
     if (requestedLabId === 'lab03-social-commitment-agents') {
       // Unlock instructor preview after verifying the existing server-side code.
       // Student navigation and normal lab loading remain locked.

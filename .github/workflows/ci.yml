@@ -44,3 +44,6 @@ jobs:
 
       - name: Validate Lab 03 starter and locked instructor preview
         run: python scripts/validate_lab03.py
+
+      - name: Validate Lab 04 browser compiler, regression tests and agent hints
+        run: node scripts/validate_lab04.mjs

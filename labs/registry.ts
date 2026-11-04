@@ -29,6 +29,11 @@ import lab03MainPy from './lab03-social-commitment-agents/starter/main.py?raw';
 import lab03Tests from './lab03-social-commitment-agents/tests/public-tests.json';
 import lab03ReportTemplate from './lab03-social-commitment-agents/report-template.json';
 
+import lab04Metadata from './lab04-software-repair-agents/manifest.json';
+import lab04Theory from './lab04-software-repair-agents/theory.md?raw';
+import lab04LabSheet from './lab04-software-repair-agents/lab-sheet.md?raw';
+import lab04ReportTemplate from './lab04-software-repair-agents/report-template.json';
+
 // Curriculum-aligned task catalog mapping for all MAI5124 laboratories
 export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
   'lab03-social-commitment-agents': [
@@ -248,23 +253,17 @@ labRegistryMap.set('lab03-social-commitment-agents', {
   instructionsMarkdown: lab03Theory + '\n\n---\n\n' + lab03LabSheet,
 });
 
-// Lab 04
-labRegistryMap.set(
-  'lab04-intelligent-agents',
-  createLabShell(
-    'lab04-intelligent-agents',
-    4,
-    4,
-    'Agent-Based Software Programming: Intelligent Agents',
-    'Build reactive and deliberate BDI (Belief-Desire-Intention) agents for dynamic software orchestration.',
-    [
-      'Implement belief update loops in response to asynchronous environment signals.',
-      'Design goal selection and intention reconsideration algorithms.',
-      'Evaluate agent resilience against dynamic failure modes.',
-    ],
-    `# Lab 04: BDI Intelligent Agents\n\nclass BDIAgent:\n    def __init__(self, agent_id):\n        self.agent_id = agent_id\n        self.beliefs = set()\n        self.desires = []\n        self.intentions = []\n\nprint("BDI Agent framework ready.")\n`
-  )
-);
+// Lab 04 - Real software repair agents with browser notebook and TypeScript checks.
+labRegistryMap.set('lab04-software-repair-agents', {
+  ...(lab04Metadata as any),
+  starterFiles: [{ name: 'agents.py', language: 'python', content: '# Use the interactive notebook to implement your agent functions.\n' }],
+  reportTemplate: lab04ReportTemplate as any,
+  snippets: [],
+  tests: [],
+  theoryMarkdown: lab04Theory,
+  labSheetMarkdown: lab04LabSheet,
+  instructionsMarkdown: lab04Theory + '\n\n---\n\n' + lab04LabSheet,
+});
 
 // Lab 05
 labRegistryMap.set(
