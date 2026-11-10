@@ -51,11 +51,9 @@ export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
     { id: 'l4-t5', title: 'Technical Report & Final Submission', description: 'Document empirical benchmarks and submit final report', category: 'submission' },
   ],
   'lab05-artifact-generation': [
-    { id: 'l5-t1', title: 'Specification Grammar Parsing', description: 'Extract architectural entities from natural language requirements', category: 'code' },
-    { id: 'l5-t2', title: 'Automated UML Diagram Synthesis', description: 'Synthesize class hierarchies and statechart specifications', category: 'design' },
-    { id: 'l5-t3', title: 'Code & Test Stub Generation', description: 'Produce compilable interfaces and mock assertions', category: 'code' },
-    { id: 'l5-t4', title: 'Generated Artifact Verification', description: 'Execute syntactic and structural integrity checks', category: 'test' },
-    { id: 'l5-t5', title: 'Technical Report & Final Submission', description: 'Analyze synthesis fidelity and submit academic report', category: 'submission' },
+    { id: 'l5-t1', title: 'Sequence-to-Sequence Generation', description: 'Study how a natural-language specification becomes a software artefact', category: 'design' },
+    { id: 'l5-t2', title: 'Booking Game', description: 'Predict booking outcomes and test two implementations against the specification', category: 'test' },
+    { id: 'l5-t3', title: 'Report Q&A', description: 'Explain test evidence, limitations, and how to evaluate the final group project', category: 'report' },
   ],
   'lab06-software-fusion': [
     { id: 'l6-t1', title: 'AST & Dependency Extraction', description: 'Construct code abstract syntax trees and call graphs', category: 'code' },
@@ -265,23 +263,23 @@ labRegistryMap.set('lab04-software-repair-agents', {
   instructionsMarkdown: lab04Theory + '\n\n---\n\n' + lab04LabSheet,
 });
 
-// Lab 05
-labRegistryMap.set(
-  'lab05-artifact-generation',
-  createLabShell(
+// Lab 05 uses the self-paced browser activity in public/lab5.html.
+labRegistryMap.set('lab05-artifact-generation', {
+  ...createLabShell(
     'lab05-artifact-generation',
     5,
-    5,
-    'Automated Software Artifact Generation',
-    'Synthesize UML diagrams, API stubs, and unit test suites from natural language specifications.',
+    6,
+    'Automated Software Artefact Generation',
+    'Explore sequence-to-sequence generation, play a room-booking test game, and write a Q&A report from the results.',
     [
-      'Extract entity models and associations from structured domain narratives.',
-      'Generate OpenAPI-compliant JSON schemas and Python FastAPI route stubs.',
-      'Evaluate semantic completeness of generated artifacts.',
+      'Explain how a natural-language specification becomes a software artefact.',
+      'Compare two artefacts on the same tests and identify a regression.',
+      'Explain methods, results and limitations using evidence from the game.',
     ],
-    `# Lab 05: Software Artifact Generation\n\ndef generate_api_stub(entity_name, fields):\n    return f"class {entity_name}Model:\\n    " + "\\n    ".join([f"{f}: str" for f in fields])\n\nprint(generate_api_stub("UserAccount", ["id", "username", "email"]))\n`
-  )
-);
+    ''
+  ),
+  estimatedDuration: '45–60 minutes',
+});
 
 // Lab 06
 labRegistryMap.set(

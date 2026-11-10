@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="MAI5124 Lab 5. Learn how AI generates software artefacts, test a campus booking system and write a report from the evidence.">
+<title>Would You Release This? | MAI5124 Lab 05</title>
+<style>
+:root{color-scheme:light;--ink:#182837;--muted:#4b6070;--navy:#102b38;--line:#cddcdd;--paper:#f3f7f6;--white:#fff;--teal:#00665b;--soft:#e4f5ee;--amber:#fff0ce;--rose:#ffebe4;--bad:#842c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--teal);text-underline-offset:.2em}button,a,input,textarea{touch-action:manipulation}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,summary:focus-visible,textarea:focus-visible,input:focus-visible,[tabindex="-1"]:focus-visible{outline:3px solid #087c72;outline-offset:4px}[hidden]{display:none!important}.wrap{width:min(1080px,calc(100% - 2.5rem));margin-inline:auto}.top{background:#0c222d;color:#d8e8e6}.top .wrap{display:flex;justify-content:space-between;gap:1rem;align-items:center;min-height:58px}.top a{color:#b7efe0;font-weight:650}.top small,.eyebrow{font-size:.76rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.hero{background:radial-gradient(ellipse at 90% 0%,#1c5458 0%,transparent 49%),var(--navy);color:white;padding:3.7rem 0 3.1rem;border-bottom:5px solid #77d5b9}.hero .eyebrow{color:#a0f2d7}.hero h1{font-size:clamp(2.65rem,7vw,5.25rem);line-height:.99;letter-spacing:-.065em;margin:.75rem 0 1rem;max-width:13ch}.hero p{max-width:63ch;color:#dfebe9;margin:0}.tags{display:flex;gap:.55rem;flex-wrap:wrap;margin-top:1.3rem}.tags span{border:1px solid #6a9596;border-radius:99px;padding:.2rem .7rem;color:#e2f2ee;font-size:.83rem}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem;margin:1.4rem 0}.steps button{display:flex;align-items:center;text-align:left;gap:.55rem;background:var(--white);border:1px solid var(--line);padding:.72rem .9rem;border-radius:.65rem;color:var(--ink);font-weight:750}.steps button[aria-current="step"]{background:var(--teal);color:white;border-color:var(--teal)}.steps span{font-size:.75rem;font-weight:800}.panel{background:var(--white);border:1px solid var(--line);border-radius:1rem;padding:clamp(1rem,4vw,2.1rem);margin-bottom:1.25rem}.eyebrow{color:var(--teal);margin:0 0 .35rem}h2{font-size:clamp(1.65rem,4vw,2.35rem);line-height:1.12;letter-spacing:-.035em;margin:.25rem 0 .75rem}h3{line-height:1.28;margin:.25rem 0 .5rem}p{margin:.4rem 0 .85rem}.muted,small{color:var(--muted)}.top small{color:#d8e8e6}.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:1rem 0}.tile,.notice,.example,.metric,.schedule,.question{background:#f6faf9;border:1px solid var(--line);border-radius:.72rem;padding:.85rem 1rem}.tile p,.metric p,.schedule p{margin:0}.video{margin:1.1rem 0;background:#f6faf9;border:1px solid var(--line);border-radius:.85rem;padding:1rem}.video iframe{display:block;width:100%;max-width:720px;aspect-ratio:16/9;border:0;border-radius:.5rem;background:#0c222d}.video a{display:inline-block;margin-top:.55rem}.details{border-top:1px solid var(--line);padding:.7rem 0}.details summary,.example summary{cursor:pointer;font-weight:750}.example p:last-child{margin-bottom:0}.primary,.secondary,.option{border:1px solid var(--teal);border-radius:.55rem;padding:.55rem .9rem;font-weight:750}.primary{background:var(--teal);color:white}.secondary,.option{background:white;color:var(--teal)}.primary:hover{background:#034b44}.secondary:hover,.option:hover{background:var(--soft)}.option[aria-pressed="true"]{background:var(--teal);color:white}.actions{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem;align-items:center}.notice{margin:.8rem 0;background:var(--soft)}.notice.warn{background:var(--amber)}.notice.bad{background:var(--rose);color:var(--bad)}.schedule{margin:.8rem 0}.slots{display:flex;flex-wrap:wrap;gap:.45rem;margin:.4rem 0}.slots span,.pill{display:inline-block;border-radius:99px;padding:.16rem .6rem;background:#e6edf0;font-size:.87rem;font-weight:700}.pill.pass{color:#135949;background:var(--soft)}.pill.fail{color:var(--bad);background:var(--rose)}.request{font-size:clamp(1.45rem,4vw,2.15rem);font-weight:850;letter-spacing:-.045em;display:block}.choices{display:grid;gap:.55rem;margin:.75rem 0}.choices button{text-align:left}.score{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:.8rem 0}.metric strong{display:block;font-size:1.45rem;line-height:1.15}.table-wrap{overflow:auto;border-radius:.55rem;border:1px solid var(--line);margin:.8rem 0}table{width:100%;border-collapse:collapse;font-size:.9rem}caption{text-align:left;padding:.55rem .65rem;font-weight:700}th,td{text-align:left;padding:.55rem .65rem;border-bottom:1px solid var(--line);vertical-align:top}thead{background:#ecf3f2}tbody tr:last-child td{border:0}.question{margin:.8rem 0}.question label{display:block;font-weight:750}.question textarea{margin:.55rem 0;width:100%;min-height:6rem;resize:vertical;padding:.62rem;border:1px solid #a3b7ba;border-radius:.48rem;color:var(--ink);font:inherit;background:white}.question .example{margin-top:.35rem;background:white}.question small{display:block}.qtag{color:var(--teal);font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.footer{padding:0 0 1.5rem;color:var(--muted);font-size:.88rem}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:630px){.wrap{width:calc(100% - 1.3rem)}.hero{padding:2.55rem 0 2.15rem}.flow{grid-template-columns:1fr}.steps button{padding:.55rem .35rem;flex-direction:column;gap:0;text-align:center;font-size:.88rem}.score{gap:.35rem}.metric{padding:.6rem}.metric strong{font-size:1.15rem}th,td{padding:.4rem}.top .wrap{min-height:50px}}
+@media print{body{background:white}.top,.hero,.steps,.footer,#theory,#game,#report .actions,.example{display:none!important}#report{display:block!important;border:0;padding:0}.wrap{width:100%}.question{break-inside:avoid}.question textarea{display:none}.print-answer{display:block!important;white-space:pre-wrap}#report-text{display:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a href="/">AISE Lab Studio</a><small>MAI5124 / Lab 05</small></div></header>
+<section class="hero"><div class="wrap">
+<p class="eyebrow">Automated Software Artefact Generation</p>
+<h1>Would you release this?</h1>
+<p>A booking system has turned away a student from an available room. Use the specification and your test results to decide what needs to change before release.</p>
+<div class="tags"><span>Self-paced</span><span>45–60 minutes</span><span>No coding</span></div>
+</div></section>
+<main class="wrap">
+<nav class="steps" aria-label="Lab sections">
+<button type="button" data-tab="theory" aria-controls="theory" aria-current="step"><span>01</span> Theory</button>
+<button type="button" data-tab="game" aria-controls="game"><span>02</span> Booking game</button>
+<button type="button" data-tab="report" aria-controls="report"><span>03</span> Report Q&amp;A</button>
+</nav>
+<section class="panel" id="theory" aria-labelledby="theory-title">
+<p class="eyebrow">01 / Theory</p><h2 id="theory-title" tabindex="-1">From a specification to software</h2>
+<p>A <strong>software artefact</strong> is an output used to build, test, or describe a system. It can be a function, a test suite, or an API specification. In this lab, the artefact is a booking function. The input is a written specification that tells the function which requests to accept or reject.</p>
+<div class="flow">
+<div class="tile"><p class="eyebrow">Input</p><h3>Specification</h3><p>Define the inputs, required outputs, and boundary rules. Example: a new booking can start exactly when the previous one ends.</p></div>
+<div class="tile"><p class="eyebrow">Transformation</p><h3>Generation</h3><p>A model reads the specification as tokens and produces an output sequence. In this example the target sequence represents source code.</p></div>
+<div class="tile"><p class="eyebrow">Evidence</p><h3>Verification</h3><p>Derive expected answers from the specification. Run the artefact on the same inputs and compare what it actually returns.</p></div>
+</div>
+<h3>How sequence-to-sequence generation works</h3>
+<p>In an <strong>encoder–decoder</strong> Transformer, the encoder represents the input sequence in context. The decoder uses that representation and the tokens it has already produced to generate the next output token. In a code-generation task, the input could be a requirement and the output a function. Code can also be generated by decoder-only models, which receive the prompt as context and continue the sequence. The video explains the encoder–decoder architecture.</p>
+<div class="video">
+<h3>Watch · Transformer models: Encoder-Decoders</h3>
+<p>Hugging Face. As you watch, identify what the encoder reads and what the decoder produces. Then map those two roles to the booking task.</p>
+<iframe src="https://www.youtube-nocookie.com/embed/0_4KEb08xrE" title="Hugging Face video on encoder-decoder Transformer models" loading="lazy" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+<a href="https://www.youtube.com/watch?v=0_4KEb08xrE" target="_blank" rel="noopener noreferrer">Open video on YouTube</a> · <a href="https://huggingface.co/docs/course/main/en/chapter1/6#sequence-to-sequence-models" target="_blank" rel="noopener noreferrer">Read the Hugging Face lesson</a>
+</div>
+<h3>What should you evaluate?</h3>
+<details class="details" open><summary>Functional correctness</summary><p>Compare the expected and actual output for each case. Valid syntax lets the code run. Correct behavior requires the output to match the rule. A function can run successfully and still reject a valid request.</p></details>
+<details class="details"><summary>Consistency across versions</summary><p>Run the same tests against both versions. If the outputs differ, check which one follows the specification. If both versions agree, they can still both be wrong. A regression occurs when a previously passing case fails after a change.</p></details>
+<details class="details"><summary>Coverage and limitations</summary><p>A test suite only checks the cases it includes. An ordinary request in an empty room tells you little about a request between two existing bookings. A result such as 6/6 means six cases passed. It does not establish how the system behaves on untested inputs or whether a prompt will always generate a correct function.</p></details>
+<div id="theory-check"></div>
+<div class="actions"><button type="button" class="primary" data-tab="game">Start the booking game →</button></div>
+</section>
+<section class="panel" id="game" aria-labelledby="game-title" hidden>
+<p class="eyebrow">02 / Booking game</p><h2 id="game-title" tabindex="-1">The last study room</h2>
+<p>You are the release reviewer. Predict what the feature <em>should</em> do, then reveal how the two implementations behave. Earn a point for each correct first prediction.</p>
+<details class="details" open><summary>Official booking rules</summary>
+<ol><li>A request must start and end on the same booking day. Midnight at the start is 00:00 and midnight at the end is 24:00.</li><li>The end must be strictly later than the start.</li><li>Reject requests that overlap any existing booking. A request may touch another booking at either end.</li></ol>
+</details>
+<p class="muted">The game uses two fixed teaching implementations to illustrate possible generation errors. Your browser runs both implementations on the test inputs. There is no live model call.</p>
+<div id="game-content"></div><p id="game-announcement" role="status" class="sr"></p>
+</section>
+<section class="panel" id="report" aria-labelledby="report-title" hidden>
+<p class="eyebrow">03 / Report Q&amp;A</p><h2 id="report-title" tabindex="-1">Explain your release decision</h2>
+<p>Write two to four sentences for each question. Use the case IDs and outputs from your evidence table. The same structure works for your final group project.</p>
+<div id="report-evidence"></div>
+<div id="questions"></div>
+<div class="actions"><button class="primary" type="button" id="report-text-toggle" aria-controls="report-text" aria-expanded="false">View report text</button><button class="secondary" type="button" id="print">Print / save as PDF</button></div>
+<div id="report-text" class="question" hidden><label for="report-output">Copyable report</label><textarea id="report-output" rows="10" readonly></textarea><small>Select and copy this text into your project notes.</small></div>
+<p id="storage-message" class="muted" role="status">Drafts are saved in this browser. Copy your report or save it as a PDF to keep it.</p>
+</section>
+<footer class="footer">MAI5124 · AI in Software Engineering · Lab 05</footer>
+</main>
+<script>
+"use strict";
+
+const savedKey = "aise:lab05:release-game:v1";
+const initial = { predictions: {}, prompt: false, extra: "", theory: "", answers: {} };
+let storageWorks = true;
+let state = { ...initial };
+try {
+  const saved = localStorage.getItem(savedKey);
+  if (saved) state = { ...initial, ...JSON.parse(saved) };
+} catch {
+  storageWorks = false;
+}
+function save() {
+  try { localStorage.setItem(savedKey, JSON.stringify(state)); }
+  catch { storageWorks = false; }
+  document.querySelector("#storage-message").textContent = storageWorks
+    ? "Drafts are saved in this browser. Copy your report or save it as a PDF to keep it."
+    : "This browser could not save your draft. Copy your report or save it as a PDF before closing the page.";
+}
+const defaultBookings = [[600, 660], [720, 780]];
+const cases = [
+  { id: "T01", name: "Early bird", request: [540, 570], expected: true, reason: "This valid request ends before either existing booking begins." },
+  { id: "T02", name: "One room, two teams", request: [645, 675], expected: false, reason: "The request overlaps the first booking from 10:45 to 11:00." },
+  { id: "T03", name: "The one-hour gap", request: [660, 720], expected: true, reason: "The request touches both bookings but shares no minutes with either." },
+  { id: "T04", name: "Exactly on time", request: [570, 600], expected: true, reason: "The request ends exactly when the first booking begins. The rules allow this." },
+  { id: "T05", name: "The zero-minute meeting", request: [840, 840], expected: false, reason: "The end time must be strictly later than the start time." },
+  { id: "T06", name: "Midnight overtime", request: [1410, 1450], expected: false, reason: "The request ends at 24:10, outside the booking day." }
+];
+const extensions = [
+  { id: "X01", name: "An empty schedule", request: [540, 600], bookings: [], expected: true, reason: "The request is within the day and there are no bookings to overlap." },
+  { id: "X02", name: "Ends at midnight", request: [1410, 1440], expected: true, reason: "The rules allow a booking to end exactly at 24:00." },
+  { id: "X03", name: "A conflict in the second booking", request: [735, 750], expected: false, reason: "The request is inside the second booking. The function must check all bookings." }
+];
+
+function versionA(start, end, bookings) {
+  if (start < 0 || start >= end || end > 1440) return false;
+  return !bookings.some(([bookedStart, bookedEnd]) => start <= bookedEnd && bookedStart <= end);
+}
+function versionB(start, end, bookings) {
+  if (start < 0 || start >= end) return false;
+  return !bookings.some(([bookedStart, bookedEnd]) => start < bookedEnd && bookedStart < end);
+}
+function run(version, test) {
+  return version(...test.request, test.bookings ?? defaultBookings);
+}
+function time(minutes) {
+  const hour = String(Math.floor(minutes / 60)).padStart(2, "0");
+  return hour + ":" + String(minutes % 60).padStart(2, "0");
+}
+const range = ([start, end]) => time(start) + "–" + time(end);
+const verdict = value => value ? "Accept" : "Reject";
+const byId = id => document.getElementById(id);
+const isDone = test => Object.hasOwn(state.predictions, test.id);
+const totalCorrect = () => cases.filter(test => isDone(test) && state.predictions[test.id] === test.expected).length;
+const game = byId("game-content");
+const announcement = byId("game-announcement");
+
+function showTab(tab, focus = true) {
+  for (const name of ["theory", "game", "report"]) {
+    byId(name).hidden = tab !== name;
+    const nav = document.querySelector('.steps [data-tab="' + name + '"]');
+    if (name === tab) nav.setAttribute("aria-current", "step");
+    else nav.removeAttribute("aria-current");
+  }
+  if (tab === "report") renderReportEvidence();
+  if (focus) byId(tab + "-title").focus();
+}
+function renderTheory() {
+  const options = {
+    syntax: "It ran without a syntax error.",
+    matches: "Its output matched the expected decision derived from the specification.",
+    agreement: "Both implementations produced the same decision."
+  };
+  const feedback = {
+    syntax: "A function can run and still return the wrong answer. Try again.",
+    matches: "Correct. The specification tells you which decision the function should return for the input.",
+    agreement: "Two implementations can agree on an incorrect decision. Compare each with the specification."
+  };
+  byId("theory-check").innerHTML = '<div class="notice"><h3>Quick check</h3><p>What makes an implementation pass a test?</p><div class="choices">' +
+    Object.entries(options).map(([key, label]) => '<button type="button" class="option" data-theory="' + key + '" aria-pressed="' + (state.theory === key) + '">' + label + '</button>').join("") +
+    '</div><p id="theory-feedback" role="status">' + (feedback[state.theory] ?? "") + '</p></div>';
+}
+
+let round = cases.findIndex(test => !isDone(test));
+if (round < 0) round = cases.length;
+let promptFeedback = "";
+function scores(tests) {
+  const passed = version => tests.filter(test => run(version, test) === test.expected).length;
+  return '<div class="score"><div class="metric"><small>Your predictions</small><strong>' + totalCorrect() + ' / ' + cases.length +
+    '</strong></div><div class="metric"><small>Version A passed</small><strong>' + passed(versionA) + ' / ' + tests.length +
+    '</strong></div><div class="metric"><small>Version B passed</small><strong>' + passed(versionB) + ' / ' + tests.length + '</strong></div></div>';
+}
+function evidence(tests, includeB) {
+  const result = (version, test) => {
+    const actual = run(version, test);
+    const passed = actual === test.expected;
+    return '<span class="pill ' + (passed ? "pass" : "fail") + '">' + verdict(actual) + ' · ' + (passed ? "Pass" : "Fail") + '</span>';
+  };
+  return '<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable booking test results"><table><caption>Booking test results</caption><thead><tr><th scope="col">Case</th><th scope="col">Request</th><th scope="col">Expected</th><th scope="col">Version A</th>' +
+    (includeB ? '<th scope="col">Version B</th>' : "") + '</tr></thead><tbody>' +
+    tests.map(test => '<tr><td>' + test.id + ' · ' + test.name + '</td><td>' + range(test.request) + '</td><td>' + verdict(test.expected) + '</td><td>' +
+      result(versionA, test) + '</td>' + (includeB ? '<td>' + result(versionB, test) + '</td>' : "") + '</tr>').join("") +
+    '</tbody></table></div>';
+}
+function renderGame(focus = false) {
+  if (round < cases.length) {
+    const test = cases[round];
+    const answered = isDone(test);
+    const correct = state.predictions[test.id] === test.expected;
+    game.innerHTML = '<div class="schedule"><p class="eyebrow">Request ' + (round + 1) + ' of ' + cases.length + ' · ' + test.id + '</p><h3 id="round-title" tabindex="-1">' + test.name +
+      '</h3><span class="request">' + range(test.request) + '</span><p>Existing bookings</p><div class="slots">' + defaultBookings.map(booking => '<span>' + range(booking) + '</span>').join("") +
+      '</div></div>' + (answered
+      ? '<div class="notice ' + (correct ? '' : 'warn') + '" id="round-feedback" tabindex="-1"><strong>' + (correct ? "Correct prediction." : "Check the booking rule.") +
+        '</strong><p>Expected: ' + verdict(test.expected) + '. ' + test.reason + '</p><p>Version A returned <strong>' + verdict(run(versionA, test)) +
+        '</strong> and <strong>' + (run(versionA, test) === test.expected ? "passed" : "failed") +
+        '</strong> this test.</p></div><button type="button" class="primary" data-action="next">' + (round + 1 === cases.length ? "Review Version A →" : "Next request →") + '</button>'
+      : '<div class="actions"><button type="button" class="primary" data-prediction="accept">Accept request</button><button type="button" class="secondary" data-prediction="reject">Reject request</button></div>');
+    if (focus) byId(answered ? "round-feedback" : "round-title").focus();
+    return;
+  }
+
+  const extra = extensions.find(test => test.id === state.extra);
+  if (!state.prompt) {
+    game.innerHTML = '<h3 id="round-title" tabindex="-1">Revise the generation prompt</h3><p>Your first predictions: <strong>' + totalCorrect() + ' / ' + cases.length +
+      '</strong></p>' + evidence(cases, false) +
+      '<div class="example"><strong>Prompt A</strong><p>Generate a room-booking function. Accept only requests that start and end within the booking day and whose end is after the start. Reject overlapping bookings. Return accept or reject.</p></div><p>Which edit would best help a generator handle bookings that touch at their boundaries?</p><div class="choices">' +
+      '<button type="button" class="option" data-prompt="generic">Make the function smarter and more accurate.</button>' +
+      '<button type="button" class="option" data-prompt="rule">Bookings that touch at either endpoint are allowed. For example, 11:00–12:00 is allowed after a 10:00–11:00 booking. Keep all other rules.</button>' +
+      '<button type="button" class="option" data-prompt="test">Accept a request from 11:00 to 12:00 every time.</button></div><p id="prompt-feedback" role="status">' + promptFeedback + '</p>';
+    if (focus) byId("round-title").focus();
+    return;
+  }
+
+  const tests = extra ? [...cases, extra] : cases;
+  game.innerHTML = '<h3 id="round-title" tabindex="-1">Rerun the same tests</h3><p>The revised prompt explains endpoint behavior and keeps the other rules. Version B is one possible output. Compare both implementations against the same expected decisions.</p>' +
+    '<details class="details"><summary>Compare the two prompts</summary><p><strong>Prompt A.</strong> Generate a room-booking function. Accept only requests that start and end within the booking day and whose end is after the start. Reject overlapping bookings. Return accept or reject.</p><p><strong>Prompt B adds:</strong> Bookings that touch at either endpoint are allowed. For example, 11:00–12:00 is allowed after a 10:00–11:00 booking. Keep all other rules.</p></details>' +
+    scores(tests) + evidence(tests, true) +
+    '<div class="notice warn"><strong>Look for a regression.</strong> Which case passed in Version A and failed in Version B? What rule was lost?</div>' +
+    '<h3>Add one test</h3><p>Choose a condition that was missing from the original six cases. Your chosen case is added to the report.</p><div class="choices">' +
+    extensions.map(test => '<button type="button" class="option" data-extra="' + test.id + '" aria-pressed="' + (state.extra === test.id) + '">' +
+      test.id + ' · ' + test.name + ' (' + range(test.request) + ')</button>').join("") +
+    '</div><div id="extension-feedback" role="status" tabindex="-1">' +
+    (extra ? '<div class="notice"><strong>' + extra.id + ' expected: ' + verdict(extra.expected) + '.</strong><p>' + extra.reason + '</p></div>' : "") +
+    '</div><div class="actions"><button type="button" class="primary" data-tab="report">Write your report →</button></div>';
+  if (focus) byId("round-title").focus();
+}
+
+const questions = [
+  { tag: "Objective", title: "What did you evaluate, and which booking rule mattered most?", hint: "Identify the artefact and state a rule in a way that another reader could test.", example: "In a delivery app, I evaluated the fee calculator and checked whether orders of RM50 qualified for free delivery." },
+  { tag: "Methodology", title: "What changed in the prompt, and how did you make the comparison fair?", hint: "Name the prompt change, describe the shared inputs and state how you decided pass or fail.", example: "I made the delivery threshold inclusive in the second prompt. I then ran both calculators on the same order totals and compared their charges with the written fee policy." },
+  { tag: "Results", title: "Which version passed more tests? Use one case to show what changed.", hint: "Report passes out of total tests for both versions. Include a case ID and its expected and actual decisions.", example: "Version B passed 5 of 6 tests, compared with 4 of 6 for Version A. On fee case F03, the expected fee was RM0. Version A charged RM5 and Version B charged RM0." },
+  { tag: "Discussion", title: "Which case exposed a regression, and what would you do before release?", hint: "Find a test that passed in Version A and failed in Version B. State the rule it violates and propose a release decision.", example: "Version B fixed the threshold but stopped rejecting negative order values. I would fix input validation and rerun all six tests before approving release." },
+  { tag: "Limitations", title: "What did your extra test cover? What remains outside the evidence?", hint: "Name your added case and explain why it was needed. Identify one behavior or assumption that still has not been checked.", example: "I checked an order of RM0 after both versions passed the boundary cases. The experiment still does not cover rounding with fractional currency values." },
+  { tag: "Final group project", title: "What claim might your group make, and how would you support it?", hint: "Name a baseline or comparison, a metric and a table or figure you could include.", example: "To test whether our recommendation tool speeds up review, we would time the same tasks with and without it and show the median times and task counts in a table." }
+];
+
+function renderReportEvidence() {
+  const extra = extensions.find(test => test.id === state.extra);
+  const tests = extra ? [...cases, extra] : cases;
+  const target = byId("report-evidence");
+  if (!state.prompt) {
+    target.innerHTML = '<div class="notice warn">You can start your draft now. Finish comparing the two versions to add the test evidence. <button type="button" class="secondary" data-tab="game">Go to booking game</button></div>';
+    return;
+  }
+  if (!byId("report-text").hidden) byId("report-output").value = reportText();
+  target.innerHTML = scores(tests) + evidence(tests, true) +
+    (extra ? '' : '<p class="notice warn">Choose an extra case in the booking game before answering the Limitations question.</p>');
+}
+function renderQuestions() {
+  byId("questions").innerHTML = questions.map((question, index) =>
+    '<div class="question"><span class="qtag">' + String(index + 1).padStart(2, "0") + ' / ' + question.tag + '</span><label for="answer-' + index + '">' + question.title +
+    '</label><textarea id="answer-' + index + '" data-answer="' + index + '" aria-describedby="hint-' + index + '" placeholder="Write your answer here"></textarea>' +
+    '<div class="print-answer" hidden></div><small id="hint-' + index + '">' + question.hint +
+    '</small><small class="evidence-tip" hidden></small><details class="example" hidden><summary>Compare with a worked example</summary><p>' + question.example + '</p></details></div>').join("");
+  questions.forEach((_, index) => {
+    const field = byId("answer-" + index);
+    field.value = state.answers[index] ?? "";
+    updateAnswerView(field);
+  });
+}
+function updateAnswerView(field) {
+  const question = field.closest(".question");
+  const hasAnswer = field.value.trim().length > 0;
+  question.querySelector(".example").hidden = !hasAnswer;
+  const tip = question.querySelector(".evidence-tip");
+  const needsCase = ["2", "3", "4"].includes(field.dataset.answer);
+  const hasCaseId = /\b(?:T0[1-6]|X0[1-3])\b/i.test(field.value);
+  tip.hidden = !hasAnswer || !needsCase;
+  tip.textContent = hasCaseId
+    ? "Check that the case ID and decision you cite agree with the evidence table."
+    : "Add a specific case ID and its result so the reader can check your explanation.";
+  if (!byId("report-text").hidden) byId("report-output").value = reportText();
+  question.querySelector(".print-answer").textContent = field.value.trim() || "[No answer yet]";
+}
+function reportText() {
+  const extra = extensions.find(test => test.id === state.extra);
+  const tests = extra ? [...cases, extra] : cases;
+  const lines = ["# MAI5124 Lab 5 · Would You Release This?", "", "## Booking test evidence", ""];
+  if (state.prompt) {
+    lines.push("Default existing bookings: " + defaultBookings.map(range).join(", ") + ". X01 uses an empty schedule.", "", "| Case | Request | Expected | Version A | Version B |", "|---|---|---|---|---|");
+    for (const test of tests) {
+      lines.push("| " + test.id + " " + test.name + " | " + range(test.request) + " | " + verdict(test.expected) + " | " + verdict(run(versionA, test)) + " | " + verdict(run(versionB, test)) + " |");
+    }
+    lines.push("", "Version A passed " + tests.filter(test => run(versionA, test) === test.expected).length +
+      "/" + tests.length + ". Version B passed " + tests.filter(test => run(versionB, test) === test.expected).length + "/" + tests.length + ".", "");
+  } else lines.push("The two-version comparison has not been completed.", "");
+  for (const [index, question] of questions.entries()) {
+    lines.push("## " + (index + 1) + ". " + question.tag, question.title, "", state.answers[index]?.trim() || "[No answer yet]", "");
+  }
+  return lines.join("\n");
+}
+
+document.addEventListener("click", event => {
+  const button = event.target.closest("button");
+  if (!button) return;
+  const { tab, theory, prediction, action, prompt, extra } = button.dataset;
+  if (tab) { showTab(tab); return; }
+  if (theory) {
+    state.theory = theory; save(); renderTheory();
+    document.querySelector('[data-theory="' + theory + '"]').focus();
+    return;
+  }
+  if (prediction && round < cases.length && !isDone(cases[round])) {
+    state.predictions[cases[round].id] = prediction === "accept";
+    save(); renderGame(true); return;
+  }
+  if (action === "next") { round++; renderGame(true); return; }
+  if (prompt === "rule") {
+    state.prompt = true; save(); renderGame(true);
+    announcement.textContent = "Version B is ready. The six cases have been rerun.";
+    return;
+  }
+  if (prompt) {
+    promptFeedback = prompt === "generic"
+      ? "This instruction gives the model no rule or concrete example to apply. Try another."
+      : "A fixed time is not the rule. It may still overlap another booking on a different schedule. Try another.";
+    byId("prompt-feedback").textContent = promptFeedback;
+    return;
+  }
+  if (extra) {
+    state.extra = extra; save(); renderGame();
+    document.querySelector('[data-extra="' + extra + '"]').focus();
+    announcement.textContent = extra + " added to the report. Both versions have been tested.";
+    return;
+  }
+  if (button.id === "report-text-toggle") {
+    const report = byId("report-text");
+    report.hidden = !report.hidden;
+    button.setAttribute("aria-expanded", String(!report.hidden));
+    if (!report.hidden) {
+      const output = byId("report-output");
+      output.value = reportText();
+      output.focus();
+      output.select();
+    }
+  }
+  if (button.id === "print") window.print();
+});
+byId("questions").addEventListener("input", event => {
+  const field = event.target;
+  if (!Object.hasOwn(field.dataset, "answer")) return;
+  state.answers[field.dataset.answer] = field.value;
+  updateAnswerView(field);
+  save();
+});
+renderTheory();
+renderGame();
+renderQuestions();
+if (!storageWorks) byId("storage-message").textContent = "Browser storage is unavailable. Copy your report or save it as a PDF before closing the page.";
+</script>
+</body>
+</html>

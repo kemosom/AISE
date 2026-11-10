@@ -11,6 +11,8 @@ import { LabWorkspace } from './components/LabWorkspace';
 import { InstructorAccessModal } from './components/InstructorAccessModal';
 import { InstructorAdminPanel } from './components/InstructorAdminPanel';
 
+const LAB05_ID = 'lab05-artifact-generation';
+
 const DEFAULT_OPEN_USER: AuthUserPublic = {
   id: 'open-student',
   email: 'student@mai5124.academic',
@@ -77,8 +79,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Labs 01 through 04 are released to students.
-        const isUnlocked = manifest.labNumber <= 4;
+        // Labs 01 through 05 are released to students.
+        const isUnlocked = manifest.labNumber <= 4 || manifest.id === LAB05_ID;
 
         return {
           id: manifest.id,
@@ -203,12 +205,20 @@ export default function App() {
   const handleSelectLab = (labId: string) => {
     // Also enforce the lock in navigation, not just on the dashboard card.
     if (!labs.some((lab) => lab.id === labId && lab.isUnlocked)) return;
+    if (labId === LAB05_ID) {
+      window.location.assign('/lab5.html');
+      return;
+    }
     setActiveLabId(labId);
     setIsInstructorPreview(false);
     setActiveView('lab');
   };
 
   const handlePreviewLabAsInstructor = (labId: string) => {
+    if (labId === LAB05_ID) {
+      window.location.assign('/lab5.html');
+      return;
+    }
     setActiveLabId(labId);
     setIsInstructorPreview(true);
     setActiveView('lab');
