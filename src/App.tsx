@@ -79,8 +79,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Labs 01 through 05 are released to students.
-        const isUnlocked = manifest.labNumber <= 4 || manifest.id === LAB05_ID;
+        // Labs 01 through 04 are released to students.
+        const isUnlocked = manifest.labNumber <= 4;
 
         return {
           id: manifest.id,
@@ -205,20 +205,12 @@ export default function App() {
   const handleSelectLab = (labId: string) => {
     // Also enforce the lock in navigation, not just on the dashboard card.
     if (!labs.some((lab) => lab.id === labId && lab.isUnlocked)) return;
-    if (labId === LAB05_ID) {
-      window.location.assign('/lab5.html');
-      return;
-    }
     setActiveLabId(labId);
     setIsInstructorPreview(false);
     setActiveView('lab');
   };
 
   const handlePreviewLabAsInstructor = (labId: string) => {
-    if (labId === LAB05_ID) {
-      window.location.assign('/lab5.html');
-      return;
-    }
     setActiveLabId(labId);
     setIsInstructorPreview(true);
     setActiveView('lab');
@@ -346,7 +338,7 @@ export default function App() {
           isStudent ? (
             <StudentDashboard
               user={user}
-              labs={labs}
+              labs={labs.filter((lab) => lab.id !== LAB05_ID)}
               isLoading={labsLoading}
               error={labsError}
               onSelectLab={handleSelectLab}

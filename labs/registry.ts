@@ -263,7 +263,7 @@ labRegistryMap.set('lab04-software-repair-agents', {
   instructionsMarkdown: lab04Theory + '\n\n---\n\n' + lab04LabSheet,
 });
 
-// Lab 05 uses the self-paced browser activity in public/lab5.html.
+// Lab 05 is held as an unpublished self-paced browser activity.
 labRegistryMap.set('lab05-artifact-generation', {
   ...createLabShell(
     'lab05-artifact-generation',
