@@ -721,6 +721,28 @@ export const LabTheoryArticle: FC<LabTheoryArticleProps> = ({
           </div>
         </header>
 
+        {manifest.video && /^[a-zA-Z0-9_-]{11}$/.test(manifest.video.youtubeId) && (
+          <section className="my-8 rounded-2xl border border-slate-200 bg-white p-5" data-labsheet-no-print>
+            <h2 className="text-lg font-semibold text-slate-950">Watch · {manifest.video.title}</h2>
+            <p className="my-3 text-sm leading-6 text-slate-700">{manifest.video.prompt}</p>
+            <iframe
+              className="aspect-video w-full rounded-lg border-0"
+              src={'https://www.youtube-nocookie.com/embed/' + manifest.video.youtubeId}
+              title={manifest.video.title}
+              loading="lazy"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+            <p className="mt-3 text-sm">
+              {manifest.video.credit} ·{' '}
+              <a className="underline" href={'https://www.youtube.com/watch?v=' + manifest.video.youtubeId} target="_blank" rel="noreferrer">Open video</a>
+              {' · '}
+              <a className="underline" href={manifest.video.sourceUrl} target="_blank" rel="noreferrer">Read the accompanying lesson</a>
+            </p>
+          </section>
+        )}
+
         {/* 5. TARGET COMPETENCIES & LEARNING OUTCOMES CARD */}
         {manifest.learningOutcomes && manifest.learningOutcomes.length > 0 && (
           <div className="my-8 p-6 bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200/80 shadow-2xs">

@@ -108,6 +108,13 @@ export interface LabManifest {
    * Content-driven modules may also provide theoryMarkdown and labSheetMarkdown.
    */
   instructionsMarkdown: string;
+  video?: {
+    youtubeId: string;
+    title: string;
+    credit: string;
+    prompt: string;
+    sourceUrl: string;
+  };
   theoryMarkdown?: string;
   labSheetMarkdown?: string;
 }

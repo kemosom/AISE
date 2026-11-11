@@ -57,6 +57,28 @@ export const InstructorAdminPanel: React.FC<InstructorAdminPanelProps> = ({
     strategyC: 'C: Separated',
   };
 
+  if (data.labId === 'lab05-artifact-generation') {
+    return (
+      <div className="min-h-[calc(100vh-3.5rem)] bg-slate-50 px-6 py-12">
+        <div className="mx-auto max-w-4xl rounded-xl border border-slate-200 bg-white p-8">
+          <p className="text-xs font-bold uppercase tracking-widest text-blue-700">Instructor review · Lab 05</p>
+          <h1 className="mt-3 text-2xl font-semibold">{data.manifest.title}</h1>
+          <p className="mt-4 text-sm leading-6 text-slate-700">{data.instructorNotes.summary}</p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">{data.instructorNotes.review}</p>
+          <div className="my-6 flex flex-wrap gap-3">
+            <button type="button" onClick={onPreviewLab} className="rounded-md bg-slate-950 px-5 py-3 text-sm font-semibold text-white">Open Lab 05 preview</button>
+            <button type="button" onClick={onSwitchLab} className="rounded-md border border-slate-300 px-5 py-3 text-sm">Switch laboratory</button>
+            <button type="button" onClick={onExit} className="rounded-md border border-slate-300 px-5 py-3 text-sm">Exit instructor access</button>
+          </div>
+          <details className="rounded-lg border border-slate-200 p-4">
+            <summary className="cursor-pointer text-sm font-semibold">Reference implementation and metric calculation</summary>
+            <pre className="mt-4 overflow-x-auto whitespace-pre rounded bg-slate-950 p-5 text-xs leading-6 text-slate-100">{data.instructorNotes.referenceCode}</pre>
+          </details>
+        </div>
+      </div>
+    );
+  }
+
   if (data.labId === 'lab04-software-repair-agents') {
     return (
       <div className="min-h-[calc(100vh-3.5rem)] bg-slate-50 px-6 py-12">

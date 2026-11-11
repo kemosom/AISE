@@ -179,7 +179,8 @@ export default function App() {
       // The Lab 02 student access lock remains in force.
       const openCasePreview = instructorSelectedLabId === 'lab02-requirement-prioritization' ||
         instructorSelectedLabId === 'lab03-social-commitment-agents' ||
-        instructorSelectedLabId === 'lab04-software-repair-agents';
+        instructorSelectedLabId === 'lab04-software-repair-agents' ||
+        instructorSelectedLabId === LAB05_ID;
       setIsInstructorPreview(openCasePreview);
       setShowInstructorAccess(false);
       setActiveView(openCasePreview ? 'lab' : 'instructor');
@@ -211,6 +212,11 @@ export default function App() {
   };
 
   const handlePreviewLabAsInstructor = (labId: string) => {
+    if (labId === LAB05_ID && instructorData?.labId !== LAB05_ID) {
+      setInstructorSelectedLabId(LAB05_ID);
+      setShowInstructorAccess(true);
+      return;
+    }
     setActiveLabId(labId);
     setIsInstructorPreview(true);
     setActiveView('lab');
@@ -285,6 +291,7 @@ export default function App() {
               fetchLabs();
             }}
             isInstructorPreview={isInstructorPreview}
+            instructorManifest={isInstructorPreview ? instructorData?.manifest : undefined}
           />
         )}
 

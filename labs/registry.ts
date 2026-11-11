@@ -50,11 +50,7 @@ export const LAB_TASKS_CATALOG: Record<string, LabTaskItem[]> = {
     { id: 'l4-t4', title: 'Behavioral Assertion Verification', description: 'Validate agent goal convergence and safety bounds', category: 'test' },
     { id: 'l4-t5', title: 'Technical Report & Final Submission', description: 'Document empirical benchmarks and submit final report', category: 'submission' },
   ],
-  'lab05-artifact-generation': [
-    { id: 'l5-t1', title: 'Sequence-to-Sequence Generation', description: 'Study how a natural-language specification becomes a software artefact', category: 'design' },
-    { id: 'l5-t2', title: 'Booking Game', description: 'Predict booking outcomes and test two implementations against the specification', category: 'test' },
-    { id: 'l5-t3', title: 'Report Q&A', description: 'Explain test evidence, limitations, and how to evaluate the final group project', category: 'report' },
-  ],
+  'lab05-artifact-generation': [],
   'lab06-software-fusion': [
     { id: 'l6-t1', title: 'AST & Dependency Extraction', description: 'Construct code abstract syntax trees and call graphs', category: 'code' },
     { id: 'l6-t2', title: 'Graph Neural Network Pipeline', description: 'Embed architectural graph representations for pattern learning', category: 'code' },
@@ -263,22 +259,21 @@ labRegistryMap.set('lab04-software-repair-agents', {
   instructionsMarkdown: lab04Theory + '\n\n---\n\n' + lab04LabSheet,
 });
 
-// Lab 05 is held as an unpublished self-paced browser activity.
+// Lab 05 teaching assets are served after instructor-code validation.
 labRegistryMap.set('lab05-artifact-generation', {
   ...createLabShell(
-    'lab05-artifact-generation',
-    5,
-    6,
-    'Automated Software Artefact Generation',
-    'Explore sequence-to-sequence generation, play a room-booking test game, and write a Q&A report from the results.',
-    [
-      'Explain how a natural-language specification becomes a software artefact.',
-      'Compare two artefacts on the same tests and identify a regression.',
-      'Explain methods, results and limitations using evidence from the game.',
-    ],
+    'lab05-artifact-generation', 5, 6,
+    'Generating and Evaluating a Sensor Data Processor',
+    'Generate Python from requirements, verify sensor-data behaviour, and write a reproducible comparison.',
+    [],
     ''
   ),
-  estimatedDuration: '45–60 minutes',
+  estimatedDuration: '2–3 hours',
+  starterFiles: [],
+  tests: [],
+  tasks: [],
+  instructionsMarkdown: '',
+  reportTemplate: { title: 'Lab 05 instructor review', sections: [] },
 });
 
 // Lab 06

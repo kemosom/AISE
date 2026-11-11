@@ -1,3 +1,4 @@
+import lab05Content from './api/instructor/lab05.json';
 import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
@@ -94,6 +95,10 @@ app.post('/api/instructor', (req: Request, res: Response) => {
 
   if (!validateInstructorCode(req.body?.code)) {
     return res.status(401).json({ error: 'Invalid instructor code.' });
+  }
+
+  if (req.body?.labId === 'lab05-artifact-generation') {
+    return res.json({ ok: true, data: lab05Content });
   }
 
   if (req.body?.labId === 'lab04-software-repair-agents') {

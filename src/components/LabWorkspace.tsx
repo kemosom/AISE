@@ -35,6 +35,7 @@ interface LabWorkspaceProps {
   user: AuthUserPublic;
   onBack: () => void;
   isInstructorPreview?: boolean;
+  instructorManifest?: LabManifest;
 }
 
 export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
@@ -42,6 +43,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   user,
   onBack,
   isInstructorPreview,
+  instructorManifest,
 }) => {
   const [manifest, setManifest] = useState<LabManifest | null>(null);
   const [labMeta, setLabMeta] = useState<any>(null);
@@ -95,7 +97,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
   const useLocalPersistence = user.id === 'open-student';
   // A versioned Lab 02 store avoids restoring files from its retired ML activity.
   const localKey = (kind: string) =>
-    `aise:${isInstructorPreview ? 'instructor-preview:' : ''}${labId === 'lab02-requirement-prioritization' ? 'v4' : 'v2'}:${labId}:${kind}`;
+    `aise:${isInstructorPreview ? 'instructor-preview:' : ''}${labId === 'lab02-requirement-prioritization' ? 'v4' : labId === 'lab05-artifact-generation' ? 'v3' : 'v2'}:${labId}:${kind}`;
 
   const readLocal = async <T,>(kind: string): Promise<T | null> => {
     if (!useLocalPersistence) return null;
@@ -152,7 +154,7 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
 
   useEffect(() => {
     loadLabWorkspace();
-  }, [labId]);
+  }, [labId, instructorManifest]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -168,7 +170,9 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       // laboratory manifest is bundled by Vite, so loading a lab must not
       // depend on an Express /api route that does not exist in a static Vercel deployment.
       if (useLocalPersistence) {
-        const loadedManifest = LabRegistry.getLab(labId);
+        const loadedManifest = labId === 'lab05-artifact-generation'
+          ? (isInstructorPreview ? instructorManifest : null)
+          : LabRegistry.getLab(labId);
 
         if (!loadedManifest) {
           throw new Error('Laboratory module not found.');
@@ -833,7 +837,9 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
             <TestRunnerPanel
               tests={manifest.tests}
               runner={defaultCodeRunner}
-              userCode={files[activeFileIndex]?.content || files[0]?.content || ''}
+              userCode={labId === 'lab05-artifact-generation'
+                ? '_LAB05_VERIFY = True\n' + (files.find((file) => file.name === 'main.py')?.content || '')
+                : files[activeFileIndex]?.content || files[0]?.content || ''}
               files={files}
               onAddTestResultsToReport={handleAddTestResultsToReport}
               onTestRunComplete={(passed, total) => {

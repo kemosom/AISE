@@ -1,3 +1,4 @@
+import lab05Content from './instructor/lab05.json';
 import { createDecipheriv, timingSafeEqual } from 'node:crypto';
 
 // Keep the encrypted instructor payload in this serverless module itself.
@@ -107,6 +108,10 @@ export default function handler(req: any, res: any) {
     normalizeSecret(body.labId) || 'lab01-behavioral-programming';
 
   try {
+    if (requestedLabId === 'lab05-artifact-generation') {
+      return res.status(200).json({ ok: true, data: lab05Content });
+    }
+
     if (requestedLabId === 'lab04-software-repair-agents') {
       return res.status(200).json({
         ok: true,
