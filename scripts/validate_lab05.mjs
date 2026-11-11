@@ -2,6 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';
+import os from 'node:os';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import ts from 'ts-browser';
 
@@ -10,6 +13,19 @@ const handlerSource = fs.readFileSync('api/instructor.ts', 'utf8');
 const compiled = ts.transpileModule(handlerSource, {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, resolveJsonModule: true, esModuleInterop: true },
 }).outputText;
+// Exercise the native ESM loader used by the deployed server function.
+const esmDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'lab05-esm-'));
+try {
+  fs.mkdirSync(path.join(esmDirectory, 'instructor'));
+  fs.copyFileSync('api/instructor/lab05.json', path.join(esmDirectory, 'instructor/lab05.json'));
+  const esmFile = path.join(esmDirectory, 'instructor.mjs');
+  fs.writeFileSync(esmFile, ts.transpileModule(handlerSource, {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
+  }).outputText);
+  assert.equal(typeof (await import(pathToFileURL(esmFile).href)).default, 'function');
+} finally {
+  fs.rmSync(esmDirectory, { recursive: true, force: true });
+}
 const localExports = {};
 const environment = {
   ...process.env,

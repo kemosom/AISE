@@ -1,4 +1,4 @@
-import lab05Content from './instructor/lab05.json';
+import lab05Content from './instructor/lab05.json' with { type: 'json' };
 import { createDecipheriv, timingSafeEqual } from 'node:crypto';
 
 // Keep the encrypted instructor payload in this serverless module itself.

@@ -1,4 +1,4 @@
-import lab05Content from './api/instructor/lab05.json';
+import lab05Content from './api/instructor/lab05.json' with { type: 'json' };
 import express, { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
