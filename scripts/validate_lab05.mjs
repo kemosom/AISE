@@ -60,10 +60,15 @@ assert.equal(allowed.code, 200);
 assert.equal(allowed.body.data.manifest.starterFiles.length, 9);
 assert.match(allowed.headers['Cache-Control'], /no-store/);
 const app = fs.readFileSync('src/App.tsx', 'utf8');
-assert.ok(app.includes('const isUnlocked = manifest.labNumber <= 4;'));
-assert.ok(app.includes('labs={labs.filter((lab) => lab.id !== LAB05_ID)}'));
+assert.ok(app.includes('const isUnlocked = manifest.labNumber <= 5;'));
+assert.ok(app.includes('labs={labs}'));
+const studentManifest = JSON.parse(fs.readFileSync('labs/lab05-artifact-generation/manifest.json', 'utf8'));
+assert.deepEqual(studentManifest, payload.manifest);
+assert.equal(studentManifest.instructorNotes, undefined);
+assert.ok(fs.readFileSync('src/components/LabWorkspace.tsx', 'utf8').includes('loadedManifest.labNumber > 5'));
+assert.ok(fs.readFileSync('labs/registry.ts', 'utf8').includes("labRegistryMap.set('lab05-artifact-generation', lab05Manifest as LabManifest)"));
 assert.ok(app.includes('instructorManifest={isInstructorPreview ? instructorData?.manifest : undefined}'));
-console.log('PASS Lab 05 assets require instructor validation and student navigation stays closed.');
+console.log('PASS complete Lab 05 student manifest is released and instructor notes require validation.');
 
 const python = String.raw`
 import contextlib

@@ -170,15 +170,15 @@ export const LabWorkspace: React.FC<LabWorkspaceProps> = ({
       // laboratory manifest is bundled by Vite, so loading a lab must not
       // depend on an Express /api route that does not exist in a static Vercel deployment.
       if (useLocalPersistence) {
-        const loadedManifest = labId === 'lab05-artifact-generation'
-          ? (isInstructorPreview ? instructorManifest : null)
+        const loadedManifest = labId === 'lab05-artifact-generation' && isInstructorPreview && instructorManifest
+          ? instructorManifest
           : LabRegistry.getLab(labId);
 
         if (!loadedManifest) {
           throw new Error('Laboratory module not found.');
         }
 
-        if (loadedManifest.labNumber > 4 && !isInstructorPreview) {
+        if (loadedManifest.labNumber > 5 && !isInstructorPreview) {
           throw new Error('This laboratory is not released yet.');
         }
 

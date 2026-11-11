@@ -79,8 +79,8 @@ export default function App() {
       const manifests = LabRegistry.getAllLabs();
 
       const summaries: LabSummary[] = manifests.map((manifest) => {
-        // Labs 01 through 04 are released to students.
-        const isUnlocked = manifest.labNumber <= 4;
+        // Labs 01 through 05 are released to students.
+        const isUnlocked = manifest.labNumber <= 5;
 
         return {
           id: manifest.id,
@@ -345,7 +345,7 @@ export default function App() {
           isStudent ? (
             <StudentDashboard
               user={user}
-              labs={labs.filter((lab) => lab.id !== LAB05_ID)}
+              labs={labs}
               isLoading={labsLoading}
               error={labsError}
               onSelectLab={handleSelectLab}
